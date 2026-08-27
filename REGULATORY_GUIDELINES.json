@@ -1,0 +1,24 @@
+{
+  "protocol": "Bitcoin-Quantum",
+  "entity": "The BTQ Foundation",
+  "classification": "Non-Security Utility Software",
+  "regulatory_framework": {
+    "token_utility": [
+        "Network security (Mining rewards)",
+        "Spam prevention (Transaction fees)",
+        "AI Agent interaction (Autonomous grants/donations)"
+    ],
+    "governance": "Transitioning to decentralized DAO control",
+    "risk_factors": [
+        "Quantum computing cryptanalysis",
+        "Autonomous AI logic edge-cases",
+        "Physical hardware transmission compliance"
+    ]
+  },
+  "restricted_jurisdictions": [
+    "United States of America (USA)",
+    "OFAC Sanctioned Countries (North Korea, Iran, etc.)",
+    "Jurisdictions where utility token interaction is prohibited"
+  ],
+  "disclaimer": "The software is provided 'AS IS'. Users assume all operational and financial risks."
+}

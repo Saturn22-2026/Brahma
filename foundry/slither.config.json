@@ -1,0 +1,6 @@
+{
+    "detectors_to_exclude": "naming-convention,solc-version",
+    "exclude_dependencies": true,
+    "filter_paths": "test|script|lib",
+    "json": "slither-results.json"
+}

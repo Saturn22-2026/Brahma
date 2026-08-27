@@ -1,0 +1,32 @@
+{
+  "entity": "Bitcoin-Quantum",
+  "trademarks": [
+    { "name": "Bitcoin-Quantum", "ticker": "BTQ", "category": "L1 Blockchain" },
+    { "name": "Homie", "ticker": "HOMIE", "category": "L2 Memecoin" },
+    { "name": "SlumDog", "ticker": "SLUM", "category": "L2 Memecoin" },
+    { "name": "Crazy God", "ticker": "CRAZY", "category": "L2 Memecoin" },
+    { "name": "BoujieClique", "ticker": "BOUJIE", "category": "L2 Memecoin" },
+    { "name": "QuarterMile", "ticker": "QMILE", "category": "L2 Memecoin" },
+    { "name": "SoldiersOfFortune", "ticker": "SOF", "category": "L2 Memecoin" },
+    { "name": "5thAvenue", "ticker": "5AVE", "category": "L2 Memecoin" },
+    { "name": "Pookie", "ticker": "POOKIE", "category": "L2 Memecoin" }
+  ],
+  "copyrights": {
+    "whitepaper": "BITCOIN-QUANTUM (BTQ) Version 1.1",
+    "branding_assets": [
+        "Official 3D Bitcoin-Quantum Logo",
+        "8 Strategic Memecoin 3D Visual Concepts"
+    ],
+    "documentation": "All technical artifacts and walkthroughs in .artifacts/"
+  },
+  "trade_secrets": [
+    "Quantum Sentinel AI Anomaly Detection Weights",
+    "Airdrop Scorer NLP Heuristics",
+    "Omni-Transport Block Compression Algorithms"
+  ],
+  "licensing": {
+    "btq-launch": "MIT",
+    "btq-node": "MIT",
+    "btq-omni-transport": "GPL-3.0-only"
+  }
+}

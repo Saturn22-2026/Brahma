@@ -1,0 +1,93 @@
+{
+  "Bitcoin-Quantum": {
+    "token": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "airdrop": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "wallets": {
+      "wealth": "0x98A1961A67a42F80735E2D075677B7f68748366C",
+      "empower": "0xA31c890737920A939E4366C34E3EEE75af79a744",
+      "stability": "0x5df596fc9aba769926c1ee3f98181bbf3b7a54c4",
+      "donation": "0x0b93082D9b3C7C97fAcd250082899BAcf3af3885",
+      "airdrop_source": "0x19a00be544d1e065f257a9230172779a74101605"
+    }
+  },
+  "Homie": {
+    "wallets": {
+      "wealth": "0xEFD0b5d463e21A8e2d28E19D870Eb75EebFB4a6E",
+      "empower": "0x7223D8BF6f5fBF12C34b2beBf825935cfF10D400",
+      "stability": "0xa88392E6d2ecF1b7028C6b8F815eD328c53c2e57",
+      "donation": "0x7C861AE550087016121e603f761B8B879CA47F8F",
+      "airdrop": "0xeF92040c9A1D1188279f27D71B12f63EFC4927d2",
+      "float": "0x125c827e5e2AB3f90917b26970744C7d484498c4"
+    }
+  },
+  "SlumDog": {
+    "wallets": {
+      "wealth": "0x53f213847135ACaEd504218eD932F0139DcF5973",
+      "empower": "0x4e7E0eFB11B4F4034E12dC01B0A7B4bA3851DC36",
+      "stability": "0x66dCd1EB8Ad4AC7dab20c7aa4e20257c8F643694",
+      "donation": "0x312aaF4657B645BE14324fD7db2cfE055b45375F",
+      "airdrop": "0x80e0797caE0eBA7cdC2772c86C0DbEBDb02660Cd",
+      "float": "0x6032b6eA80a560f71d04562BE52CaFD4F2118002"
+    }
+  },
+  "Crazy God": {
+    "wallets": {
+      "wealth": "0x61a9FAbf01035Da70B0AE13e76F8c758634d2E33",
+      "empower": "0xAE99a2cb03c57B9924181746048129aA014f29de",
+      "stability": "0xFFB87Dd3e5f96f219e011F2757Cd44bC07a15D91",
+      "donation": "0x1A9C09bF2347D1b81F9b43E85DF3d28993A42B7f",
+      "airdrop": "0x5DCE12027d2363ba38880A19b7e2EbB63450a626",
+      "float": "0xc3712aF1f58faEf8dc414D314B24DC6C19aE4B49"
+    }
+  },
+  "BoujieClique": {
+    "wallets": {
+      "wealth": "0x1e43bF185dAf7C29B625c76645cB34e245442E17",
+      "empower": "0x1aD9f3352165ec80D23405DC583ce6A5436Ead28",
+      "stability": "0xf8E8F9aC1Cab7CD3B8BD7956ae6A69447dc6708F",
+      "donation": "0xf024354964cAAf3e1F4A12AB62e27Da3f2659786",
+      "airdrop": "0x33f08102D5cb53Cb8E537D26E695783827A8622C",
+      "float": "0xdC42b4f640429628FEE0A0a76133Ad6D9974f5EC"
+    }
+  },
+  "QuarterMile": {
+    "wallets": {
+      "wealth": "0xd17349Cc3760457beAcE7424022A3ef575030F82",
+      "empower": "0x5F24902F04a447fb205fC859E7489725c5e4313c",
+      "stability": "0xDD8edad48889c93F598e8F45236b7d2D34caB9c6",
+      "donation": "0x76a630063d526c2E5E8a9b9b8d9CeB22c8Bb8006",
+      "airdrop": "0x6bE75aeE4E683CD65ed8efc3fdb1c6f071c64cEe",
+      "float": "0x8D02E619d8895e6097C051B7190AeaB5B181507b"
+    }
+  },
+  "SoldiersOfFortune": {
+    "wallets": {
+      "wealth": "0xC3A150e1d29D3Cee32336283BD09b436C89b0E65",
+      "empower": "0x4C37e3D3fA8B78b68d56F5fB661615c66120544C",
+      "stability": "0xb08Bf1d8350b4a43751c51Ac888EA9570de4A9CC",
+      "donation": "0xE0Bb2643d071774Aa982D8AEf04f13c1f17B43Ac",
+      "airdrop": "0x13a9D439E1e07D3aca794037353488D3346e8a31",
+      "float": "0x3114541465cfADA5bAe4fFeCC8783A24b67320a1"
+    }
+  },
+  "5thAvenue": {
+    "wallets": {
+      "wealth": "0xe013461a37AF49AfE562224711834E38472dd32d",
+      "empower": "0x83599007f60aa77B6B7E6EcbFA7809bd6a951edB",
+      "stability": "0xAD0B5eC317ab480C144BA89704c8d52D805F168E",
+      "donation": "0x021DD9508bF47FA672a9Cc03FC68D7B537d2cC4E",
+      "airdrop": "0x3FB336ee75b7bA5D48FD0AC64288D39240fC6887",
+      "float": "0x7f67Cb1a41eb425f406Ab2cF7516599694235B9E"
+    }
+  },
+  "Pookie": {
+    "wallets": {
+      "wealth": "0x40ce049D603f8227E9E6B42743030dd40Ae40ef5",
+      "empower": "0x2D93688c9f0645011c861cC746F66fe4547d97f4",
+      "stability": "0x90207d95AEe97B1f91C98c2d9dEcFbcEb79Ae529",
+      "donation": "0x9523161087F8aABc23bdDE7B37516977979eAa3b",
+      "airdrop": "0x03659635174b4364D4cDD54CB8CE4F864aDad9c1",
+      "float": "0x47FD23F8C50b444eCAcd7dC6B973c82fF35AD9C3"
+    }
+  }
+}
