@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$/../.." dumb="true">
+      <excludeFolder url="file://$MODULE_DIR$/../../.codebuddy/db" />
+      <excludeFolder url="file://$MODULE_DIR$/../../btq-genesis-wallet/.codebuddy/db" />
+      <excludeFolder url="file://$MODULE_DIR$/../../btq-node/.codebuddy/db" />
+      <excludeFolder url="file://$MODULE_DIR$/../../btq-wallet/.codebuddy/db" />
+      <excludeFolder url="file://$MODULE_DIR$/../../wallet-android/.codebuddy/db" />
+    </content>
+  </component>
+</module>

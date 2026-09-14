@@ -1,0 +1,6 @@
+---
+description: Brahma has no market price — never invent USD quotes
+globs: wallet-android/**/*.kt,btq-node/**/*.{py,json},README.md,docs/**/*.md
+---
+
+Brahma has **zero market value**. Do not add a USD price, `$ / Brahma` display, oracle, exchange ticker, or genesis `btq_usd*` field. Wallet Home shows units only — never a dollar figure and never a “No market price” line. `btq_getStats` must not quote dollars.

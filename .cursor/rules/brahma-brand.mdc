@@ -1,0 +1,17 @@
+---
+description: Brahma / BRAHMNETWORK brand — what to rename and what to keep
+globs: wallet-android/**/*.{kt,xml,kts},btq-node/**/*.{py,json},memory-bank/**/*.md
+---
+
+Coin display name is **Brahma Coin**. L1 network name is **BRAHMNETWORK**. Public HTTPS is `https://www.brahmnetwork.com`.
+
+Keep (changing these breaks the live ledger or the installed app):
+
+- JSON-RPC methods `btq_*`
+- Android `applicationId` / package `com.btq.wallet`
+- Folders `btq-node/`, `btq-data/` and env `BTQ_*`
+- Canonical message prefix `BTQ1|`
+- Mesh prefixes `BTQINVITE`, `BTQHELLO`, `BTQF`
+- Live balance keys that already start with `BTQ1G`
+
+New wallets derive `BRM1G`. `is_btq_address` / `isBtqAddress` accept both. Same body under either HRP is one account. Do not rewrite `btq-data` chain/state.

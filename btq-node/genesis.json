@@ -1,0 +1,60 @@
+{
+  "network": "BRAHMNETWORK",
+  "chain_id": 2026,
+  "protocol_version": "1.1.0-l1",
+  "canonical_ledger": "python-l1",
+  "signature": "Dilithium3",
+  "units_per_btq": 100000000,
+  "protocol_locked": true,
+  "public_launch": false,
+  "warning": "Private testnet. Pools are protocol organs. Founder/empower/strategic/50 distribution keys are generated into genesis_accounts.json (public) and genesis_secrets.json (operator only). Python L1 is the canonical ledger.",
+  "economics": {
+    "total_supply": 100000000,
+    "mining_pool": 45000000,
+    "airdrop_pool": 25000000,
+    "donation_pool": 10000000,
+    "genesis_wallets_total": 10000000,
+    "genesis_wallet_count": 50,
+    "genesis_wallet_each": 200000,
+    "empower": 5000000,
+    "strategic": 3000000,
+    "founder": 2000000,
+    "rewards": {
+      "pool": 25000000,
+      "tier1_users": 10000,
+      "tier1_join": 100,
+      "tier1_referrer": 50,
+      "tier2_users": 25000,
+      "tier2_join": 50,
+      "tier2_referrer": 25,
+      "then_halve_every_users": 25000,
+      "then_join_start": 25,
+      "then_referrer_is_half_join": true
+    },
+    "yearly_mine_cap": 5000000,
+    "block_reward": 0.1,
+    "first_mine_bonus_btq": 1,
+    "mine_full_joins": 10000,
+    "mine_halve_every_joins": 100000,
+    "donation_unlock_days": 730,
+    "pow_difficulty_bits": 20,
+    "whale_tax_bps": 2500,
+    "whale_tax_threshold_bps": 250,
+    "l2_launch_burn_btq": 100,
+    "faucet_amount": 100
+  },
+  "treasury": {
+    "POOL_MINING": 45000000,
+    "POOL_AIRDROP": 25000000,
+    "POOL_DONATION": 10000000,
+    "TREASURY_EMPOWER": 5000000,
+    "TREASURY_STRATEGIC": 3000000,
+    "TREASURY_FOUNDER": 2000000
+  },
+  "genesis_block": {
+    "index": 0,
+    "previous_hash": "0" ,
+    "miner": "GENESIS",
+    "timestamp": 1756900000
+  }
+}

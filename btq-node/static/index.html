@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAHMNETWORK — Creation is mined.</title>
+<meta name="description" content="BRAHMNETWORK — a post-quantum Layer 1. Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone. Private testnet until the launch gates flip. Units only — never dollars.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23E4AC3F" stroke-width="1.4"><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(45 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(90 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(135 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(180 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(225 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(270 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(315 12 12)"/><circle cx="12" cy="12" r="2.3"/></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0B08; --bg-2:#14100A; --panel:#161209;
+  --ink:#F0E8D8; --ink-dim:#BFB39D; --mut:#8E8371;
+  --gold:#E4AC3F; --gold-deep:#8A651E;
+  --ok:#9DB56B; --bad:#C4573B;
+  --line:rgba(228,204,160,.13); --line-strong:rgba(228,204,160,.32);
+  --serif:'Fraunces',serif; --sans:'Archivo',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --nav:70px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--gold);color:#14100A}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#2A2318}::-webkit-scrollbar-track{background:var(--bg)}
+a{color:inherit}button{font-family:inherit}
+.grain{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:1240px;margin:0 auto;padding:0 40px}
+.overline{font:500 11px/1 var(--mono);letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
+.overline i{font-style:normal;color:var(--mut);margin-right:12px}
+h2.sec{font:450 clamp(34px,4.6vw,60px)/1.06 var(--serif);letter-spacing:-.015em;margin-top:22px}
+.lede{color:var(--mut);font-size:17px;max-width:52ch}
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+.top{position:fixed;inset:0 0 auto;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  height:var(--nav);padding:0 28px;border-bottom:1px solid var(--line);
+  background:rgba(13,11,8,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
+.brand .mark{display:grid;place-items:center;color:var(--gold)}
+.brand .bt b{display:block;font:600 17px/1 var(--serif);letter-spacing:.03em}
+.brand .bt small{display:block;font:500 8px var(--mono);letter-spacing:.42em;color:var(--mut);margin-top:3px}
+.nav{display:flex;gap:22px;align-items:center}
+.nav a{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);text-decoration:none;position:relative;padding:6px 0;transition:color .2s}
+.nav a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.nav a:hover{color:var(--ink)}
+.nav a.active{color:var(--gold)}
+.nav a.active::after,.nav a:hover::after{transform:scaleX(1)}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border:1px solid var(--gold);color:var(--gold);
+  font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;text-decoration:none;background:transparent;cursor:pointer;transition:.25s}
+.btn:hover{background:var(--gold);color:#161006}
+.btn.solid{background:var(--gold);color:#161006}
+.btn.solid:hover{background:transparent;color:var(--gold)}
+.btn.sm{padding:10px 18px;font-size:10.5px}
+.btn svg{width:14px}
+.burger{display:none;flex-direction:column;gap:6px;background:none;border:none;cursor:pointer;padding:8px;z-index:70}
+.burger span{display:block;width:24px;height:1.5px;background:var(--ink);transition:.3s}
+.burger.open span:first-child{transform:translateY(3.8px) rotate(45deg)}
+.burger.open span:last-child{transform:translateY(-3.8px) rotate(-45deg)}
+.mmenu{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:0 34px;gap:2px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
+.mmenu.open{opacity:1;pointer-events:auto}
+.m-link{display:flex;align-items:baseline;gap:18px;font:450 38px var(--serif);color:var(--ink);text-decoration:none;padding:11px 0;border-bottom:1px solid var(--line)}
+.m-link i{font:400 11px var(--mono);color:var(--gold);font-style:normal;letter-spacing:.2em}
+.m-link:hover{color:var(--gold)}
+.m-foot{margin:32px 0 40px;font:400 9px var(--mono);letter-spacing:.3em;color:var(--mut)}
+main{padding-top:var(--nav)}
+.view{display:none}
+.view.on{display:block;animation:vin .55s cubic-bezier(.22,.7,.3,1) both}
+@keyframes vin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hero{max-width:1240px;margin:0 auto;padding:52px 40px 30px;display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;min-height:calc(100vh - var(--nav))}
+.gatechip{display:inline-flex;align-items:center;gap:9px;font:500 9.5px var(--mono);letter-spacing:.22em;color:var(--ink-dim);border:1px solid var(--line-strong);padding:7px 12px}
+.gatechip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none}
+.hero h1{font:500 clamp(54px,8vw,112px)/0.96 var(--serif);letter-spacing:-.02em;margin:26px 0 26px}
+.hero h1 em{font-style:italic;color:var(--gold);font-weight:450}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px}
+.stat-strip{display:flex;flex-wrap:wrap}
+.stat-strip>div{padding:2px 24px;border-left:1px solid var(--line)}
+.stat-strip>div:first-child{padding-left:0;border-left:none}
+.stat-strip b{display:block;font:500 19px var(--mono);letter-spacing:-.01em}
+.stat-strip span{display:block;font:400 8.5px var(--mono);letter-spacing:.18em;color:var(--mut);margin-top:7px}
+.orb-wrap{position:relative;height:clamp(380px,56vh,600px);cursor:grab;touch-action:none}
+.orb-wrap.pt{cursor:pointer}
+.orb-wrap canvas{display:block;width:100%;height:100%}
+.orb-tip{position:absolute;transform:translate(-50%,-100%);background:#191309;border:1px solid var(--line-strong);padding:9px 13px;pointer-events:none;opacity:0;transition:opacity .18s;white-space:nowrap;z-index:3}
+.orb-tip b{display:block;font:italic 500 15px var(--serif);color:var(--ink)}
+.orb-tip span{font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--mut)}
+.orb-cap{margin-top:14px;font:400 9px var(--mono);letter-spacing:.24em;color:var(--mut);text-align:center}
+.honesty{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.honesty .wrap{display:flex;flex-wrap:wrap}
+.hc{flex:1;min-width:200px;padding:18px 26px;border-left:1px solid var(--line)}
+.hc:first-child{border-left:none;padding-left:0}
+.hc span{display:block;font:400 8.5px var(--mono);letter-spacing:.22em;color:var(--mut)}
+.hc b{display:block;font:500 13px var(--mono);margin-top:6px;letter-spacing:.06em}
+.hc b.ok{color:var(--ok)}.hc b.bad{color:var(--bad)}
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;padding:15px 0}
+.tk-track{display:flex;width:max-content;animation:mq 38s linear infinite}
+.ticker:hover .tk-track{animation-play-state:paused}
+.tk{display:inline-flex;align-items:center;gap:11px;padding:0 28px;border-right:1px solid var(--line);font:500 12px var(--mono);letter-spacing:.12em;color:var(--ink-dim);white-space:nowrap}
+.tk b{font:italic 500 15px var(--serif);color:var(--ink);letter-spacing:0}
+.tk u{text-decoration:none;color:var(--mut)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.manifest{border-top:1px solid var(--line);padding:100px 0 40px}
+.mhead{margin-bottom:60px}
+.mrow{display:grid;grid-template-columns:110px 1fr 1.5fr;gap:30px;padding:36px 0;border-top:1px solid var(--line);align-items:start}
+.mrow:last-child{border-bottom:1px solid var(--line)}
+.mnum{font:500 13px var(--mono);color:var(--gold);letter-spacing:.2em;padding-top:6px}
+.mrow h3{font:500 26px/1.15 var(--serif);letter-spacing:-.01em;transition:color .25s}
+.mrow:hover h3{color:var(--gold)}
+.mrow p{color:var(--mut);font-size:15px;max-width:54ch}
+.flowsec{padding:110px 0;border-top:1px solid var(--line)}
+.flow{position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin-top:76px}
+.flow::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line-strong)}
+.fs{position:relative;height:210px;padding-right:30px}
+.fs::before{content:"";position:absolute;top:50%;left:0;width:9px;height:9px;margin-top:-4.5px;background:var(--bg);border:1.5px solid var(--gold);border-radius:50%}
+.fs:last-child::before{background:var(--gold)}
+.fs .ftx{position:absolute;left:0;right:30px}
+.fs:nth-child(odd) .ftx{bottom:calc(50% + 32px)}
+.fs:nth-child(even) .ftx{top:calc(50% + 32px)}
+.fs i{display:block;font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.24em;margin-bottom:8px}
+.fs b{display:block;font:600 15px var(--sans);margin-bottom:6px}
+.fs p{font-size:13px;color:var(--mut);line-height:1.55}
+.band{border-top:1px solid var(--line);padding:130px 0}
+.band h2{font:italic 450 clamp(42px,6.4vw,92px)/1.08 var(--serif);letter-spacing:-.02em;max-width:20ch}
+.band .link-g{display:inline-block;margin-top:44px}
+.page-head{padding:130px 0 64px}
+.page-head h1{font:500 clamp(52px,7.4vw,104px)/1 var(--serif);letter-spacing:-.02em;margin-top:24px}
+.page-head h1 em{color:var(--gold);font-style:italic;font-weight:450}
+.page-head .lede{margin-top:24px}
+.page-head.compact{padding-bottom:0}
+.supply-big{margin:64px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:38px 0}
+.supply-big b{font:500 clamp(40px,7.4vw,104px)/1 var(--mono);letter-spacing:-.045em}
+.supply-big i{font-style:normal;color:var(--gold)}
+.supply-big span{display:block;margin-top:14px;font:400 9px var(--mono);letter-spacing:.26em;color:var(--mut);line-height:2}
+.facts{margin-top:80px;display:grid;grid-template-columns:1fr 1fr;column-gap:70px}
+.fact{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line);align-items:baseline}
+.fact dt{font:500 10px var(--mono);letter-spacing:.22em;color:var(--mut)}
+.fact dd{font:500 12.5px var(--mono);text-align:right}
+.alloc-sec{margin-top:100px}
+.alloc{display:flex;height:56px;border:1px solid var(--line-strong);margin-top:24px}
+.alloc>div{transition:filter .2s}
+.alloc>div:hover{filter:brightness(1.3)}
+.alloc-legend{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 44px}
+.alloc-legend div{display:flex;align-items:baseline;gap:12px;font:400 11px var(--mono);letter-spacing:.06em;color:var(--ink-dim)}
+.alloc-legend b{color:var(--ink);font-weight:500}
+.alloc-legend .amt{margin-left:auto;color:var(--gold);font-weight:500;white-space:nowrap}
+.sw{width:10px;height:10px;flex:none;transform:translateY(1px)}
+.snote{margin-top:18px;font:400 10.5px/2 var(--mono);color:var(--mut);letter-spacing:.08em}
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
+.qcard{border:1px solid var(--line);padding:24px 22px}
+.qcard i{display:block;font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.22em}
+.qcard b{display:block;font:600 15px var(--sans);margin:12px 0 8px}
+.qcard p{font-size:13px;color:var(--mut);line-height:1.6}
+.panel2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.panel{border:1px solid var(--line);padding:30px}
+.panel h3{font:500 24px var(--serif);letter-spacing:-.01em}
+.panel .pl{color:var(--mut);font-size:14px;margin-top:12px;max-width:48ch}
+.sched{margin-top:22px}
+.sched>div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line);align-items:baseline}
+.sched span{font:500 10px var(--mono);letter-spacing:.18em;color:var(--mut)}
+.sched b{font:500 13px var(--mono);text-align:right}
+.sched b.gold{color:var(--gold)}
+.idlist{margin-top:22px}
+.idlist li{list-style:none;display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink-dim)}
+.idlist li i{font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.16em;padding-top:3px}
+.chip{display:inline-block;font:500 9px var(--mono);letter-spacing:.22em;color:var(--gold);border:1px solid var(--gold-deep);padding:5px 10px;margin-bottom:6px}
+.gates{margin-top:56px;border:1px solid var(--line-strong)}
+.grow{display:grid;grid-template-columns:240px 1fr;border-top:1px solid var(--line)}
+.grow:first-child{border-top:none}
+.grow>div{padding:17px 22px}
+.gk{font:500 10px var(--mono);letter-spacing:.2em;color:var(--mut)}
+.gv{font:500 12.5px var(--mono);line-height:1.7}
+.gv.ok{color:var(--ok)}.gv.bad{color:var(--bad)}
+.gv code{font:inherit;color:var(--gold)}
+.flip{margin-top:56px}
+.flip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
+.endpoints{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.ep{border:1px solid var(--line);padding:26px}
+.ep i{display:block;font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.22em}
+.ep b{display:block;font:500 13px var(--mono);margin:14px 0 10px;word-break:break-all;color:var(--ink)}
+.ep p{font-size:13px;color:var(--mut);line-height:1.65}
+.rpc{margin-top:16px;border:1px dashed var(--line-strong);padding:24px 28px;font:400 11.5px/2.2 var(--mono);color:var(--ink-dim);letter-spacing:.06em}
+.rpc b{color:var(--gold);font-weight:500}
+.ncl{margin-top:22px}
+.ncl li{list-style:none;display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line);color:var(--ink-dim);font-size:15px;align-items:baseline}
+.ncl li::before{content:"✕";color:var(--bad);font:500 13px var(--mono);flex:none}
+.bigq{border-top:1px solid var(--line);margin-top:110px;padding:110px 0;text-align:center}
+.bigq h2{font:italic 450 clamp(34px,5.2vw,72px)/1.15 var(--serif);max-width:24ch;margin:0 auto}
+.bigq p{margin-top:24px;font:400 10px var(--mono);letter-spacing:.24em;color:var(--mut)}
+.eight-strip{display:flex;border:1px solid var(--line-strong);margin-top:56px}
+.eight-strip>div{flex:1;padding:20px 26px;border-right:1px solid var(--line)}
+.eight-strip>div:last-child{border-right:none}
+.eight-strip b{display:block;font:500 19px var(--mono)}
+.eight-strip span{display:block;font:400 8.5px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
+.eight-grid{display:grid;grid-template-columns:320px 1px 1fr;padding:8px 0 0;border-top:1px solid var(--line);margin-top:70px}
+.rail{display:flex;flex-direction:column}
+.rail-item{display:flex;align-items:center;gap:14px;padding:15px 18px;background:none;border:none;border-left:2px solid transparent;cursor:pointer;text-align:left;transition:.2s;color:var(--ink-dim)}
+.rail-item i{font:400 10px var(--mono);font-style:normal;color:var(--mut);width:20px;flex:none}
+.rail-item svg{flex:none}
+.rail-item b{font:500 17px var(--serif);color:var(--ink);font-weight:500}
+.rail-item span{margin-left:auto;font:400 9.5px var(--mono);letter-spacing:.14em;color:var(--mut)}
+.rail-item:hover{background:#14100A}
+.rail-item.on{border-left-color:var(--gold);background:#16120B}
+.e-div{background:var(--line)}
+.detail{padding:26px 0 0 56px;min-height:540px}
+.d-top{display:flex;justify-content:space-between;align-items:center}
+.d-idx{font:400 10.5px var(--mono);letter-spacing:.22em;color:var(--mut)}
+.d-nav{display:flex;gap:8px}
+.d-nav button{width:44px;height:38px;display:grid;place-items:center;border:1px solid var(--line-strong);background:none;color:var(--ink-dim);cursor:pointer;transition:.2s}
+.d-nav button:hover{border-color:var(--gold);color:var(--gold)}
+.d-main{display:flex;gap:36px;margin-top:46px;align-items:flex-start}
+.d-glyph{padding-top:10px}
+.d-name{font:italic 450 clamp(52px,6.8vw,108px)/1 var(--serif);letter-spacing:-.02em}
+.d-rule{height:2px;width:120px;margin:24px 0 18px;background:var(--coin,var(--gold))}
+.d-tag{font:italic 500 22px var(--serif);color:var(--coin,var(--gold))}
+.d-lore{margin-top:20px;color:var(--ink-dim);max-width:56ch;font-size:15.5px}
+.d-specs{margin-top:36px;display:flex;border-top:1px solid var(--line);flex-wrap:wrap}
+.d-specs>div{padding:16px 34px 4px 0;margin-right:34px;border-right:1px solid var(--line)}
+.d-specs>div:last-child{border-right:none}
+.d-specs i{display:block;font:400 8.5px var(--mono);font-style:normal;letter-spacing:.22em;color:var(--mut)}
+.d-specs b{display:block;font:500 13px var(--mono);margin-top:8px}
+.d-note{margin-top:30px;font:400 9px var(--mono);letter-spacing:.2em;color:var(--mut);line-height:2}
+.d-swap{animation:dswap .5s cubic-bezier(.22,.7,.3,1) both}
+@keyframes dswap{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.launchl2{border:1px solid var(--line);padding:44px;margin:90px 0 110px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+.launchl2 h3{font:500 28px var(--serif)}
+.launchl2 p{color:var(--mut);font-size:14.5px;margin-top:12px;max-width:52ch}
+.launchl2 .burnb{font:500 40px var(--mono);color:var(--gold);white-space:nowrap}
+.launchl2 .burnb span{display:block;font:400 8.5px var(--mono);letter-spacing:.22em;color:var(--mut);margin-top:8px}
+.ladder{position:relative;height:410px;display:flex;gap:12px;margin-top:90px}
+.step{flex:1;position:relative}
+.s-fill{position:absolute;left:0;right:0;bottom:78px;height:var(--h);background:#16110A;border:1px solid var(--line-strong);border-top:2px solid var(--gold);padding:16px 16px 0;transition:background .25s}
+.step:hover .s-fill{background:#1D160C}
+.s-reward{font:500 40px/1 var(--serif)}
+.s-unit{display:block;font:400 8.5px var(--mono);letter-spacing:.18em;color:var(--mut);margin-top:8px}
+.s-ref{display:block;margin-top:12px;font:500 10px var(--mono);color:var(--gold);letter-spacing:.1em}
+.s-meta{position:absolute;left:0;right:0;bottom:0}
+.s-era{font:500 10px var(--mono);letter-spacing:.16em;color:var(--ink-dim);display:block}
+.s-range{font:400 10px var(--mono);color:var(--mut);display:block;margin-top:6px}
+.you{position:absolute;top:-44px;bottom:78px;width:1px;background:var(--gold);transition:left .45s cubic-bezier(.22,.7,.3,1);z-index:2}
+.you::after{content:"YOU";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font:500 9px var(--mono);letter-spacing:.22em;color:var(--gold);background:var(--bg);padding:2px 7px;border:1px solid var(--gold)}
+.ladder-note{margin-top:22px;font:400 10px/2 var(--mono);color:var(--mut);letter-spacing:.1em}
+.calc{border:1px solid var(--line-strong);padding:48px;margin-top:100px;display:grid;grid-template-columns:1.2fr .8fr;gap:60px}
+.calc label.t{display:block;font:500 10px var(--mono);letter-spacing:.24em;color:var(--mut);margin-bottom:26px}
+.calc-nums{display:flex;align-items:center;gap:22px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:2px;background:var(--line-strong);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);border:5px solid var(--bg);box-shadow:0 0 0 1px var(--gold);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--gold);border:4px solid var(--bg);box-shadow:0 0 0 1px var(--gold);cursor:pointer}
+#calcNum{width:130px;background:transparent;border:none;border-bottom:1px solid var(--line-strong);color:var(--ink);font:500 20px var(--mono);padding:8px 2px;outline:none;text-align:right}
+#calcNum:focus{border-color:var(--gold)}
+.c-hint{margin-top:22px;font:400 10px var(--mono);color:var(--mut);letter-spacing:.12em;line-height:2}
+.c-res{border-left:1px solid var(--line);padding-left:56px}
+.c-era{font:italic 500 28px var(--serif);color:var(--gold)}
+.c-row{margin-top:28px}
+.c-row i{display:block;font:400 8.5px var(--mono);font-style:normal;letter-spacing:.22em;color:var(--mut)}
+.c-row b{display:block;font:500 40px var(--mono);letter-spacing:-.02em;margin-top:6px}
+.c-row.small b{font-size:19px}
+.c-row.small{margin-top:20px}
+.c-meta{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);font:400 10px var(--mono);color:var(--mut);letter-spacing:.12em;line-height:2.1}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:100px 0 0}
+.rule{border:1px solid var(--line);padding:24px}
+.rule i{display:block;font:500 9.5px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.2em}
+.rule b{display:block;font:600 14.5px var(--sans);margin:10px 0 6px}
+.rule p{font-size:13px;color:var(--mut);line-height:1.6}
+.forge{border:1px solid var(--line);padding:52px;display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.forge h3{font:450 30px var(--serif);letter-spacing:-.01em}
+.forge .fl{color:var(--mut);font-size:14.5px;margin-top:14px;max-width:42ch}
+.f-field{margin-top:30px}
+.f-in{background:transparent;border:none;border-bottom:1px solid var(--line-strong);color:var(--ink);font:500 20px var(--mono);padding:12px 2px;width:100%;outline:none}
+.f-in:focus{border-color:var(--gold)}
+.f-out{border:1px dashed var(--line-strong);padding:30px;display:none}
+.f-out.show{display:block;animation:dswap .4s ease both}
+.inv-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.inv-row i{font:400 8.5px var(--mono);font-style:normal;letter-spacing:.2em;color:var(--mut);width:44px;flex:none}
+.inv-row code{font:500 12px var(--mono);color:var(--gold);word-break:break-all;flex:1}
+.inv-row button{flex:none}
+.f-btns{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.mine{display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:center;padding:100px 0;border-top:1px solid var(--line);margin-top:90px}
+.phone{width:min(340px,100%);margin:0 auto;background:#0F0C07;border:1px solid var(--line-strong);border-radius:44px;padding:12px;box-shadow:0 24px 60px -30px rgba(0,0,0,.8)}
+.scr{background:#120E09;border:1px solid var(--line);border-radius:34px;padding:20px 20px 16px;position:relative;overflow:hidden}
+@keyframes foundf{0%{border-color:var(--gold)}100%{border-color:var(--line)}}
+.scr.found{animation:foundf .6s ease}
+.sbar{display:flex;justify-content:space-between;font:500 10px var(--mono);color:var(--mut);letter-spacing:.14em;margin-bottom:14px}
+.ptabs{display:flex;border:1px solid var(--line);margin-bottom:14px}
+.ptab{flex:1;background:none;border:none;color:var(--mut);font:500 10px var(--mono);letter-spacing:.22em;padding:9px;cursor:pointer;transition:.2s}
+.ptab.on{background:var(--gold);color:#161006}
+.pbody.hidden{display:none}
+.app-h{display:flex;justify-content:space-between;align-items:center}
+.app-h b{font:500 10px var(--mono);color:var(--gold);letter-spacing:.18em}
+.eye{background:none;border:none;color:var(--mut);cursor:pointer;padding:3px;display:grid;place-items:center}
+.eye.on{color:var(--gold)}
+.bal{font:500 38px/1.1 var(--mono);letter-spacing:-.02em;margin-top:8px}
+.bal-l{font:400 9px var(--mono);color:var(--mut);letter-spacing:.24em;margin:4px 0 10px}
+.homerow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+.homerow span{font:400 8.5px var(--mono);letter-spacing:.18em;color:var(--mut)}
+.homerow b{font:500 12.5px var(--mono)}
+.homerow b.gold{color:var(--gold)}
+.l2note{margin-top:12px;font:400 8.5px/1.9 var(--mono);color:var(--mut);letter-spacing:.14em;border-top:1px solid var(--line);padding-top:12px}
+.bb-zone{position:relative;height:190px;display:grid;place-items:center}
+.bb-ring{position:absolute;inset:0;margin:auto;width:176px;height:176px}
+#ringP{transition:stroke-dashoffset .25s linear}
+.lz{position:relative;z-index:2;text-align:center}
+.lz b{font:500 46px/1 var(--mono);letter-spacing:-.02em}
+.lz span{display:block;font:400 8.5px var(--mono);letter-spacing:.24em;color:var(--mut);margin-top:8px}
+.rip{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border:1px solid var(--gold);border-radius:50%;animation:rip .7s ease-out forwards;pointer-events:none}
+@keyframes rip{from{opacity:.7;transform:scale(.6)}to{opacity:0;transform:scale(1.55)}}
+.prog-t{font:400 9px var(--mono);color:var(--mut);letter-spacing:.16em;text-align:center;margin-top:6px}
+.lblrow{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.lblrow span{font:400 8.5px var(--mono);letter-spacing:.2em;color:var(--mut)}
+.bits,.joins{display:flex;gap:6px;margin-top:6px}
+.bitb,.jb{flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink-dim);font:500 9.5px var(--mono);letter-spacing:.1em;padding:8px 2px;cursor:pointer;transition:.2s}
+.bitb:hover,.jb:hover{border-color:var(--gold);color:var(--gold)}
+.bitb.on,.jb.on{background:var(--gold);border-color:var(--gold);color:#161006}
+.ctl{width:100%;background:none;border:1px solid var(--gold);color:var(--gold);font:500 10px var(--mono);letter-spacing:.2em;padding:12px;cursor:pointer;transition:.2s;margin-top:14px}
+.ctl:hover,.ctl.on{background:var(--gold);color:#161006}
+.mstats{display:flex;border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.mstats>div{flex:1;text-align:center}
+.mstats b{display:block;font:500 13px var(--mono)}
+.mstats span{display:block;font:400 8px var(--mono);color:var(--mut);letter-spacing:.16em;margin-top:4px}
+.slog{margin-top:12px;font:400 9.5px/1.9 var(--mono);color:var(--mut);letter-spacing:.05em;min-height:56px}
+.slog .new{color:var(--gold)}
+.selftest{margin-top:10px;font:400 8.5px var(--mono);letter-spacing:.16em;color:var(--mut);text-align:center}
+.selftest.pass{color:var(--ok)}
+.sim-side p{color:var(--mut);max-width:52ch;margin-top:22px}
+.sim-side ul{list-style:none;margin-top:30px}
+.sim-side li{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--line);font-size:14.5px;color:var(--ink-dim)}
+.sim-side li i{font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.14em;padding-top:4px}
+.net-row{display:flex;gap:28px 44px;flex-wrap:wrap;margin-top:36px}
+.net-row b{display:block;font:500 22px var(--mono);color:var(--gold)}
+.net-row span{display:block;font:400 8.5px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
+.scrtable{margin-top:34px}
+.scrtable>div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:15px 0;border-top:1px solid var(--line);align-items:baseline}
+.scrtable>div:last-child{border-bottom:1px solid var(--line)}
+.scrtable i{font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.18em}
+.scrtable p{font-size:14px;color:var(--ink-dim)}
+.checklist{border:1px solid var(--line-strong);margin-top:56px}
+.checklist>div{display:grid;grid-template-columns:36px 1fr auto;gap:16px;align-items:center;padding:20px 26px;border-top:1px solid var(--line)}
+.checklist>div:first-child{border-top:none}
+.cbox{width:16px;height:16px;border:1.5px solid var(--mut);flex:none}
+.checklist b{font:500 14px var(--sans);display:block}
+.checklist p{font:400 11px var(--mono);color:var(--mut);letter-spacing:.08em;margin-top:4px;line-height:1.8}
+.checklist .st{font:500 10px var(--mono);letter-spacing:.2em;color:var(--bad);white-space:nowrap}
+.dl-row{display:flex;gap:16px;flex-wrap:wrap;margin:70px 0 90px}
+.dl{display:flex;align-items:center;gap:16px;border:1px solid var(--line-strong);padding:16px 28px;text-decoration:none;transition:.25s;min-width:225px}
+.dl:hover{border-color:var(--gold);transform:translateY(-2px)}
+.dl svg{width:24px;flex:none;color:var(--ink)}
+.dl small{display:block;font:400 8.5px var(--mono);letter-spacing:.22em;color:var(--mut)}
+.dl b{font:500 15px var(--sans)}
+.dl-note{font:400 10px var(--mono);color:var(--mut);letter-spacing:.14em;align-self:center}
+.faq{margin-top:110px;border-top:1px solid var(--line)}
+.faq h2{font:450 clamp(30px,4vw,46px) var(--serif);margin:60px 0 30px}
+.fq{border-bottom:1px solid var(--line)}
+.fq-q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 0;background:none;border:none;color:var(--ink);font:500 20px var(--serif);cursor:pointer;text-align:left}
+.fq-q svg{width:16px;flex:none;color:var(--gold);transition:transform .3s}
+.fq.open .fq-q svg{transform:rotate(45deg)}
+.fq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.fq.open .fq-a{grid-template-rows:1fr}
+.fq-a>div{overflow:hidden}
+.fq-a p{color:var(--mut);padding:0 0 28px;max-width:66ch;font-size:15px}
+.fine{margin:80px 0 0;font:400 10px/2 var(--mono);color:var(--mut);letter-spacing:.08em;max-width:76ch}
+footer{border-top:1px solid var(--line);padding:64px 0 26px}
+.f-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:44px}
+.f-brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.f-brand b{font:600 18px var(--serif)}
+.f-brand small{display:block;font:500 8px var(--mono);letter-spacing:.4em;color:var(--mut)}
+.f-disc{font-size:12.5px;color:var(--mut);max-width:48ch;line-height:1.7}
+.f-links{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.f-links a{font:500 11px var(--mono);letter-spacing:.18em;color:var(--ink-dim);text-decoration:none;text-transform:uppercase}
+.f-links a:hover{color:var(--gold)}
+.f-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:48px;padding-top:22px;font:400 9.5px var(--mono);letter-spacing:.18em;color:var(--mut)}
+#toasts{position:fixed;right:22px;bottom:22px;z-index:300;display:flex;flex-direction:column;gap:10px}
+.toast{background:#191309;border:1px solid var(--line-strong);border-left:2px solid var(--gold);padding:14px 18px;font:400 13.5px var(--sans);color:var(--ink);max-width:330px;animation:tin .35s ease both}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+.toast.out{animation:tout .3s ease both}
+@keyframes tout{to{opacity:0;transform:translateY(8px)}}
+@media(max-width:1020px){
+  .hero{grid-template-columns:1fr;min-height:0;padding-top:40px}
+  .eight-grid{display:block}
+  .rail{flex-direction:row;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:36px}
+  .rail-item{border-left:none;border-bottom:2px solid transparent;flex:none}
+  .rail-item.on{border-bottom-color:var(--gold)}
+  .detail{padding-left:0;min-height:0}
+  .mine{grid-template-columns:1fr;gap:60px}
+  .calc{grid-template-columns:1fr;gap:44px;padding:36px}
+  .c-res{border-left:none;padding-left:0;border-top:1px solid var(--line);padding-top:36px}
+  .quad{grid-template-columns:1fr 1fr}
+  .flip-grid,.rules,.endpoints{grid-template-columns:1fr}
+  .panel2{grid-template-columns:1fr}
+  .launchl2{grid-template-columns:1fr}
+}
+@media(max-width:860px){
+  .nav{display:none}
+  .burger{display:flex}
+  .wrap{padding:0 22px}
+  .hero{padding-left:22px;padding-right:22px}
+  .mrow{grid-template-columns:1fr;gap:12px;padding:28px 0}
+  .flow{display:block;margin-top:50px}
+  .flow::before{left:4px;top:6px;bottom:6px;right:auto;width:1px;height:auto}
+  .fs{height:auto;padding:0 0 34px 30px}
+  .fs::before{top:6px;margin:0}
+  .fs .ftx{position:static}
+  .facts{grid-template-columns:1fr}
+  .alloc-legend{grid-template-columns:1fr}
+  .eight-strip{flex-direction:column}
+  .eight-strip>div{border-right:none;border-bottom:1px solid var(--line)}
+  .eight-strip>div:last-child{border-bottom:none}
+  .ladder{height:auto;flex-direction:column;gap:22px;margin-top:70px}
+  .step{height:150px}
+  .s-fill{bottom:0}
+  .s-meta,.you{display:none}
+  .forge{grid-template-columns:1fr;padding:34px;gap:34px}
+  .f-grid{grid-template-columns:1fr}
+  .d-main{flex-direction:column;gap:20px}
+  .grow{grid-template-columns:1fr}
+  .gk{padding-bottom:0}
+  .scrtable>div,.idlist li{grid-template-columns:1fr;gap:6px}
+  .hc{min-width:140px;padding:14px 18px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .tk-track{animation:none}
+  .rv{transition:none;opacity:1;transform:none}
+  .view.on,.d-swap{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<header class="top">
+  <a class="brand" href="#/home">
+    <span class="mark" data-s="27"></span>
+    <span class="bt"><b>BRAHMA</b><small>NETWORK</small></span>
+  </a>
+  <nav class="nav">
+    <a href="#/home">Home</a>
+    <a href="#/coin">Brahma Coin</a>
+    <a href="#/eight">The Eight</a>
+    <a href="#/rewards">Rewards</a>
+    <a href="#/network">Network</a>
+    <a href="#/wallet">Wallet</a>
+    <a href="#/join">Join</a>
+  </nav>
+  <a class="btn solid sm" href="#/join">Get the app</a>
+  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+</header>
+
+<div class="mmenu" id="mmenu">
+  <a class="m-link" href="#/home"><i>01</i>Home</a>
+  <a class="m-link" href="#/coin"><i>02</i>Brahma Coin</a>
+  <a class="m-link" href="#/eight"><i>03</i>The Eight</a>
+  <a class="m-link" href="#/rewards"><i>04</i>Rewards</a>
+  <a class="m-link" href="#/network"><i>05</i>Network</a>
+  <a class="m-link" href="#/wallet"><i>06</i>Wallet</a>
+  <a class="m-link" href="#/join"><i>07</i>Join</a>
+  <p class="m-foot">BRAHMNETWORK — PRIVATE TESTNET · CHAIN 2026</p>
+</div>
+
+<main>
+<section class="view" id="view-home">
+  <div class="hero">
+    <div>
+      <p class="gatechip rv" id="gateChip">PRIVATE TESTNET — PUBLIC LAUNCH: FALSE</p>
+      <h1 class="rv" style="transition-delay:.08s">Creation<br>is <em>mined.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">Brahma Coin is the native unit of BRAHMNETWORK — a post-quantum Layer 1. A Python node seals the chain, wallets sign with Dilithium3 (ML-DSA-65), and 100,000,000 coins are mined on the phone. Units only. Never dollars.</p>
+      <div class="cta-row rv" style="transition-delay:.24s">
+        <a class="btn solid" href="#/wallet">See the miner
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" href="#/eight">Meet the Eight</a>
+      </div>
+      <div class="stat-strip rv" style="transition-delay:.32s">
+        <div><b>100,000,000</b><span>MAX SUPPLY — FIXED</span></div>
+        <div><b>CHAIN 2026</b><span>CHAIN ID</span></div>
+        <div><b>ML-DSA-65</b><span>DILITHIUM3 SIGNATURES</span></div>
+        <div><b>~20 BITS</b><span>PHONE PROOF OF WORK</span></div>
+      </div>
+    </div>
+    <div class="rv" style="transition-delay:.2s">
+      <div class="orb-wrap" id="orbWrap">
+        <canvas id="orbitCanvas"></canvas>
+        <div class="orb-tip" id="orbTip"></div>
+      </div>
+      <p class="orb-cap">THE BRAHMA SYSTEM — DRAG TO TILT · HOVER A COIN · CLICK TO INSPECT</p>
+    </div>
+  </div>
+
+  <div class="honesty rv">
+    <div class="wrap">
+      <div class="hc"><span>PROTOCOL LOCKED</span><b class="ok">YES — FIXED IN PROTOCOL CODE</b></div>
+      <div class="hc"><span>PUBLIC LAUNCH</span><b class="bad" id="liveLaunch">FALSE</b></div>
+      <div class="hc"><span>SECOND OPERATOR</span><b class="bad">REQUIRED — NOT YET REAL</b></div>
+      <div class="hc"><span>DOLLAR VALUE</span><b class="bad">NONE — UNITS ONLY, FOREVER</b></div>
+      <div class="hc"><span>THIS NODE HEIGHT</span><b id="liveHeight">—</b></div>
+      <div class="hc"><span>THIS NODE JOINED</span><b id="liveJoined">—</b></div>
+    </div>
+  </div>
+
+  <div class="ticker"><div class="tk-track" id="tkTrack"></div></div>
+
+  <section class="manifest">
+    <div class="wrap">
+      <div class="mhead rv">
+        <p class="overline"><i>01</i>THE PROTOCOL</p>
+        <h2 class="sec">Written before<br>the first block.</h2>
+      </div>
+      <div class="mrow rv"><span class="mnum">01 /</span><h3>Post-quantum identity</h3><p>The ledger is a Python node. Wallets sign with Dilithium3 (ML-DSA-65). Addresses are checksummed BRM1G. One Brahma Coin is 100,000,000 base units.</p></div>
+      <div class="mrow rv"><span class="mnum">02 /</span><h3>Honest by design</h3><p>This is a private testnet, and the site says so. Before any mainnet claim: two independent operators, a named public host live, and launch explicitly flipped on. Two processes on one PC are not two operators.</p></div>
+      <div class="mrow rv"><span class="mnum">03 /</span><h3>Pools are organs</h3><p>POOL_MINING, POOL_AIRDROP and POOL_DONATION cannot send as a user — they are protocol organs, not wallets you can drain. The donation pool sits locked for 730 days, then moves only by council key with empower cosign.</p></div>
+      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 2.5% of circulating supply burns 25% of itself. Launching an L2 costs a permanent burn of 100 Brahma Coin.</p></div>
+    </div>
+  </section>
+
+  <section class="flowsec">
+    <div class="wrap">
+      <p class="overline rv"><i>02</i>THE FLOW</p>
+      <h2 class="sec rv">From pocket<br>to protocol.</h2>
+      <div class="flow">
+        <div class="fs rv"><div class="ftx"><i>01</i><b>Download</b><p>Create or recover a Dilithium identity. An app recovery phrase — not BIP-39.</p></div></div>
+        <div class="fs rv" style="transition-delay:.1s"><div class="ftx"><i>02</i><b>Claim</b><p>One join claim per address, paid from the 25,000,000 adoption pool. Referrers get half.</p></div></div>
+        <div class="fs rv" style="transition-delay:.2s"><div class="ftx"><i>03</i><b>Mine</b><p>The phone searches ~20 bits of proof of work. The node seals; the reward pays.</p></div></div>
+        <div class="fs rv" style="transition-delay:.3s"><div class="ftx"><i>04</i><b>Halve</b><p>Block reward halves as the network grows. Each halving drops 750M of every genesis L2.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="flowsec" style="padding-top:0;border-top:none">
+    <div class="wrap">
+      <p class="overline rv"><i>03</i>REACH THE NODE</p>
+      <h2 class="sec rv">Where it works.</h2>
+      <div class="endpoints">
+        <div class="ep rv"><i>OPERATOR WI-FI</i><b>http://192.168.168.16:8545</b><p>On the operator LAN (192.168.168.*) the wallet prefers the local node directly.</p></div>
+        <div class="ep rv" style="transition-delay:.1s"><i>GSM / INTERNET</i><b>https://www.brahmnetwork.com</b><p>Works only if the host actually reaches the node origin. The named host must forward to the node.</p></div>
+        <div class="ep rv" style="transition-delay:.2s"><i>NO INTERNET — MESH</i><b>Sentinel · TCP 18545 · BT · Wi-Fi Aware</b><p>Sign and hash on the phone, gossip the packet. Any node that hears it seals it.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap rv">
+      <p class="overline"><i>04</i>THE RULE</p>
+      <h2>Gossip is not payment. The block is payment.</h2>
+      <a class="link-g" href="#/network" style="color:var(--gold);font:500 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:6px">Read the network spec</a>
+    </div>
+  </section>
+</section>
+
+<section class="view" id="view-coin">
+  <div class="wrap">
+    <div class="page-head">
+      <p class="overline rv"><i>02</i>BRAHMA COIN — THE NATIVE UNIT</p>
+      <h1 class="rv" style="transition-delay:.08s">One hundred<br>million. <em>Period.</em></h1>
+      <div class="supply-big rv" style="transition-delay:.16s">
+        <b>100<i>,</i>000<i>,</i>000</b>
+        <span>MAX SUPPLY — NOTHING ABOVE 100M CAN EXIST AS OUTSTANDING UNITS (BALANCES + BURNED)<br>1 BRAHMA COIN = 100,000,000 BASE UNITS · MINED ONLY ON THE PHONE</span>
+      </div>
+    </div>
+
+    <dl class="facts rv">
+      <div class="fact"><dt>NETWORK</dt><dd>BRAHMNETWORK — PRIVATE TESTNET</dd></div>
+      <div class="fact"><dt>CHAIN ID</dt><dd>2026</dd></div>
+      <div class="fact"><dt>NODE</dt><dd>PYTHON</dd></div>
+      <div class="fact"><dt>SIGNATURES</dt><dd>DILITHIUM3 / ML-DSA-65</dd></div>
+      <div class="fact"><dt>CONSENSUS</dt><dd>PHONE PROOF OF WORK · ~20 BITS</dd></div>
+      <div class="fact"><dt>BLOCK TARGET</dt><dd>~8 S · BITS 18–24</dd></div>
+      <div class="fact"><dt>MAX SUPPLY</dt><dd>100,000,000</dd></div>
+      <div class="fact"><dt>BASE UNIT</dt><dd>1E8 PER COIN</dd></div>
+      <div class="fact"><dt>YEARLY MINE CAP</dt><dd>5,000,000</dd></div>
+      <div class="fact"><dt>GENESIS WALLETS</dt><dd>50 × 200,000</dd></div>
+      <div class="fact"><dt>WHALE TAX</dt><dd>25% BURN OVER 2.5% CIRC.</dd></div>
+      <div class="fact"><dt>ADDRESSES</dt><dd>BRM1G CHECKSUMMED</dd></div>
+    </dl>
+
+    <div class="alloc-sec rv">
+      <p class="overline"><i>—</i>ALLOCATION — EVERY UNIT ACCOUNTED FOR</p>
+      <div class="alloc">
+        <div style="width:45%;background:#E4AC3F" title="Mining pool — 45,000,000"></div>
+        <div style="width:25%;background:#C98F2F" title="Adoption / referral pool — 25,000,000"></div>
+        <div style="width:10%;background:#A97622" title="Donation pool — 10,000,000"></div>
+        <div style="width:10%;background:#8A651E" title="50 genesis wallets — 10,000,000"></div>
+        <div style="width:5%;background:#6E4F1A" title="Empower treasury — 5,000,000"></div>
+        <div style="width:3%;background:#563E18" title="Strategic treasury — 3,000,000"></div>
+        <div style="width:2%;background:#413015" title="Founder treasury — 2,000,000"></div>
+      </div>
+      <div class="alloc-legend">
+        <div><span class="sw" style="background:#E4AC3F"></span><b>MINING POOL</b><span class="amt">45,000,000</span></div>
+        <div><span class="sw" style="background:#C98F2F"></span><b>ADOPTION / REFERRAL POOL</b><span class="amt">25,000,000</span></div>
+        <div><span class="sw" style="background:#A97622"></span><b>DONATION POOL — LOCKED 730 DAYS</b><span class="amt">10,000,000</span></div>
+        <div><span class="sw" style="background:#8A651E"></span><b>50 GENESIS WALLETS × 200,000</b><span class="amt">10,000,000</span></div>
+        <div><span class="sw" style="background:#6E4F1A"></span><b>EMPOWER — PROTOCOL TREASURY</b><span class="amt">5,000,000</span></div>
+        <div><span class="sw" style="background:#563E18"></span><b>STRATEGIC — PROTOCOL TREASURY</b><span class="amt">3,000,000</span></div>
+        <div><span class="sw" style="background:#413015"></span><b>FOUNDER — PROTOCOL TREASURY</b><span class="amt">2,000,000</span></div>
+      </div>
+      <p class="snote">POOL_MINING, POOL_AIRDROP AND POOL_DONATION CANNOT SEND AS A USER.<br>THEY ARE PROTOCOL ORGANS, NOT WALLETS YOU CAN DRAIN.</p>
+    </div>
+
+    <section class="alloc-sec rv" style="margin-top:90px">
+      <p class="overline"><i>—</i>MINING — HOW A BLOCK IS MADE</p>
+      <h2 class="sec">Searched on the phone.<br>Sealed by the node.</h2>
+      <div class="quad">
+        <div class="qcard"><i>01 — SIGN</i><b>Sign the mine</b><p>The wallet signs a mine transaction with Dilithium3 (ML-DSA-65).</p></div>
+        <div class="qcard"><i>02 — SEARCH</i><b>Proof of work</b><p>The phone searches ~20 bits. Difficulty retargets toward ~8 second blocks and stays between 18 and 24 bits.</p></div>
+        <div class="qcard"><i>03 — VERIFY</i><b>Node checks</b><p>The node checks the signature, the nonce, and the supply cap before accepting anything.</p></div>
+        <div class="qcard"><i>04 — SEAL</i><b>Block written</b><p>The node writes the block and the reward pays. Gossip relays it — the block is the payment.</p></div>
+      </div>
+      <div class="panel2" style="margin-top:16px">
+        <div class="panel">
+          <h3>Block reward</h3>
+          <p class="pl">First mine on an address pays the current block reward plus a one-time +1 bonus. Then the schedule halves as joined users grow.</p>
+          <div class="sched">
+            <div><span>FIRST-EVER MINE ON AN ADDRESS</span><b class="gold">BLOCK REWARD + 1 · ONCE (1.1 WHILE 0.1)</b></div>
+            <div><span>WHILE JOINED USERS ≤ 10,000</span><b class="gold">0.1 / BLOCK</b></div>
+            <div><span>HALVES EVERY 100,000 JOINS</span><b>0.05 → 0.025 → 0.0125 …</b></div>
+            <div><span>AFTER MANY HALVINGS</span><b>REWARD REACHES 0</b></div>
+            <div><span>YEARLY CAP</span><b>5,000,000 / YEAR — UNUSED STAYS IN POOL</b></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Whale tax</h3>
+          <p class="pl">Brahma Coin only. L2 transfers are not taxed this way. Positive amounts only — protocol pools cannot be the sender or the destination.</p>
+          <div class="sched">
+            <div><span>SEND &gt; 2.5% OF CIRCULATING SUPPLY</span><b class="gold">25% OF THE SEND IS BURNED</b></div>
+            <div><span>L2 MEMECOIN TRANSFERS</span><b>EXEMPT</b></div>
+            <div><span>ZERO OR NEGATIVE AMOUNTS</span><b>REJECTED</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alloc-sec rv" style="margin-top:90px;padding-bottom:110px">
+      <p class="overline"><i>—</i>IDENTITY &amp; COMPATIBILITY</p>
+      <h2 class="sec">New name.<br>Same key body.</h2>
+      <ul class="idlist">
+        <li><i>ADDRESSES</i><span>Wallets use checksummed BRM1G. Older checksummed invites still resolve to the same key body, one account.</span></li>
+        <li><i>SIGNING</i><span>Signatures use the canonical BRAH1| message. JSON-RPC methods are brah_*.</span></li>
+        <li><i>RPC</i><span>Methods live in the brah_* namespace. JSON-RPC is POST / on the node host.</span></li>
+        <li><i>GENESIS LABEL</i><span>The network name is BRAHMNETWORK. Chain id 2026.</span></li>
+        <li><i>NOT ETHEREUM</i><span>This is not an Ethereum or dRPC endpoint. No EVM, no Solidity as consensus.</span></li>
+      </ul>
+    </section>
+  </div>
+</section>
+
+<section class="view" id="view-eight">
+  <div class="wrap">
+    <div class="page-head compact">
+      <p class="overline rv"><i>03</i>LAYER 2 — TOKENS ON THE SAME BLOCKS</p>
+      <h1 class="rv" style="transition-delay:.08s">The <em>Eight.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">Layer 2 here means extra tokens on the same L1 — not a separate chain. The genesis eight were created by a one-time operator grant of 5 billion units each. At every mine-schedule halving, wallets that have joined or mined can receive 750,000,000 whole units of each.</p>
+      <div class="eight-strip rv" style="transition-delay:.24s">
+        <div><b>8</b><span>GENESIS TOKENS</span></div>
+        <div><b>5,000,000,000</b><span>UNITS EACH — OPERATOR GRANT</span></div>
+        <div><b>750,000,000</b><span>PER WALLET, PER MINE HALVING</span></div>
+        <div><b>100</b><span>BRAHMA COIN BURN TO LAUNCH AN L2</span></div>
+      </div>
+    </div>
+    <div class="eight-grid">
+      <div class="rail" id="rail"></div>
+      <div class="e-div"></div>
+      <div class="detail" id="detail"></div>
+    </div>
+
+    <div class="launchl2 rv">
+      <div>
+        <h3>Launch your own L2.</h3>
+        <p>Any wallet can mint a new token onto the same blocks: burn 100 Brahma Coin, pick a name and a unique alphanumeric symbol. The burn is permanent — the token is yours. Transfers of L2 tokens never pay the whale tax.</p>
+      </div>
+      <div class="burnb">BURN 100<span>BRAHMA COIN — PERMANENT</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="view-rewards">
+  <div class="wrap">
+    <div class="page-head compact">
+      <p class="overline rv"><i>04</i>ADOPTION POOL — 25,000,000 BRAHMA COIN</p>
+      <h1 class="rv" style="transition-delay:.08s">Early hands<br>eat <em>first.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 25,000,000 adoption pool. One claim per address. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the join amount.</p>
+    </div>
+
+    <div class="ladder rv" id="ladder">
+      <div class="you" id="youMark" style="left:12%"></div>
+      <div class="step">
+        <div class="s-fill" style="--h:88%"><span class="s-reward">100</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 50</span></div>
+        <div class="s-meta"><span class="s-era">TIER I — FIRST HANDS</span><span class="s-range">JOINS 1 – 10,000</span></div>
+      </div>
+      <div class="step">
+        <div class="s-fill" style="--h:60%"><span class="s-reward">50</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 25</span></div>
+        <div class="s-meta"><span class="s-era">TIER II — SECOND WAVE</span><span class="s-range">JOINS 10,001 – 35,000</span></div>
+      </div>
+      <div class="step">
+        <div class="s-fill" style="--h:37%"><span class="s-reward">25</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 12.5</span></div>
+        <div class="s-meta"><span class="s-era">TIER III — THIRD WATCH</span><span class="s-range">JOINS 35,001 – 60,000</span></div>
+      </div>
+      <div class="step">
+        <div class="s-fill" style="--h:20%"><span class="s-reward">12.5</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 6.25</span></div>
+        <div class="s-meta"><span class="s-era">TIER IV — LAST QUARTER</span><span class="s-range">JOINS 60,001 – 85,000</span></div>
+      </div>
+    </div>
+    <p class="ladder-note rv">AFTER THE NAMED TIERS THE SCHEDULE CONTINUES FROM 6.25 AND HALVES EVERY 25,000 JOINS — 3.125, 1.5625 … THE REFERRER ALWAYS RECEIVES HALF OF WHATEVER THE JOIN PAYS.</p>
+
+    <div class="calc rv">
+      <div>
+        <label class="t" for="calcRange">WHERE DO YOU LAND?</label>
+        <div class="calc-nums">
+          <input type="range" id="calcRange" min="1" max="300000" value="12400">
+          <input type="number" id="calcNum" min="1" max="300000" value="12400">
+        </div>
+        <p class="c-hint">DRAG THE SLIDER — YOUR JOIN NUMBER SETS YOUR TIER.<br>THE GOLD MARK ON THE LADDER SHOWS YOUR POSITION.</p>
+      </div>
+      <div class="c-res">
+        <p class="c-era" id="cEra">TIER II — SECOND WAVE</p>
+        <div class="c-row"><i>YOUR JOIN CLAIM</i><b id="cWallet">50</b></div>
+        <div class="c-row small"><i>EACH REFERRAL PAYS THE REFERRER</i><b id="cRef">25</b></div>
+        <div class="c-meta" id="cMeta">TIER WINDOW — JOINS 10,001 – 35,000<br>PAID FROM THE 25,000,000 ADOPTION POOL · NODE LIMIT 20 JOINS / HOUR</div>
+      </div>
+    </div>
+
+    <div class="rules">
+      <div class="rule rv"><i>ONE PER ADDRESS</i><b>One claim, ever</b><p>The join claim is paid once per address, from the adoption pool. No farming, no resets.</p></div>
+      <div class="rule rv" style="transition-delay:.08s"><i>POOL EMPTY → STOP</i><b>Joins stop paying</b><p>When the 25,000,000 adoption pool runs dry, new joins simply stop paying. The chain doesn't borrow to reward.</p></div>
+      <div class="rule rv" style="transition-delay:.16s"><i>PER HALVING</i><b>750,000,000 × 8</b><p>At every mine-schedule halving, wallets that have joined or mined can receive 750,000,000 whole units of each genesis L2 token — not Brahma Coin.</p></div>
+    </div>
+
+    <div class="forge rv" style="margin-top:100px;margin-bottom:110px">
+      <div>
+        <h3>Build your invite.</h3>
+        <p class="fl">Paste your BRM1G address and the site assembles your claim links. Whoever joins through them mines for themselves; you receive half their join amount.</p>
+        <div class="f-field">
+          <input class="f-in" id="invAddr" placeholder="BRM1G… your address" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="f-btns"><button class="btn solid" id="invGen">Build links</button></div>
+      </div>
+      <div class="f-out" id="invOut">
+        <p style="font:400 9px var(--mono);letter-spacing:.24em;color:var(--mut);margin-bottom:6px">YOUR CLAIM LINKS</p>
+        <div class="inv-row"><i>WEB</i><code id="invWeb"></code><button class="btn sm" data-inv="web">Copy</button></div>
+        <div class="inv-row"><i>DEEP</i><code id="invBrahm"></code><button class="btn sm" data-inv="brahm">Copy</button></div>
+        <p style="margin-top:18px;font:400 9px var(--mono);letter-spacing:.2em;color:var(--mut)">DEEP LINK: BRAHM://CLAIM</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="view" id="view-network">
+  <div class="wrap">
+    <div class="page-head compact">
+      <p class="overline rv"><i>05</i>STATUS — STATED HONESTLY</p>
+      <h1 class="rv" style="transition-delay:.08s">The gates,<br>as they <em>are.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">BRAHMNETWORK is a private testnet. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that's the point.</p>
+      <div class="gates rv" style="transition-delay:.24s">
+        <div class="grow"><div class="gk">PROTOCOL LOCKED</div><div class="gv ok">YES — SUPPLY, MINE SCHEDULE, REWARDS, TAX AND BURNS ARE FIXED IN PROTOCOL CODE</div></div>
+        <div class="grow"><div class="gk">PUBLIC LAUNCH</div><div class="gv bad" id="gateLaunch">FALSE</div></div>
+        <div class="grow"><div class="gk">NAMED HOST</div><div class="gv"><code>WWW.BRAHMNETWORK.COM</code> — MUST FORWARD TO THE NODE ORIGIN <code>HTTP://127.0.0.1:8545</code></div></div>
+        <div class="grow"><div class="gk">SECOND OPERATOR</div><div class="gv bad">REQUIRED BEFORE ANY MAINNET CLAIM — TWO PROCESSES ON ONE PC ARE NOT TWO OPERATORS</div></div>
+        <div class="grow"><div class="gk">DOLLAR VALUE</div><div class="gv bad">NONE — THE COIN HAS NO MARKET PRICE. UNITS ONLY. NEVER DOLLARS.</div></div>
+      </div>
+    </div>
+
+    <section class="flip rv">
+      <p class="overline"><i>—</i>WHAT FLIPS LAUNCH TO TRUE</p>
+      <div class="flip-grid">
+        <div class="ep"><i>01 — OPERATORS</i><b>Two independent operators</b><p>Separate humans, separate machines. Two processes on one PC do not count, no matter how they're named.</p></div>
+        <div class="ep"><i>02 — HOST</i><b>Named public host live</b><p>www.brahmnetwork.com actually reaching the node origin — not a landing page in front of a dead socket.</p></div>
+        <div class="ep"><i>03 — FLAG</i><b>Explicit launch flip</b><p>Launch is a declared act, never a default. Until it is flipped on, the honest label is private testnet.</p></div>
+      </div>
+    </section>
+
+    <section class="rv" style="margin-top:100px">
+      <p class="overline"><i>—</i>HOW THE PHONE REACHES A NODE</p>
+      <h2 class="sec">Three roads.<br>One chain.</h2>
+      <div class="endpoints">
+        <div class="ep"><i>LAN — OPERATOR PC</i><b>http://192.168.168.16:8545</b><p>On the operator Wi-Fi (192.168.168.*) the wallet prefers the local node. Lowest latency, no middleman.</p></div>
+        <div class="ep"><i>GSM — INTERNET</i><b>https://www.brahmnetwork.com</b><p>Only if Cloudflare actually reaches the node. If the origin is down, the road is down — and the site won't pretend otherwise.</p></div>
+        <div class="ep"><i>MESH — NO INTERNET</i><b>Sentinel · TCP 18545 · Bluetooth · Wi-Fi Aware</b><p>Sign and search PoW on the phone, gossip the signed packet. A node that hears the packet seals it.</p></div>
+      </div>
+      <div class="rpc">
+        <b>JSON-RPC</b> — POST / on the node host · methods in the <b>brah_*</b> namespace · chain id <b>2026</b><br>
+        <b>PAGES</b> — / this site · /claim invite · /explorer (localhost or flag) · /rpc metadata<br>
+        <b>NOT</b> — an Ethereum or dRPC endpoint · no EVM · no Solidity as consensus
+      </div>
+    </section>
+
+    <div class="panel2 rv" style="margin-top:100px">
+      <div class="panel">
+        <h3>Chain branches (reorg)</h3>
+        <p class="pl">If two blocks share a parent, the node keeps the heavier accumulated work. Tied on work, the smaller hash wins. History is linear after that.</p>
+        <div class="sched">
+          <div><span>HEAVIER CUMULATIVE WORK</span><b class="gold">WINS</b></div>
+          <div><span>WORK TIED</span><b>SMALLER HASH WINS</b></div>
+          <div><span>RESULT</span><b>LINEAR HISTORY</b></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>What we do not claim</h3>
+        <ul class="ncl">
+          <li>No exchange, no USD, no price line anywhere.</li>
+          <li>No pause or mint by an owner.</li>
+          <li>No EVM or Solidity as consensus.</li>
+          <li>Not decentralized until the launch gates are real.</li>
+          <li>The network is BRAHMNETWORK. This is not Bitcoin and not Ethereum.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="bigq rv">
+    <h2>Gossip is not payment.<br>The block is payment.</h2>
+    <p>SIGNED PACKETS TRAVEL · SEALED BLOCKS SETTLE</p>
+  </div>
+</section>
+
+<section class="view" id="view-wallet">
+  <div class="wrap">
+    <div class="page-head compact">
+      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.34</p>
+      <h1 class="rv" style="transition-delay:.08s">The chain,<br>in a <em>pocket.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">The app is called Brahma Coin. It signs with Dilithium3, searches real proof of work on the phone, seals over RPC or mesh, and never shows a price — because there isn't one. The phone below is a bit-search demo: real SHA-256 in this tab, not the node's block header.</p>
+      <p class="rv" style="margin-top:28px"><span class="chip">BIT-SEARCH DEMO — REAL SHA-256 IN THIS TAB · NOT THE NODE HEADER</span></p>
+    </div>
+
+    <div class="mine" style="margin-top:40px">
+      <div class="rv">
+        <div class="phone">
+          <div class="scr" id="scr">
+            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.34</span></div>
+            <div class="ptabs">
+              <button class="ptab on" data-pt="home">HOME</button>
+              <button class="ptab" data-pt="mine">MINE</button>
+            </div>
+            <div class="pbody" id="pt-home">
+              <div class="app-h"><b>BRM1G 8K2P…Q7DF</b>
+                <button class="eye" id="eyeBtn" aria-label="Hide balances">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                </button>
+              </div>
+              <div class="bal" id="simBal">0.000</div>
+              <div class="bal-l">BRAHMA COIN — THIS WALLET</div>
+              <div class="homerow"><span>NEXT MINE PAYS</span><b class="gold" id="nextMine">+1.1 · FIRST MINE</b></div>
+              <div class="homerow"><span>REWARD NOW</span><b id="rewNow">0.1 / BLOCK</b></div>
+              <div class="homerow"><span>SIM HEIGHT</span><b id="netH">1,024,809</b></div>
+              <div class="homerow"><span>SIM JOINED</span><b id="netJ">8,412</b></div>
+              <p class="l2note">L2 AIRDROP — 750,000,000 × 8 GENESIS TOKENS<br>AT EVERY MINE-SCHEDULE HALVING TO WALLETS THAT JOINED OR MINED · BALANCES CAN BE HIDDEN; NEXT-MINE AND TOTALS STAY VISIBLE.</p>
+            </div>
+            <div class="pbody hidden" id="pt-mine">
+              <div class="lblrow"><span>DIFFICULTY — BITS (NODE RANGE 18–24)</span><span id="tgtEl">2^20</span></div>
+              <div class="bits">
+                <button class="bitb" data-b="18">18</button>
+                <button class="bitb on" data-b="20">20</button>
+                <button class="bitb" data-b="22">22</button>
+                <button class="bitb" data-b="24">24</button>
+              </div>
+              <div class="bb-zone" id="bbZone">
+                <svg class="bb-ring" viewBox="0 0 210 210">
+                  <circle cx="105" cy="105" r="95" fill="none" stroke="rgba(228,204,160,.12)" stroke-width="2"/>
+                  <circle id="ringP" cx="105" cy="105" r="95" fill="none" stroke="#E4AC3F" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="596.9" stroke-dashoffset="596.9" transform="rotate(-90 105 105)"/>
+                </svg>
+                <div class="lz"><b id="lzBig">00</b><span>LEADING ZERO BITS</span></div>
+              </div>
+              <p class="prog-t">ATTEMPT <span id="attTxt">0</span> / <span id="attTgt">1,048,576</span></p>
+              <div class="lblrow"><span>SIM NETWORK — JOINED USERS</span></div>
+              <div class="joins">
+                <button class="jb on" data-j="8000">~8K</button>
+                <button class="jb" data-j="110000">~110K</button>
+                <button class="jb" data-j="210000">~210K</button>
+                <button class="jb" data-j="310000">~310K</button>
+              </div>
+              <button class="ctl" id="mineStart">START MINER</button>
+              <div class="mstats">
+                <div><b id="rateEl">0</b><span>H/S</span></div>
+                <div><b id="nonceEl">0</b><span>NONCE</span></div>
+                <div><b id="foundEl">0</b><span>BLOCKS</span></div>
+              </div>
+              <div class="slog" id="mineLog"><div>HALTED — PRESS START MINER TO SEARCH…</div></div>
+              <p class="selftest" id="selfTest">SHA-256 SELF-TEST — RUNNING…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sim-side rv" style="transition-delay:.1s">
+        <h2 class="sec">Real work,<br>tiny numbers.</h2>
+        <p>The wallet signs a mine transaction, then the phone searches for a hash with ~20 leading zero bits. The node retargets toward 8-second blocks, keeping difficulty between 18 and 24 bits. This demo runs the same bit-search idea — actual SHA-256, right here — not the node's <code>{height}|tip|miner|reward|root:nonce</code> header.</p>
+        <ul>
+          <li><i>01</i><span>Set the bits and start. At 20 bits a phone-grade search takes a few seconds; at 24 it takes a while. That's the whole security model, honestly scaled.</span></li>
+          <li><i>02</i><span>When a hash qualifies, the block is sealed and the reward pays: the current block reward plus +1 on the first-ever mine for that address (1.1 while joined users stay under 10,000), then 0.1 per later block in that band.</span></li>
+          <li><i>03</i><span>Flip the sim network past 110,000 joined and watch the same work pay half. Halvings continue every 100,000 joins until the reward reaches zero.</span></li>
+        </ul>
+        <div class="net-row">
+          <div><b>~8 s</b><span>BLOCK TARGET (RETARGET)</span></div>
+          <div><b>5,000,000</b><span>YEARLY MINE CAP</span></div>
+          <div><b>45,000,000</b><span>MINING POOL, ALL YEARS</span></div>
+        </div>
+        <div class="scrtable">
+          <div><i>ONBOARDING</i><p>Create or recover a Dilithium identity — app recovery phrase, not BIP-39.</p></div>
+          <div><i>HOME</i><p>Brahma Coin + L2 balances, claim adoption, launch L2, share invite.</p></div>
+          <div><i>SEND</i><p>Transfer Brahma Coin or an L2. Whale tax applies to Brahma Coin only.</p></div>
+          <div><i>RECEIVE</i><p>Address + QR.</p></div>
+          <div><i>MINE</i><p>Local proof of work, then seal over RPC or mesh gossip.</p></div>
+          <div><i>SETTINGS</i><p>RPC, hide balances, 14-day inactivity sweep, recovery phrase (auth gated).</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="view-join">
+  <div class="wrap">
+    <div class="page-head compact">
+      <p class="overline rv"><i>07</i>GENESIS ACCESS</p>
+      <h1 class="rv" style="transition-delay:.08s">Ready before<br>the <em>flip.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">There is no countdown, because public launch is FALSE — and this site doesn't lie. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.</p>
+      <div class="checklist rv" style="transition-delay:.24s">
+        <div><span class="cbox"></span><span><b>Two independent operators</b><p>Separate humans, separate machines — two processes on one PC are not two operators.</p></span><span class="st">PENDING</span></div>
+        <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com forwarding to the node origin at http://127.0.0.1:8545.</p></span><span class="st">PENDING</span></div>
+        <div><span class="cbox"></span><span><b>Launch explicitly flipped on</b><p>Declared, never defaulted. Until then the honest label stays: private testnet.</p></span><span class="st">FALSE</span></div>
+      </div>
+    </div>
+
+    <div class="dl-row rv">
+      <a class="dl" href="#/join" data-toast="The Android wallet rolls out with the app release — public launch is still FALSE. Hold a genesis address by building your invite first.">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.6v16.8c0 .5.5.8.9.5l10-8.2c.3-.3.3-.8 0-1.1l-10-8.4c-.4-.3-.9 0-.9.4z"/></svg>
+        <span><small>GET IT ON</small><b>Google Play</b></span>
+      </a>
+      <span class="dl-note">ANDROID FIRST — BUILD 1.0.34 · APP LABEL: BRAHMA COIN</span>
+    </div>
+
+    <div class="faq">
+      <h2 class="rv">Asked at the gate.</h2>
+      <div class="fq rv"><button class="fq-q">How does it get value?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>It does not have a market value. Users grow units by mining and adoption. A price would be a later market — not something the node or the wallet shows. This site shows units only.</p></div></div></div>
+      <div class="fq rv"><button class="fq-q">Is mining like Bitcoin?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>Same idea — work plus a sealed chain. Different numbers: ~20-bit phone proof of work, ~8 second blocks, a 100,000,000 cap, a 5,000,000 yearly mine cap, an adoption pool, and permanent burns for L2 launches.</p></div></div></div>
+      <div class="fq rv"><button class="fq-q">Can I use it on mobile data?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>Yes, if https://www.brahmnetwork.com actually reaches the node. On operator Wi-Fi the wallet still prefers the LAN node at http://192.168.168.16:8545.</p></div></div></div>
+      <div class="fq rv"><button class="fq-q">What if I have no internet at all?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>The phone signs and searches proof of work offline, then gossips the signed packet over Sentinel mesh — LAN TCP 18545, Bluetooth, Wi-Fi Aware. A node that hears the packet seals it. Gossip is not payment; the block is payment.</p></div></div></div>
+      <div class="fq rv"><button class="fq-q">What happens at a halving?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>Two things. The mine schedule halves per the join ladder — 0.1 becomes 0.05, then 0.025, on toward zero. And wallets that have joined or mined can receive 750,000,000 whole units of each of the eight genesis L2 tokens.</p></div></div></div>
+      <div class="fq rv"><button class="fq-q">How do I launch my own L2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>Burn 100 Brahma Coin, choose a name and a unique alphanumeric symbol. The burn is permanent and the token lives on the same blocks. L2 transfers never pay the whale tax.</p></div></div></div>
+    </div>
+
+    <p class="fine rv">BRAHMNETWORK IS A PRIVATE TESTNET. NO EXCHANGE, NO USD, NO MARKET PRICE — UNITS ONLY. NO PAUSE OR MINT BY AN OWNER. NOT DECENTRALIZED UNTIL TWO INDEPENDENT OPERATORS, A LIVE NAMED HOST, AND AN EXPLICIT LAUNCH FLIP EXIST. NOTHING HERE IS INVESTMENT ADVICE. CREATE RESPONSIBLY.</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <div class="f-brand"><span class="mark" data-s="26"></span><span><b>BRAHMA</b><small>NETWORK</small></span></div>
+        <p class="f-disc">A post-quantum Layer 1 — Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone, eight L2 tokens on the same blocks. Private testnet until the gates flip. Units only, never dollars.</p>
+      </div>
+      <div class="f-links">
+        <a href="#/home">Home</a><a href="#/coin">Brahma Coin</a><a href="#/eight">The Eight</a><a href="#/rewards">Rewards</a><a href="#/network">Network</a><a href="#/wallet">Wallet</a><a href="#/join">Join</a>
+        <a href="/claim">Claim page</a>
+        <a href="/rpc">RPC metadata</a>
+      </div>
+    </div>
+    <div class="f-bot">
+      <span>© <span id="fYear"></span> BRAHMNETWORK · CHAIN ID 2026</span>
+      <span id="utcClock">--:--:-- UTC</span>
+      <span>UNITS ONLY · NEVER DOLLARS</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toasts"></div>
+<script src="/static/site.js"></script>
+</body>
+</html>
+
+

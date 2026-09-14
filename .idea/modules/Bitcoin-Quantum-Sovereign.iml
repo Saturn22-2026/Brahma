@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$/../.." dumb="true">
+      <excludeFolder url="file://$MODULE_DIR$/../artifacts" />
+      <excludeFolder url="file://$MODULE_DIR$/../codeStyles" />
+      <excludeFolder url="file://$MODULE_DIR$" />
+      <excludeFolder url="file://$MODULE_DIR$/../../btq-genesis-wallet/.codebuddy/db" />
+      <excludeFolder url="file://$MODULE_DIR$/../../btq-genesis-wallet/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/../../btq-genesis-wallet/target" />
+    </content>
+  </component>
+</module>
