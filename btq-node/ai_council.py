@@ -14,18 +14,24 @@ TIER2_REF = 25.0
 POST_JOIN = 25.0
 REWARDS_POOL = 25_000_000.0
 WHALE_TAX_BPS = 2500
-WHALE_THRESHOLD_BPS = 250
+# Dump tax starts when one send is more than 10% of circulating Brahma.
+WHALE_THRESHOLD_BPS = 1000
 DONATION_UNLOCK_DAYS = 730
 FIRST_MINE_BONUS = 1.0
-FIRST_MINE_BONUS_BTQ = FIRST_MINE_BONUS
+FIRST_MINE_BONUS_Brah = FIRST_MINE_BONUS
 MINE_FULL_JOINS = 10_000
-MINE_BASE_BLOCK = 0.1
+MINE_BASE_BLOCK = 0.00014
 MINE_HALVE_EVERY_JOINS = 100_000
 YEARLY_MINE_CAP = 5_000_000.0
 L2_OPERATOR_GRANT_ADDR = "BRM1Ge19737c9aa6f097f76cb609a84a6"
 L2_OPERATOR_GRANT = 5_000_000_000
+# Shared pool of each genesis L2 at a mine-schedule halving, split across active wallets.
 L2_HALVING_AIRDROP = 750_000_000
-L2_BOOTSTRAP_IDS = tuple(str(i) for i in range(1, 9))
+L2_HALVING_AIRDROP_SHARE = L2_HALVING_AIRDROP
+L2_BOOTSTRAP_IDS = tuple(str(i) for i in range(1, 10))
+# Distinct inbound senders before the hub address is wiped (anti scrap-phone farm).
+CONSOLIDATION_BURN_SENDERS = 6
+NEW_WALLET_JOIN_BRAH = 100.0
 
 
 def mine_halving_band(joined_count: int) -> int:
@@ -37,7 +43,7 @@ def mine_halving_band(joined_count: int) -> int:
 
 
 def block_reward(joined_count: int) -> float:
-    """0.1 for the first 10_000 joins, then half every 100_000 joins. ~8s blocks stay."""
+    """0.00014 for the first 10_000 joins, then half every 100_000 joins. ~8s blocks stay."""
     n = max(0, int(joined_count))
     if n <= MINE_FULL_JOINS:
         return MINE_BASE_BLOCK

@@ -1,23 +1,25 @@
 'use strict';
 const COINS=[
- {id:'homie',name:'Homie',ticker:'HOMIE',color:'#DE8A3C',tag:'Ride or die.',lore:'The first name in every wallet. HOMIE held before holding was cool — never rushed, never rugged, never left the corner. Loyal to the last base unit.'},
- {id:'slum',name:'SlumDog',ticker:'SLUM',color:'#B34A2E',tag:'From the trenches.',lore:'Forged at the lowest block heights and proud of it. SLUM is proof the trenches do not just test a token — they make one.'},
- {id:'crazy',name:'Crazy God',ticker:'CRAZY',color:'#C93C74',tag:'Certified unhinged.',lore:'CRAZY does not follow the ledger. The ledger follows CRAZY. Five billion units, zero chill.'},
+ {id:'amrith',name:'Amrith',ticker:'AMRITH',color:'#DE8A3C',tag:'Nectar of the ledger.',lore:'AMRITH is the first pour. Immortal units on mortal phones — held before holding was cool, never rugged, never left the corner.'},
+ {id:'kiaan',name:'Kiaan',ticker:'KIAAN',color:'#B34A2E',tag:'The king\'s share.',lore:'Forged at the lowest block heights and proud of it. KIAAN is proof the trenches do not just test a token — they crown one.'},
+ {id:'crazy',name:'Alesha',ticker:'ALESHA',color:'#C93C74',tag:'Named Alesha.',lore:'ALESHA does not follow the ledger. The ledger follows ALESHA. Five billion units, zero chill.'},
  {id:'boujie',name:'BoujieClique',ticker:'BOUJIE',color:'#95507A',tag:'Champagne mechanics.',lore:'Old-money manners on new-money rails. Every BOUJIE transfer arrives dressed for dinner — and never pays the whale tax.'},
  {id:'qmile',name:'QuarterMile',ticker:'QMILE',color:'#3F8F7B',tag:'Fastest on the block.',lore:'A quarter mile of pure gas on blocks that seal in about eight seconds. QMILE does not race — it leaves.'},
- {id:'sof',name:'SoldiersOfFortune',ticker:'SOF',color:'#7D9CC0',tag:'Soft life only.',lore:'No stress. No whale tax. No hard feelings. SOF takes the easy road on the same blocks and still arrives first.'},
+ {id:'sof',name:'Bonn',ticker:'BONN',color:'#7D9CC0',tag:'Named Bonn.',lore:'No stress. No whale tax. No hard feelings. BONN takes the easy road on the same blocks and still arrives first.'},
  {id:'5ave',name:'5thAvenue',ticker:'5AVE',color:'#9AA66B',tag:'Stack now, flex later.',lore:'The disciplined one of the family. 5AVE turns mined units into five billion reasons, one sealed block at a time.'},
- {id:'pookie',name:'Pookie',ticker:'POOKIE',color:'#E7A9A0',tag:'The people\u2019s favorite.',lore:'Main character of every group chat on earth. POOKIE was not launched — it was adopted, and the internet never let go.'}
+ {id:'thiro',name:'Thiro',ticker:'THIRO',color:'#E7A9A0',tag:'Third flame.',lore:'THIRO was not launched — it was adopted. Third of the renamed triad, still the main character of every group chat on the mesh.'},
+ {id:'santi',name:'Santi',ticker:'SANTI',color:'#C4A35A',tag:'Peace on the tip.',lore:'SANTI seals last and rests first. Nine genesis L2s, one calm corner of the same blocks — peace that still stacks.'}
 ];
 const GLYPHS={
- homie:'<path d="M9.6 14.4l4.8-4.8"/><path d="M8.7 12.5l-2.3 2.3a3.3 3.3 0 0 0 4.7 4.7l2.3-2.3"/><path d="M15.3 11.5l2.3-2.3a3.3 3.3 0 0 0-4.7-4.7l-2.3 2.3"/>',
- slum:'<path d="M4 20.5h7"/><path d="M5.5 18.5L17.5 6.5"/><path d="M11.5 6.5h6v6"/>',
+ amrith:'<path d="M9.6 14.4l4.8-4.8"/><path d="M8.7 12.5l-2.3 2.3a3.3 3.3 0 0 0 4.7 4.7l2.3-2.3"/><path d="M15.3 11.5l2.3-2.3a3.3 3.3 0 0 0-4.7-4.7l-2.3 2.3"/>',
+ kiaan:'<path d="M4 20.5h7"/><path d="M5.5 18.5L17.5 6.5"/><path d="M11.5 6.5h6v6"/>',
  crazy:'<path d="M13 2.5L5.5 13.5h5.2L9.4 21.5l9.1-12h-5.6l2.1-7z"/>',
  boujie:'<path d="M4 18h16"/><path d="M4.6 18L3.4 8.2l4.9 3.4L12 5.2l3.7 6.4 4.9-3.4L19.4 18"/>',
  qmile:'<rect x="5.5" y="3.5" width="13" height="10" fill="currentColor" fill-opacity=".14"/><path d="M5.5 21.5V3"/><path d="M5.5 8.5h13M11.9 3.5v10"/>',
  sof:'<path d="M19.5 4.5C12 5 6.8 10.5 5.2 19.3 13.8 18.5 18.8 12.5 19.5 4.5z"/><path d="M19.5 4.5L6.5 18"/>',
  '5ave':'<ellipse cx="12" cy="6.3" rx="6.4" ry="2.7"/><path d="M5.6 6.3v5.2c0 1.5 2.9 2.7 6.4 2.7s6.4-1.2 6.4-2.7V6.3"/><path d="M5.6 11.5v5.2c0 1.5 2.9 2.7 6.4 2.7s6.4-1.2 6.4-2.7v-5.2"/>',
- pookie:'<path d="M12 20.4S4 15.4 3.1 10.3C2.7 7.6 4.7 5.2 7.4 5.2c1.9 0 3.6 1.1 4.6 2.8 1-1.7 2.7-2.8 4.6-2.8 2.7 0 4.7 2.4 4.3 5.1-.9 5.1-8.9 10.1-8.9 10.1z"/>'
+ thiro:'<path d="M12 20.4S4 15.4 3.1 10.3C2.7 7.6 4.7 5.2 7.4 5.2c1.9 0 3.6 1.1 4.6 2.8 1-1.7 2.7-2.8 4.6-2.8 2.7 0 4.7 2.4 4.3 5.1-.9 5.1-8.9 10.1-8.9 10.1z"/>',
+ santi:'<circle cx="12" cy="12" r="7.2"/><path d="M12 6.5v11M6.5 12h11"/><circle cx="12" cy="12" r="2.2"/>'
 };
 const glyph=(id,color,size)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:${color}">${GLYPHS[id]}</svg>`;
 const LOTUS=(s=24)=>{let p='';for(let i=0;i<8;i++)p+=`<ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(${i*45} 12 12)"/>`;
@@ -35,8 +37,8 @@ function copyText(txt,msg){
   document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){toast('Copy failed — select it manually.');}ta.remove();};
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(fb);}else fb();}
 
-const VIEWS=['home','coin','eight','rewards','network','wallet','join'];
-const TITLES={home:'BRAHMNETWORK — Creation is mined.',coin:'Brahma Coin — BRAHMNETWORK',eight:'The Genesis Eight — BRAHMNETWORK',
+const VIEWS=['home','coin','nine','rewards','network','wallet','join'];
+const TITLES={home:'BRAHMNETWORK — Creation is mined.',coin:'Brahma Coin — BRAHMNETWORK',nine:'The Genesis Nine — BRAHMNETWORK',
  rewards:'Adoption & Referrals — BRAHMNETWORK',network:'Network & Launch Gates — BRAHMNETWORK',wallet:'Brahma Coin Wallet — BRAHMNETWORK',join:'Join the Testnet — BRAHMNETWORK'};
 let currentView='home';
 function route(){
@@ -49,7 +51,7 @@ function route(){
  window.scrollTo({top:0,left:0,behavior:'instant'});
  if(h!=='wallet')pauseMining();
  currentView=h;
- if(h==='eight')initEightFocus();
+ if(h==='nine')initEightFocus();
  closeMenu();
 }
 addEventListener('hashchange',route);
@@ -130,7 +132,7 @@ mmenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
    moved+=Math.abs(dx)+Math.abs(dy);rot+=dx*0.0045;vr=dx*0.0009;
    tilt=Math.max(.16,Math.min(.9,tilt+dy*0.0026));}});
  cv.addEventListener('pointerup',()=>{drag=false;
-  if(moved<6&&hov){sessionStorage.setItem('bn-coin',hov);location.hash='#/eight';}});
+  if(moved<6&&hov){sessionStorage.setItem('bn-coin',hov);location.hash='#/nine';}});
  cv.addEventListener('pointerleave',()=>{pt.x=-9999;pt.y=-9999;});
 })();
 
@@ -164,7 +166,7 @@ function selectCoin(i){cur=(i+8)%8;renderDetail();
  [...rail.children].forEach((el,j)=>el.classList.toggle('on',j===cur));}
 rail.addEventListener('click',e=>{const b=e.target.closest('.rail-item');if(b)selectCoin(+b.dataset.i);});
 detail.addEventListener('click',e=>{const b=e.target.closest('[data-dnav]');if(b)selectCoin(cur+ +b.dataset.dnav);});
-addEventListener('keydown',e=>{if(currentView!=='eight')return;
+addEventListener('keydown',e=>{if(currentView!=='nine')return;
  if(e.key==='ArrowRight')selectCoin(cur+1);
  if(e.key==='ArrowLeft')selectCoin(cur-1);});
 function initEightFocus(){const id=sessionStorage.getItem('bn-coin');
@@ -220,7 +222,7 @@ function sha256Core(buf,total){
 const MINER=(function(){
  const balEl=document.getElementById('simBal'),nextEl=document.getElementById('nextMine'),
   rewEl=document.getElementById('rewNow'),netHEl=document.getElementById('netH'),netJEl=document.getElementById('netJ'),
-  eyeBtn=document.getElementById('eyeBtn'),tgtEl=document.getElementById('tgtEl'),
+  eyeL1=document.getElementById('eyeL1'),eyeL2=document.getElementById('eyeL2'),simL2=document.getElementById('simL2'),tgtEl=document.getElementById('tgtEl'),
   ring=document.getElementById('ringP'),lzBig=document.getElementById('lzBig'),
   attTxt=document.getElementById('attTxt'),attTgt=document.getElementById('attTgt'),
   rateEl=document.getElementById('rateEl'),nonceEl=document.getElementById('nonceEl'),
@@ -235,8 +237,8 @@ const MINER=(function(){
  const scratch=new Uint8Array(160);scratch.set(baseBytes);
  let padLen=-1,padTotal=64;
  let bits=20,joins=8000,mining=false,nonce=Math.floor(Math.random()*900000)+100000,
-  attempts=0,found=0,bal=0,firstDone=false,hidden=false,rateEma=0,timer=null;
- const rewardFor=j=>j<=10000?0.1:0.1/Math.pow(2,Math.ceil((j-10000)/100000));
+  attempts=0,found=0,bal=0,l2sum=0,firstDone=false,hideL1=false,hideL2=false,rateEma=0,timer=null;
+ const rewardFor=j=>j<=10000?0.00014:0.00014/Math.pow(2,Math.ceil((j-10000)/100000));
  function lzForNonce(n){
   const s=''+n,len=BL+s.length;
   for(let j=0;j<s.length;j++)scratch[BL+j]=s.charCodeAt(j);
@@ -256,7 +258,8 @@ const MINER=(function(){
   return lz;
  }
  function draw(){
-  balEl.textContent=hidden?'•••••':bal.toFixed(3);
+  balEl.textContent=hideL1?'•••••':bal.toFixed(5);
+  if(simL2)simL2.textContent=hideL2?'•••••':String(Math.floor(l2sum));
   rewEl.textContent=fmtAmt(rewardFor(joins))+' / BLOCK';
   const next=firstDone?rewardFor(joins):rewardFor(joins)+1;
   nextEl.textContent=firstDone?('+'+fmtAmt(next)+' / BLOCK'):('+'+fmtAmt(next)+' · FIRST MINE');
@@ -319,8 +322,10 @@ const MINER=(function(){
   b.classList.add('on');joins=+b.dataset.j;
   log(`SIM NETWORK → ~${fmt(joins)} JOINED · BLOCK PAYS ${fmtAmt(rewardFor(joins))}`);
   draw();}));
- eyeBtn.addEventListener('click',()=>{hidden=!hidden;eyeBtn.classList.toggle('on',hidden);draw();
-  toast(hidden?'Balances hidden — next-mine and network totals stay visible.':'Balances visible.');});
+ eyeL1.addEventListener('click',()=>{hideL1=!hideL1;eyeL1.classList.toggle('on',hideL1);draw();
+  toast(hideL1?'L1 Brahma Coin hidden.':'L1 Brahma Coin visible.');});
+ eyeL2.addEventListener('click',()=>{hideL2=!hideL2;eyeL2.classList.toggle('on',hideL2);draw();
+  toast(hideL2?'L2 memecoins hidden.':'L2 memecoins visible.');});
  let netH=1024809,netJ=8412;
  setInterval(()=>{if(currentView!=='wallet')return;
   netH+=1+(Math.random()<.2?1:0);

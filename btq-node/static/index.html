@@ -187,12 +187,12 @@ main{padding-top:var(--nav)}
 .bigq{border-top:1px solid var(--line);margin-top:110px;padding:110px 0;text-align:center}
 .bigq h2{font:italic 450 clamp(34px,5.2vw,72px)/1.15 var(--serif);max-width:24ch;margin:0 auto}
 .bigq p{margin-top:24px;font:400 10px var(--mono);letter-spacing:.24em;color:var(--mut)}
-.eight-strip{display:flex;border:1px solid var(--line-strong);margin-top:56px}
-.eight-strip>div{flex:1;padding:20px 26px;border-right:1px solid var(--line)}
-.eight-strip>div:last-child{border-right:none}
-.eight-strip b{display:block;font:500 19px var(--mono)}
-.eight-strip span{display:block;font:400 8.5px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
-.eight-grid{display:grid;grid-template-columns:320px 1px 1fr;padding:8px 0 0;border-top:1px solid var(--line);margin-top:70px}
+.nine-strip{display:flex;border:1px solid var(--line-strong);margin-top:56px}
+.nine-strip>div{flex:1;padding:20px 26px;border-right:1px solid var(--line)}
+.nine-strip>div:last-child{border-right:none}
+.nine-strip b{display:block;font:500 19px var(--mono)}
+.nine-strip span{display:block;font:400 8.5px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
+.nine-grid{display:grid;grid-template-columns:320px 1px 1fr;padding:8px 0 0;border-top:1px solid var(--line);margin-top:70px}
 .rail{display:flex;flex-direction:column}
 .rail-item{display:flex;align-items:center;gap:14px;padding:15px 18px;background:none;border:none;border-left:2px solid transparent;cursor:pointer;text-align:left;transition:.2s;color:var(--ink-dim)}
 .rail-item i{font:400 10px var(--mono);font-style:normal;color:var(--mut);width:20px;flex:none}
@@ -287,7 +287,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .pbody.hidden{display:none}
 .app-h{display:flex;justify-content:space-between;align-items:center}
 .app-h b{font:500 10px var(--mono);color:var(--gold);letter-spacing:.18em}
-.eye{background:none;border:none;color:var(--mut);cursor:pointer;padding:3px;display:grid;place-items:center}
+.eye-pair{display:flex;gap:6px;align-items:center}.eye-pair .eye{min-width:28px;font-size:10px;font-weight:700;letter-spacing:.04em}.eye{background:none;border:none;color:var(--mut);cursor:pointer;padding:3px;display:grid;place-items:center}
 .eye.on{color:var(--gold)}
 .bal{font:500 38px/1.1 var(--mono);letter-spacing:-.02em;margin-top:8px}
 .bal-l{font:400 9px var(--mono);color:var(--mut);letter-spacing:.24em;margin:4px 0 10px}
@@ -375,7 +375,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 @keyframes tout{to{opacity:0;transform:translateY(8px)}}
 @media(max-width:1020px){
   .hero{grid-template-columns:1fr;min-height:0;padding-top:40px}
-  .eight-grid{display:block}
+  .nine-grid{display:block}
   .rail{flex-direction:row;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:36px}
   .rail-item{border-left:none;border-bottom:2px solid transparent;flex:none}
   .rail-item.on{border-bottom-color:var(--gold)}
@@ -401,9 +401,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   .fs .ftx{position:static}
   .facts{grid-template-columns:1fr}
   .alloc-legend{grid-template-columns:1fr}
-  .eight-strip{flex-direction:column}
-  .eight-strip>div{border-right:none;border-bottom:1px solid var(--line)}
-  .eight-strip>div:last-child{border-bottom:none}
+  .nine-strip{flex-direction:column}
+  .nine-strip>div{border-right:none;border-bottom:1px solid var(--line)}
+  .nine-strip>div:last-child{border-bottom:none}
   .ladder{height:auto;flex-direction:column;gap:22px;margin-top:70px}
   .step{height:150px}
   .s-fill{bottom:0}
@@ -434,7 +434,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   <nav class="nav">
     <a href="#/home">Home</a>
     <a href="#/coin">Brahma Coin</a>
-    <a href="#/eight">The Eight</a>
+    <a href="#/nine">The Nine</a>
     <a href="#/rewards">Rewards</a>
     <a href="#/network">Network</a>
     <a href="#/wallet">Wallet</a>
@@ -447,7 +447,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 <div class="mmenu" id="mmenu">
   <a class="m-link" href="#/home"><i>01</i>Home</a>
   <a class="m-link" href="#/coin"><i>02</i>Brahma Coin</a>
-  <a class="m-link" href="#/eight"><i>03</i>The Eight</a>
+  <a class="m-link" href="#/nine"><i>03</i>The Nine</a>
   <a class="m-link" href="#/rewards"><i>04</i>Rewards</a>
   <a class="m-link" href="#/network"><i>05</i>Network</a>
   <a class="m-link" href="#/wallet"><i>06</i>Wallet</a>
@@ -465,7 +465,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="cta-row rv" style="transition-delay:.24s">
         <a class="btn solid" href="#/wallet">See the miner
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a class="btn" href="#/eight">Meet the Eight</a>
+        <a class="btn" href="#/nine">Meet the Nine</a>
       </div>
       <div class="stat-strip rv" style="transition-delay:.32s">
         <div><b>100,000,000</b><span>MAX SUPPLY — FIXED</span></div>
@@ -505,7 +505,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="mrow rv"><span class="mnum">01 /</span><h3>Post-quantum identity</h3><p>The ledger is a Python node. Wallets sign with Dilithium3 (ML-DSA-65). Addresses are checksummed BRM1G. One Brahma Coin is 100,000,000 base units.</p></div>
       <div class="mrow rv"><span class="mnum">02 /</span><h3>Honest by design</h3><p>This is a private testnet, and the site says so. Before any mainnet claim: two independent operators, a named public host live, and launch explicitly flipped on. Two processes on one PC are not two operators.</p></div>
       <div class="mrow rv"><span class="mnum">03 /</span><h3>Pools are organs</h3><p>POOL_MINING, POOL_AIRDROP and POOL_DONATION cannot send as a user — they are protocol organs, not wallets you can drain. The donation pool sits locked for 730 days, then moves only by council key with empower cosign.</p></div>
-      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 2.5% of circulating supply burns 25% of itself. Launching an L2 costs a permanent burn of 100 Brahma Coin.</p></div>
+      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 10% of circulating supply burns 25% of itself. The wallet has an active burn button. Memecoins are retired.</p></div>
     </div>
   </section>
 
@@ -517,7 +517,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <div class="fs rv"><div class="ftx"><i>01</i><b>Download</b><p>Create or recover a Dilithium identity. An app recovery phrase — not BIP-39.</p></div></div>
         <div class="fs rv" style="transition-delay:.1s"><div class="ftx"><i>02</i><b>Claim</b><p>One join claim per address, paid from the 25,000,000 adoption pool. Referrers get half.</p></div></div>
         <div class="fs rv" style="transition-delay:.2s"><div class="ftx"><i>03</i><b>Mine</b><p>The phone searches ~20 bits of proof of work. The node seals; the reward pays.</p></div></div>
-        <div class="fs rv" style="transition-delay:.3s"><div class="ftx"><i>04</i><b>Halve</b><p>Block reward halves as the network grows. Each halving drops 750M of every genesis L2.</p></div></div>
+        <div class="fs rv" style="transition-delay:.3s"><div class="ftx"><i>04</i><b>Halve</b><p>Block reward halves as the network grows. Each halving splits a shared 750M pool of every genesis L2.</p></div></div>
       </div>
     </div>
   </section>
@@ -565,7 +565,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="fact"><dt>BASE UNIT</dt><dd>1E8 PER COIN</dd></div>
       <div class="fact"><dt>YEARLY MINE CAP</dt><dd>5,000,000</dd></div>
       <div class="fact"><dt>GENESIS WALLETS</dt><dd>50 × 200,000</dd></div>
-      <div class="fact"><dt>WHALE TAX</dt><dd>25% BURN OVER 2.5% CIRC.</dd></div>
+      <div class="fact"><dt>WHALE TAX</dt><dd>25% BURN OVER 10% CIRC.</dd></div>
       <div class="fact"><dt>ADDRESSES</dt><dd>BRM1G CHECKSUMMED</dd></div>
     </dl>
 
@@ -606,8 +606,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
           <h3>Block reward</h3>
           <p class="pl">First mine on an address pays the current block reward plus a one-time +1 bonus. Then the schedule halves as joined users grow.</p>
           <div class="sched">
-            <div><span>FIRST-EVER MINE ON AN ADDRESS</span><b class="gold">BLOCK REWARD + 1 · ONCE (1.1 WHILE 0.1)</b></div>
-            <div><span>WHILE JOINED USERS ≤ 10,000</span><b class="gold">0.1 / BLOCK</b></div>
+            <div><span>FIRST-EVER MINE ON AN ADDRESS</span><b class="gold">BLOCK REWARD + 1 · ONCE (1.00014 WHILE 0.00014)</b></div>
+            <div><span>WHILE JOINED USERS ≤ 10,000</span><b class="gold">0.00014 / BLOCK</b></div>
             <div><span>HALVES EVERY 100,000 JOINS</span><b>0.05 → 0.025 → 0.0125 …</b></div>
             <div><span>AFTER MANY HALVINGS</span><b>REWARD REACHES 0</b></div>
             <div><span>YEARLY CAP</span><b>5,000,000 / YEAR — UNUSED STAYS IN POOL</b></div>
@@ -617,7 +617,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
           <h3>Whale tax</h3>
           <p class="pl">Brahma Coin only. L2 transfers are not taxed this way. Positive amounts only — protocol pools cannot be the sender or the destination.</p>
           <div class="sched">
-            <div><span>SEND &gt; 2.5% OF CIRCULATING SUPPLY</span><b class="gold">25% OF THE SEND IS BURNED</b></div>
+            <div><span>SEND &gt; 10% OF CIRCULATING SUPPLY</span><b class="gold">25% OF THE SEND IS BURNED</b></div>
             <div><span>L2 MEMECOIN TRANSFERS</span><b>EXEMPT</b></div>
             <div><span>ZERO OR NEGATIVE AMOUNTS</span><b>REJECTED</b></div>
           </div>
@@ -639,20 +639,20 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   </div>
 </section>
 
-<section class="view" id="view-eight">
+<section class="view" id="view-nine">
   <div class="wrap">
     <div class="page-head compact">
       <p class="overline rv"><i>03</i>LAYER 2 — TOKENS ON THE SAME BLOCKS</p>
-      <h1 class="rv" style="transition-delay:.08s">The <em>Eight.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">Layer 2 here means extra tokens on the same L1 — not a separate chain. The genesis eight were created by a one-time operator grant of 5 billion units each. At every mine-schedule halving, wallets that have joined or mined can receive 750,000,000 whole units of each.</p>
-      <div class="eight-strip rv" style="transition-delay:.24s">
-        <div><b>8</b><span>GENESIS TOKENS</span></div>
+      <h1 class="rv" style="transition-delay:.08s">The <em>Nine.</em></h1>
+      <p class="lede rv" style="transition-delay:.16s">Layer 2 here means extra tokens on the same L1 — not a separate chain. The genesis nine were created by a one-time operator grant of 5 billion units each. At every mine-schedule halving, a shared 750,000,000 pool of each genesis L2 is split across those wallets — not 750M each.</p>
+      <div class="nine-strip rv" style="transition-delay:.24s">
+        <div><b>9</b><span>GENESIS TOKENS</span></div>
         <div><b>5,000,000,000</b><span>UNITS EACH — OPERATOR GRANT</span></div>
-        <div><b>750,000,000</b><span>PER WALLET, PER MINE HALVING</span></div>
+        <div><b>750,000,000</b><span>SHARED POOL PER MINE HALVING</span></div>
         <div><b>100</b><span>BRAHMA COIN BURN TO LAUNCH AN L2</span></div>
       </div>
     </div>
-    <div class="eight-grid">
+    <div class="nine-grid">
       <div class="rail" id="rail"></div>
       <div class="e-div"></div>
       <div class="detail" id="detail"></div>
@@ -661,7 +661,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="launchl2 rv">
       <div>
         <h3>Launch your own L2.</h3>
-        <p>Any wallet can mint a new token onto the same blocks: burn 100 Brahma Coin, pick a name and a unique alphanumeric symbol. The burn is permanent — the token is yours. Transfers of L2 tokens never pay the whale tax.</p>
+        <p>Memecoins are retired. Burn Brahma Coin from the wallet. A send over 10% of circulating supply burns 25% of itself.</p>
       </div>
       <div class="burnb">BURN 100<span>BRAHMA COIN — PERMANENT</span></div>
     </div>
@@ -673,7 +673,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>04</i>ADOPTION POOL — 25,000,000 BRAHMA COIN</p>
       <h1 class="rv" style="transition-delay:.08s">Early hands<br>eat <em>first.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 25,000,000 adoption pool. One claim per address. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the join amount.</p>
+      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 25,000,000 adoption pool. One claim per address and one per phone. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the join amount.</p>
     </div>
 
     <div class="ladder rv" id="ladder">
@@ -717,7 +717,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="rules">
       <div class="rule rv"><i>ONE PER ADDRESS</i><b>One claim, ever</b><p>The join claim is paid once per address, from the adoption pool. No farming, no resets.</p></div>
       <div class="rule rv" style="transition-delay:.08s"><i>POOL EMPTY → STOP</i><b>Joins stop paying</b><p>When the 25,000,000 adoption pool runs dry, new joins simply stop paying. The chain doesn't borrow to reward.</p></div>
-      <div class="rule rv" style="transition-delay:.16s"><i>PER HALVING</i><b>750,000,000 × 8</b><p>At every mine-schedule halving, wallets that have joined or mined can receive 750,000,000 whole units of each genesis L2 token — not Brahma Coin.</p></div>
+      <div class="rule rv" style="transition-delay:.16s"><i>PER HALVING</i><b>750,000,000 × 8</b><p>At every mine-schedule halving, a shared 750,000,000 pool of each genesis L2 is split across wallets that joined or mined — not Brahma Coin.</p></div>
     </div>
 
     <div class="forge rv" style="margin-top:100px;margin-bottom:110px">
@@ -826,17 +826,20 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
             </div>
             <div class="pbody" id="pt-home">
               <div class="app-h"><b>BRM1G 8K2P…Q7DF</b>
-                <button class="eye" id="eyeBtn" aria-label="Hide balances">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
-                </button>
+                <span class="eye-pair">
+                  <button class="eye" id="eyeL1" aria-label="Hide L1 Brahma Coin">L1</button>
+                  <button class="eye" id="eyeL2" aria-label="Hide L2 memecoins">L2</button>
+                </span>
               </div>
               <div class="bal" id="simBal">0.000</div>
-              <div class="bal-l">BRAHMA COIN — THIS WALLET</div>
-              <div class="homerow"><span>NEXT MINE PAYS</span><b class="gold" id="nextMine">+1.1 · FIRST MINE</b></div>
-              <div class="homerow"><span>REWARD NOW</span><b id="rewNow">0.1 / BLOCK</b></div>
+              <div class="bal-l">BRAHMA COIN (L1) — THIS WALLET</div>
+              <div class="bal l2bal" id="simL2">0</div>
+              <div class="bal-l">L2 MEMECOINS (SUM)</div>
+              <div class="homerow"><span>NEXT MINE PAYS</span><b class="gold" id="nextMine">+1.00014 · FIRST MINE</b></div>
+              <div class="homerow"><span>REWARD NOW</span><b id="rewNow">0.00014 / BLOCK</b></div>
               <div class="homerow"><span>SIM HEIGHT</span><b id="netH">1,024,809</b></div>
               <div class="homerow"><span>SIM JOINED</span><b id="netJ">8,412</b></div>
-              <p class="l2note">L2 AIRDROP — 750,000,000 × 8 GENESIS TOKENS<br>AT EVERY MINE-SCHEDULE HALVING TO WALLETS THAT JOINED OR MINED · BALANCES CAN BE HIDDEN; NEXT-MINE AND TOTALS STAY VISIBLE.</p>
+              <p class="l2note">L2 AIRDROP — 750,000,000 SHARED × 9 GENESIS TOKENS<br>SPLIT ACROSS JOINED/MINED WALLETS AT EACH MINE HALVING · HIDE L1 AND L2 SEPARATELY; NEXT-MINE STAYS VISIBLE.</p>
             </div>
             <div class="pbody hidden" id="pt-mine">
               <div class="lblrow"><span>DIFFICULTY — BITS (NODE RANGE 18–24)</span><span id="tgtEl">2^20</span></div>
@@ -878,7 +881,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <p>The wallet signs a mine transaction, then the phone searches for a hash with ~20 leading zero bits. The node retargets toward 8-second blocks, keeping difficulty between 18 and 24 bits. This demo runs the same bit-search idea — actual SHA-256, right here — not the node's <code>{height}|tip|miner|reward|root:nonce</code> header.</p>
         <ul>
           <li><i>01</i><span>Set the bits and start. At 20 bits a phone-grade search takes a few seconds; at 24 it takes a while. That's the whole security model, honestly scaled.</span></li>
-          <li><i>02</i><span>When a hash qualifies, the block is sealed and the reward pays: the current block reward plus +1 on the first-ever mine for that address (1.1 while joined users stay under 10,000), then 0.1 per later block in that band.</span></li>
+          <li><i>02</i><span>When a hash qualifies, the block is sealed and the reward pays: the current block reward plus +1 on the first-ever mine for that address (1.00014 while joined users stay under 10,000), then 0.00014 per later block in that band.</span></li>
           <li><i>03</i><span>Flip the sim network past 110,000 joined and watch the same work pay half. Halvings continue every 100,000 joins until the reward reaches zero.</span></li>
         </ul>
         <div class="net-row">
@@ -913,11 +916,11 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     </div>
 
     <div class="dl-row rv">
-      <a class="dl" href="#/join" data-toast="The Android wallet rolls out with the app release — public launch is still FALSE. Hold a genesis address by building your invite first.">
+      <a class="dl" href="/wallet.apk?v=3">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.6v16.8c0 .5.5.8.9.5l10-8.2c.3-.3.3-.8 0-1.1l-10-8.4c-.4-.3-.9 0-.9.4z"/></svg>
-        <span><small>GET IT ON</small><b>Google Play</b></span>
+        <span><small>DIRECT DOWNLOAD</small><b>Android APK</b></span>
       </a>
-      <span class="dl-note">ANDROID FIRST — BUILD 1.0.34 · APP LABEL: BRAHMA COIN</span>
+      <span class="dl-note">ANDROID FIRST — BUILD 1.0.34 · APP LABEL: BRAHMA COIN · OPENS /wallet.apk</span>
     </div>
 
     <div class="faq">
@@ -931,9 +934,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="fq rv"><button class="fq-q">What if I have no internet at all?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         <div class="fq-a"><div><p>The phone signs and searches proof of work offline, then gossips the signed packet over Sentinel mesh — LAN TCP 18545, Bluetooth, Wi-Fi Aware. A node that hears the packet seals it. Gossip is not payment; the block is payment.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">What happens at a halving?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Two things. The mine schedule halves per the join ladder — 0.1 becomes 0.05, then 0.025, on toward zero. And wallets that have joined or mined can receive 750,000,000 whole units of each of the eight genesis L2 tokens.</p></div></div></div>
+        <div class="fq-a"><div><p>Two things. The mine schedule halves per the join ladder — 0.00014 becomes 0.00007, then 0.000035, on toward zero. And a shared 750,000,000 pool of each of the nine genesis L2 tokens is split across those wallets.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">How do I launch my own L2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Burn 100 Brahma Coin, choose a name and a unique alphanumeric symbol. The burn is permanent and the token lives on the same blocks. L2 transfers never pay the whale tax.</p></div></div></div>
+        <div class="fq-a"><div><p>Use the Burn button in the wallet. The amount leaves circulation and cannot be returned. A send over 10% of circulating supply also burns 25% of that send.</p></div></div></div>
     </div>
 
     <p class="fine rv">BRAHMNETWORK IS A PRIVATE TESTNET. NO EXCHANGE, NO USD, NO MARKET PRICE — UNITS ONLY. NO PAUSE OR MINT BY AN OWNER. NOT DECENTRALIZED UNTIL TWO INDEPENDENT OPERATORS, A LIVE NAMED HOST, AND AN EXPLICIT LAUNCH FLIP EXIST. NOTHING HERE IS INVESTMENT ADVICE. CREATE RESPONSIBLY.</p>
@@ -946,10 +949,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="f-grid">
       <div>
         <div class="f-brand"><span class="mark" data-s="26"></span><span><b>BRAHMA</b><small>NETWORK</small></span></div>
-        <p class="f-disc">A post-quantum Layer 1 — Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone, eight L2 tokens on the same blocks. Private testnet until the gates flip. Units only, never dollars.</p>
+        <p class="f-disc">A post-quantum Layer 1 — Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone, nine L2 tokens on the same blocks. Private testnet until the gates flip. Units only, never dollars.</p>
       </div>
       <div class="f-links">
-        <a href="#/home">Home</a><a href="#/coin">Brahma Coin</a><a href="#/eight">The Eight</a><a href="#/rewards">Rewards</a><a href="#/network">Network</a><a href="#/wallet">Wallet</a><a href="#/join">Join</a>
+        <a href="#/home">Home</a><a href="#/coin">Brahma Coin</a><a href="#/nine">The Nine</a><a href="#/rewards">Rewards</a><a href="#/network">Network</a><a href="#/wallet">Wallet</a><a href="#/join">Join</a>
         <a href="/claim">Claim page</a>
         <a href="/rpc">RPC metadata</a>
       </div>

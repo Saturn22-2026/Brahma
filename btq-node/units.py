@@ -4,7 +4,6 @@ from __future__ import annotations
 from decimal import Decimal, ROUND_DOWN
 
 UNITS_PER_BRAH = 100_000_000
-UNITS_PER_BTQ = UNITS_PER_BRAH
 
 
 def to_units(value) -> int:

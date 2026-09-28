@@ -4,6 +4,11 @@ Secrets stay in genesis_secrets.json (gitignored). Addresses go in genesis_accou
 """
 from __future__ import annotations
 
+import json
+import secrets
+from pathlib import Path
+
+from crypto_mldsa import Dilithium3, address_from_pubkey
 from envutil import env
 
 ROOT = Path(__file__).resolve().parent

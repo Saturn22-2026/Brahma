@@ -14,6 +14,7 @@ import json
 import os
 import subprocess
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -23,6 +24,9 @@ try:
     from dilithium_py.dilithium import Dilithium3
 except ImportError:  # pragma: no cover
     Dilithium3 = None
+
+# dilithium-py is not safe to overlap sign/verify across threads (HTTP miners).
+_MLDSA_LOCK = threading.Lock()
 
 
 def sha256(data: bytes) -> bytes:
@@ -97,7 +101,7 @@ def is_brah_address(addr: str) -> bool:
     return rest[24:] == _addr_checksum(rest[:24], prefix)
 
 
-is_btq_address = is_brah_address
+is_brah_address = is_brah_address
 
 
 def checksum_address(addr: str) -> str:
@@ -237,17 +241,18 @@ def verify_dilithium3(public_key: bytes, message: bytes, signature: bytes) -> bo
     if len(public_key) > 1952:
         candidates.append(public_key[-1952:])
     if Dilithium3 is not None and len(signature) != 3309:
-        for pk in candidates:
-            try:
-                if Dilithium3.verify(pk, message, signature):
-                    return True
-            except Exception:
-                pass
-            try:
-                if Dilithium3.verify(pk, signature, message):
-                    return True
-            except Exception:
-                continue
+        with _MLDSA_LOCK:
+            for pk in candidates:
+                try:
+                    if Dilithium3.verify(pk, message, signature):
+                        return True
+                except Exception:
+                    pass
+                try:
+                    if Dilithium3.verify(pk, signature, message):
+                        return True
+                except Exception:
+                    continue
     for pk in candidates:
         if _verify_bouncycastle(pk, message, signature):
             return True
@@ -275,7 +280,8 @@ def verify_spend(from_addr: str, public_key_hex: str, signature_hex: str, messag
 def sign_dilithium3(secret_key: bytes, message: bytes) -> bytes:
     if Dilithium3 is None:
         raise ValueError("Dilithium3 signer not installed (pip install dilithium-py)")
-    return Dilithium3.sign(secret_key, message)
+    with _MLDSA_LOCK:
+        return Dilithium3.sign(secret_key, message)
 
 
 HELLO_MAX_SKEW_SEC = 90

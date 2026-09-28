@@ -52,8 +52,8 @@ android {
         applicationId = "com.brahmnetwork.wallet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 40
-        versionName = "1.0.34"
+        versionCode = 41
+        versionName = "1.0.35"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -65,7 +65,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -79,6 +80,10 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    lint {
+        checkReleaseBuilds = false
     }
 
     packaging {

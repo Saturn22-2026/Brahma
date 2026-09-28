@@ -3,7 +3,7 @@
 # Uses a separate data dir so the live tip in btq-data is not rewritten.
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
-$primary = if ($env:BRAH_DATA_DIR) { $env:BRAH_DATA_DIR } elseif ($env:BTQ_DATA_DIR) { $env:BTQ_DATA_DIR } else { Join-Path $root "btq-data" }
+$primary = if ($env:BRAH_DATA_DIR) { $env:BRAH_DATA_DIR } elseif ($env:BRAH_DATA_DIR) { $env:BRAH_DATA_DIR } else { Join-Path $root "btq-data" }
 $replica = Join-Path $root "btq-data-replica"
 New-Item -ItemType Directory -Force -Path $replica | Out-Null
 
@@ -24,9 +24,9 @@ $env:BRAH_UDP_PORT = "18548"
 Remove-Item Env:BRAH_ALLOW_SECRETS_ON_DISK -ErrorAction SilentlyContinue
 Remove-Item Env:BRAH_ALLOW_LAN -ErrorAction SilentlyContinue
 Remove-Item Env:BRAH_SERVE_APK -ErrorAction SilentlyContinue
-Remove-Item Env:BTQ_ALLOW_SECRETS_ON_DISK -ErrorAction SilentlyContinue
-Remove-Item Env:BTQ_ALLOW_LAN -ErrorAction SilentlyContinue
-Remove-Item Env:BTQ_SERVE_APK -ErrorAction SilentlyContinue
+Remove-Item Env:BRAH_ALLOW_SECRETS_ON_DISK -ErrorAction SilentlyContinue
+Remove-Item Env:BRAH_ALLOW_LAN -ErrorAction SilentlyContinue
+Remove-Item Env:BRAH_SERVE_APK -ErrorAction SilentlyContinue
 
 Write-Host "Replica catch-up (not consensus). RPC 127.0.0.1:8546 P2P 18546 -> 18545"
 Write-Host "Data: $replica"

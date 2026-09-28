@@ -37,10 +37,12 @@ from ai_council import (
 from l1_mainnet import (
     account,
     allow_cors_origin,
+    apply_rewards,
     apk_download_allowed,
     assert_operator_hygiene,
     asset_units,
     claim_html,
+    canonical_rpc_method,
     home_html,
     static_asset,
     commit_signed,
@@ -106,6 +108,9 @@ def _key():
 
 def _signed(state, pk, sk, addr, kind, to="", amount=0, memo="", asset="0"):
     nonce = int(account(state, addr).get("nonce", 0))
+    if kind in ("join", "reward", "faucet") and not str(memo or "").lower().startswith("dev:"):
+        # One join claim per phone; tests use a unique device id per address.
+        memo = f"dev:test-{addr[-12:]}" + (f":{memo}" if memo else "")
     msg = canonical_message(int(state["chain_id"]), nonce, kind, addr, to, asset, amount, memo)
     sig = sign_dilithium3(sk, msg)
     tx_hash = sha256_hex(msg.decode("utf-8"))
@@ -129,6 +134,47 @@ def _signed(state, pk, sk, addr, kind, to="", amount=0, memo="", asset="0"):
 
 
 class LaunchGates(unittest.TestCase):
+    def test_canonical_rpc_method_maps_brah_without_doubling_brah(self):
+        self.assertEqual(canonical_rpc_method("brah_getAccount"), "brah_getAccount")
+        self.assertEqual(canonical_rpc_method("brah_getAccount"), "brah_getAccount")
+        self.assertEqual(canonical_rpc_method("brah_submitTx"), "brah_submitTx")
+        self.assertEqual(canonical_rpc_method("eth_getBalance"), "eth_getBalance")
+
+    def test_bind_referrer_after_join_without_memo(self):
+        state = _fresh_state()
+        _pk, _sk, joiner = _key()
+        _rpk, _rsk, referrer = _key()
+        apply_rewards(state, joiner, f"dev:phone-joiner-{joiner[-8:]}")
+        self.assertEqual(int(account(state, joiner)["0"]), to_units(100))
+        self.assertEqual(state.get("referrals") or {}, {})
+        msg = apply_rewards(state, joiner, referrer)
+        self.assertIn("referrer", msg.lower())
+        self.assertEqual(int(account(state, referrer)["0"]), to_units(50))
+        self.assertEqual(state["referrals"][referrer], 1)
+        with self.assertRaises(ValueError):
+            apply_rewards(state, joiner, referrer)
+
+    def test_join_one_per_device(self):
+        state = _fresh_state()
+        _pk, _sk, a1 = _key()
+        _pk2, _sk2, a2 = _key()
+        apply_rewards(state, a1, "dev:same-phone")
+        with self.assertRaises(ValueError) as ctx:
+            apply_rewards(state, a2, "dev:same-phone")
+        self.assertIn("phone", str(ctx.exception).lower())
+
+    def test_consolidation_burn_on_sixth_sender(self):
+        state = _fresh_state()
+        _pk, _sk, hub = _key()
+        account(state, hub)["0"] = to_units(1)
+        for i in range(6):
+            _pk, _sk, sender = _key()
+            account(state, sender)["0"] = to_units(1)
+            raw = _signed(state, _pk, _sk, sender, "send", to=hub, amount=to_units(1))
+            commit_signed(state, raw)
+        self.assertEqual(int(account(state, hub)["0"]), 0)
+        self.assertTrue(account(state, hub).get("consolidation_burned"))
+
     def test_unsigned_steal_fails(self):
         state = _fresh_state()
         pk, sk, addr = _key()
@@ -164,6 +210,7 @@ class LaunchGates(unittest.TestCase):
     def test_integer_units(self):
         self.assertEqual(UNITS_PER_BRAH, 100_000_000)
         self.assertEqual(to_units(0.1), 10_000_000)
+        self.assertEqual(to_units(0.00014), 14_000)
         self.assertEqual(to_units(10), 1_000_000_000)
         self.assertEqual(to_units(45_000_000), 45_000_000 * UNITS_PER_BRAH)
         state = _fresh_state()
@@ -464,7 +511,8 @@ class LaunchGates(unittest.TestCase):
         self.assertIn("BRAHMNETWORK", page)
         self.assertIn("Brahma Coin", page)
         self.assertIn("Creation is mined", page)
-        self.assertIn("1.1", page)
+        self.assertIn("1.00014", page)
+        self.assertIn("0.00014", page)
         self.assertIn("joined or mined", page)
         self.assertNotIn("$", page)
         self.assertNotIn("HEADER_AND_MAIN", page)
@@ -472,10 +520,13 @@ class LaunchGates(unittest.TestCase):
         self.assertIsNotNone(js)
         self.assertIn("javascript", ctype)
         text = js.decode("utf-8")
-        self.assertIn("SlumDog", text)
-        self.assertIn("Crazy God", text)
+        self.assertIn("Kiaan", text)
+        self.assertIn("Amrith", text)
+        self.assertIn("Thiro", text)
+        self.assertIn("Santi", text)
+        self.assertIn("Alesha", text)
         self.assertIn("BoujieClique", text)
-        self.assertIn("SoldiersOfFortune", text)
+        self.assertIn("Bonn", text)
         self.assertIn("5thAvenue", text)
         self.assertIn("floor((n-35001)/25000)", text)
         self.assertIn("rewardFor(joins)+1", text)
@@ -492,7 +543,10 @@ class LaunchGates(unittest.TestCase):
         prev_cors = os.environ.get("BRAH_CORS_ORIGIN")
         prev_pub = os.environ.get("BRAH_PUBLIC_RPC")
         prev_ex = os.environ.get("BRAH_EXPLORER")
+        prev_lan = os.environ.get("BRAH_ALLOW_LAN")
         try:
+            os.environ["BRAH_ALLOW_LAN"] = "1"
+            self.assertEqual(allow_cors_origin("http://192.168.168.16:8545"), "http://192.168.168.16:8545")
             os.environ["BRAH_CORS_ORIGIN"] = "https://brah.example"
             self.assertEqual(allow_cors_origin("https://brah.example"), "https://brah.example")
             os.environ["BRAH_PUBLIC_RPC"] = "https://rpc.example.test"
@@ -515,6 +569,10 @@ class LaunchGates(unittest.TestCase):
                 os.environ.pop("BRAH_EXPLORER", None)
             else:
                 os.environ["BRAH_EXPLORER"] = prev_ex
+            if prev_lan is None:
+                os.environ.pop("BRAH_ALLOW_LAN", None)
+            else:
+                os.environ["BRAH_ALLOW_LAN"] = prev_lan
 
     def test_invite_must_be_signed(self):
         self.assertFalse(is_safe_claim_url("javascript:alert(1)"))
@@ -677,85 +735,52 @@ class LaunchGates(unittest.TestCase):
                 os.environ["BRAH_PUBLIC_RPC"] = prev_pub
 
     def test_block_reward_schedule(self):
-        self.assertEqual(block_reward(0), 0.1)
-        self.assertEqual(block_reward(10_000), 0.1)
-        self.assertEqual(block_reward(10_001), 0.05)
-        self.assertEqual(block_reward(110_000), 0.05)
-        self.assertEqual(block_reward(110_001), 0.025)
-        self.assertEqual(block_reward(210_001), 0.0125)
+        self.assertEqual(to_units(block_reward(0)), 14_000)
+        self.assertEqual(to_units(block_reward(10_000)), 14_000)
+        self.assertEqual(to_units(block_reward(10_001)), 7_000)
+        self.assertEqual(to_units(block_reward(110_000)), 7_000)
+        self.assertEqual(to_units(block_reward(110_001)), 3_500)
+        self.assertEqual(to_units(block_reward(210_001)), 1_750)
         self.assertEqual(mine_halving_band(0), -1)
         self.assertEqual(mine_halving_band(10_000), -1)
         self.assertEqual(mine_halving_band(10_001), 0)
         self.assertEqual(mine_halving_band(110_001), 1)
 
-    def test_operator_l2_grant_once(self):
+    def test_memecoins_retired(self):
         state = _fresh_state()
-        self.assertTrue(state.get("l2_operator_grant_done"))
-        for asset_id in range(1, 9):
-            self.assertEqual(
-                asset_units(account(state, L2_OPERATOR_GRANT_ADDR), str(asset_id)),
-                L2_OPERATOR_GRANT,
-            )
+        self.assertTrue(state.get("l2_retired"))
+        self.assertEqual(state.get("l2_assets"), {})
         self.assertFalse(maybe_grant_operator_l2(state))
-        self.assertEqual(
-            asset_units(account(state, L2_OPERATOR_GRANT_ADDR), "1"),
-            L2_OPERATOR_GRANT,
-        )
-        save_state(state)
-        again = load_or_init()
-        self.assertEqual(
-            asset_units(account(again, L2_OPERATOR_GRANT_ADDR), "8"),
-            L2_OPERATOR_GRANT,
-        )
+        self.assertFalse(maybe_l2_halving_airdrop(state))
+        for asset_id in range(1, 10):
+            self.assertEqual(asset_units(account(state, L2_OPERATOR_GRANT_ADDR), str(asset_id)), 0)
 
-    def test_l2_halving_airdrop(self):
-        prev = os.environ.get("BRAH_JOIN_MAX_PER_HOUR")
-        os.environ["BRAH_JOIN_MAX_PER_HOUR"] = "20"
-        try:
-            state = _fresh_state()
-            pk, sk, addr = _key()
-            commit_signed(state, _signed(state, pk, sk, addr, "join"))
-            self.assertEqual(int(state["joined_count"]), 1)
-            self.assertEqual(asset_units(account(state, addr), "1"), 0)
-            state["joined_count"] = 10_000
-            save_state(state)
-            pk2, sk2, addr2 = _key()
-            commit_signed(state, _signed(state, pk2, sk2, addr2, "join"))
-            self.assertEqual(int(state["joined_count"]), 10_001)
-            self.assertEqual(mine_halving_band(10_001), 0)
-            for asset_id in range(1, 9):
-                self.assertEqual(asset_units(account(state, addr), str(asset_id)), L2_HALVING_AIRDROP)
-                self.assertEqual(asset_units(account(state, addr2), str(asset_id)), L2_HALVING_AIRDROP)
-            self.assertEqual(
-                asset_units(account(state, L2_OPERATOR_GRANT_ADDR), "1"),
-                L2_OPERATOR_GRANT,
-            )
-            self.assertEqual(int(account(state, "POOL_MINING").get("1", 0)), 0)
-            pk3, sk3, addr3 = _key()
-            commit_signed(state, _signed(state, pk3, sk3, addr3, "join"))
-            self.assertEqual(asset_units(account(state, addr), "1"), L2_HALVING_AIRDROP)
-            self.assertEqual(asset_units(account(state, addr3), "1"), 0)
-        finally:
-            if prev is None:
-                os.environ.pop("BRAH_JOIN_MAX_PER_HOUR", None)
-            else:
-                os.environ["BRAH_JOIN_MAX_PER_HOUR"] = prev
+    def test_active_burn(self):
+        state = _fresh_state()
+        pk, sk, addr = _key()
+        account(state, addr)["0"] = to_units(10)
+        raw = _signed(state, pk, sk, addr, "burn", amount=to_units(3))
+        commit_signed(state, raw)
+        self.assertEqual(int(account(state, addr)["0"]), to_units(7))
+        self.assertGreaterEqual(int(state.get("burned_brah") or 0), to_units(3))
+        with self.assertRaises(ValueError):
+            commit_signed(state, _signed(state, pk, sk, addr, "launch_l2", memo="Nope|NOPE"))
 
     def test_first_mine_bonus_once(self):
         state = _fresh_state()
         pk, sk, addr = _key()
         save_state(state)
-        self.assertEqual(mine_payout_units(state, addr), to_units(1.1))
+        self.assertEqual(mine_payout_units(state, addr), to_units(1.00014))
         raw = _signed(state, pk, sk, addr, "mine")
         _tx, block = commit_signed(state, raw)
-        self.assertEqual(int(block["reward"]), to_units(1.1))
-        self.assertEqual(int(account(state, addr)["0"]), to_units(1.1))
+        self.assertEqual(int(block["reward"]), to_units(1.00014))
+        self.assertEqual(int(account(state, addr)["0"]), to_units(1.00014))
         self.assertTrue((state.get("first_mined") or {}).get(addr))
-        self.assertEqual(mine_payout_units(state, addr), to_units(0.1))
+        self.assertEqual(mine_payout_units(state, addr), to_units(0.00014))
         raw2 = _signed(state, pk, sk, addr, "mine")
         _tx2, block2 = commit_signed(state, raw2)
-        self.assertEqual(int(block2["reward"]), to_units(0.1))
-        self.assertEqual(int(account(state, addr)["0"]), to_units(1.2))
+        self.assertEqual(int(block2["reward"]), to_units(0.00014))
+        self.assertEqual(int(account(state, addr)["0"]), to_units(1.00028))
 
     def test_mesh_ingest_mine_block(self):
         state = _fresh_state()

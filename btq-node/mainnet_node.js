@@ -29,7 +29,7 @@ const server = http.createServer((req, res) => {
 
                 console.log(`[RPC] ${method}`);
 
-                if (method === "btq_getNetworkStats") {
+                if (method === "brah_getNetworkStats") {
                     result = {
                         chain_height: 42069,
                         total_mined: 25000000.0,
@@ -37,7 +37,7 @@ const server = http.createServer((req, res) => {
                         difficulty: 4,
                         p2p_status: "SYNCED"
                     };
-                } else if (method === "btq_getBalance") {
+                } else if (method === "brah_getBalance") {
                     const addr = params[0];
                     if (!BALANCES[addr]) {
                         BALANCES[addr] = {
@@ -47,17 +47,17 @@ const server = http.createServer((req, res) => {
                         };
                     }
                     result = BALANCES[addr];
-                } else if (method === "btq_requestFaucet") {
+                } else if (method === "brah_requestFaucet") {
                     const addr = params[0];
                     if (BALANCES[addr]) BALANCES[addr]["0"] += 100.0;
-                    result = "Sovereign Faucet: 100 BTQ Dispatched";
-                } else if (method === "btq_mine") {
+                    result = "Sovereign Faucet: 100 Brah Dispatched";
+                } else if (method === "brah_mine") {
                     const addr = params[0];
                     if (BALANCES[addr]) BALANCES[addr]["0"] += 0.1;
-                    result = "Mainnet Block Found: 0.1 BTQ Reward";
-                } else if (method === "btq_sendTransaction") {
+                    result = "Mainnet Block Found: 0.1 Brah Reward";
+                } else if (method === "brah_sendTransaction") {
                     result = "0x" + "f".repeat(64);
-                } else if (method === "btq_requestSystemDrip") {
+                } else if (method === "brah_requestSystemDrip") {
                     const addr = params[0];
                     const amount = params[1];
                     if (BALANCES[addr]) BALANCES[addr]["0"] += amount;
@@ -87,5 +87,5 @@ const server = http.createServer((req, res) => {
 
 const PORT = 8545;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 BTQ MAINNET NODE LIVE ON PORT ${PORT}`);
+    console.log(`🚀 Brah MAINNET NODE LIVE ON PORT ${PORT}`);
 });
