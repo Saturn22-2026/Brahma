@@ -21,8 +21,6 @@ rootProject.name = "Bitcoin-Quantum-Sovereign"
 
 include(":app")
 include(":shared")
-include(":composeApp")
 
 project(":app").projectDir = file("wallet-android/app")
 project(":shared").projectDir = file("wallet-android/shared")
-project(":composeApp").projectDir = file("wallet-android/composeApp")
