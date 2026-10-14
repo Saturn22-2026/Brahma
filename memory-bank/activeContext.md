@@ -1,13 +1,15 @@
 # Active context
 
-**Current focus** (one short paragraph): Public APK download. Node streams `/wallet.apk` in 64KB chunks in source. Release wallet minify is on. This PC has no `JAVA_HOME`, so the smaller APK is not built. VPS patch file is `/tmp/brahm-apk-patch.py` and has not been applied; live process still serves the 21,479,030-byte file.
+**Current focus** (one short paragraph): Public origin is the VPS again. 2026-10-14 ~09:35 UTC: `https://www.brahmnetwork.com` HEAD and `POST /rpc` **200** (CF-RAY JNB), height **49**, tip `000000d837619491`, peers 0. SSH `opc@84.12.123.117` (`brahm-l1`, key `ssh-key-2026-09-21.key`) is open; `btq-l1` and `cloudflared` **active** since 2026-10-12 05:45 GMT, RPC matches the public tip. `84.12.75.158` still times out. This PC’s ledger is a **different chain** (height **67**, tip `000011bbe13dfeb1`). Laptop task `Brahm-Cloudflared` had 4 HA connections on that same tunnel (`dup_edge_conn`, 0 requests proxied); **stopped and Disabled** 2026-10-14 ~09:49 UTC. Windows service `Cloudflared` stays **Stopped / Manual**. **Did not** set `BRAH_PUBLIC_LAUNCH=1`. Apex `brahmnetwork.com` is SOA only (no address). Do not re-enable the laptop tunnel while its chain differs from the VPS.
 
-Coin is **Brahma Coin**, L1 is **BRAHMNETWORK**. Parallel, isolated work: `polymarket-hft/` localhost paper scalper for Polymarket (port 8787). GitHub listing/docs use Brahma Coin (not Bitcoin-Quantum). Repo URL is still `Saturn22-2026/Bitcoin-Quantum` until renamed on GitHub. Operator node `0.0.0.0:8545`. Phone LAN `192.168.168.65` → `192.168.168.16:8545`.
+Coin is **Brahma Coin**, L1 is **BRAHMNETWORK**. Parallel, isolated work: `polymarket-hft/` localhost paper scalper for Polymarket (port 8787). GitHub listing/docs use Brahma Coin (not Brahma). Repo URL is still `Saturn22-2026/Brahma` until renamed on GitHub. Operator node `0.0.0.0:8545`. Phone LAN `192.168.168.65` → `192.168.168.16:8545`.
 
 **Latest (policy + download)**:
 
 - Site Join download is `/wallet.apk` (direct APK), not fake Play Store toast.
-- **VPS APK live (2026-09-22):** `BRAH_SERVE_APK=1`, `/var/lib/btq/wallet.apk` on origin; public `https://www.brahmnetwork.com/wallet.apk` → 200 (~21MB).
+- **Wallet 1.0.36 (2026-09-28):** signed `brahma-wallet.apk` ~3,290,749 bytes on `/var/lib/btq/wallet.apk` and `/opt/btq/btq-node/wallet.apk`; site link `/wallet.apk?v=36`. Home lists nine L2s (Alesha/Bonn included). Release Mine falls through to `https://www.brahmnetwork.com` on operator LAN (cleartext LAN is refused).
+- **Restore blocked (2026-10-06 ~16:40 UTC ACT):** HEAD `https://www.brahmnetwork.com` **530** / 1033. SSH timeouts: `opc@84.12.123.117:22` and `opc@84.12.75.158:22`. **No ledger host** — neither `/opt/btq` nor `/var/lib/btq` inspected. Services started: **none**. Windows `cloudflared` still **Stopped / Manual**. Exact next click: Compute → Boot Volumes → **Brahm-L1 (Boot Volume)** → **Create instance** from that volume (do not launch a new Oracle Linux image / instance-pool clone). Then SSH that public IP and start systemd `btq-l1` + `cloudflared`.
+- **Origin outage (2026-10-01 ~14:27 UTC):** public GET and `/rpc` Cloudflare **530** / error 1033. Laptop `cloudflared` remains Stopped/Manual. No OCI CLI on this PC (`~/.oci` missing). Reboot the Ampere instance from the Oracle console, then SSH and confirm `btq-l1` + `cloudflared` active.
 - **GSM outage (2026-09-22 ~20:00):** Cloudflare **530** + SSH timeout — VPS unreachable/hung. Reboot restored `btq-l1` + `cloudflared`. Health cron every 2m restarts L1 if local RPC ≠ 200. Instance is **498Mi RAM** + 945Mi swap. Caps set 2026-09-23: L1 MemoryMax **180M**, cloudflared MemoryMax **80M** (previous 400M+300M exceeded RAM). Real fix is an Ampere shape with **8 GB**.
 - L2 mine-halving airdrop: **750M shared pool** split across active wallets (not 750M each).
 - Join: **100 Brahma** (first tier) + memo `dev:<phoneId>[:referrer]` — **one claim per phone**.
@@ -27,8 +29,7 @@ Coin is **Brahma Coin**, L1 is **BRAHMNETWORK**. Parallel, isolated work: `polym
 - [x] Isolated miner stress (`btq-node/test_miner_stress.py`, temp ledger only)
 - [x] Operator keep-awake helpers (idle sleep + lid script). Not a VPS.
 - [x] Cloudflared Windows service reinstalled 2026-09-19 20:32 with the new tunnel token (`ha_connections=4`). Old Sept-9 token replaced. Desktop token file removed.
-- [x] Cloudflare Public Hostname: `www.brahmnetwork.com` resolves (Cloudflare proxy). Public GET and `POST /rpc` **200**, same height as local (43). Tunnel Healthy, `config_version=1`, requests reaching this PC. GSM Mine can use this URL. Keep laptop + Cloudflared + node running. Do not set `BRAH_PUBLIC_LAUNCH=1`.
-- [x] Oracle VPS `brahm-l1`: L1 + Cloudflared connector **both running**. Same tunnel token as laptop. Cutover verified 2026-09-21: laptop Cloudflared **Stopped**, public `/rpc` still **200** height 44 via VPS. Laptop L1 stopped to avoid split ledger. Laptop `btq-data` kept. Do not set `BRAH_PUBLIC_LAUNCH=1`.
+- [ ] Public GSM origin: 2026-10-14 VPS `brahm-l1` (`84.12.123.117`) serves `www.brahmnetwork.com` height **49**. Laptop chain is height **67** and must not publish. Task `Brahm-Cloudflared` **Disabled**; Windows service stays Stopped/Manual. Peers still 0. Do not set `BRAH_PUBLIC_LAUNCH=1`.
 - [ ] Second independent operator machine (`BRAH_PEERS` both ways)
 - [ ] `BRAH_PUBLIC_LAUNCH=1` only after the two items above
 - [x] Isolated Polymarket paper API + maker scalper in `polymarket-hft/` (`127.0.0.1:8787`, `POLY_MODE=paper`)

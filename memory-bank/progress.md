@@ -17,7 +17,7 @@
 - Always-on helpers: `start_operator_node.ps1`, `install_l1_windows_task.ps1` (this PC), `keep_operator_awake.ps1` (lid/sleep off), `btq-l1.service` + `install_l1_linux.sh` (Linux VPS). Origin for cloudflared is `http://127.0.0.1:8545`. Node process also requests Windows stay-awake. GSM still dies if this PC is off or has no internet.
 - Replica catch-up: `start_replica.ps1` (`btq-data-replica`, P2P 18546, RPC 8546, UDP 18548, peer 18545). Not consensus. Same-host replica has matched live height when peering works
 - Independent operator: `start_independent_operator.ps1` refuses this repo’s `btq-data` / `btq-data-replica`. Needs another machine
-- Wallet **1.0.33**: GSM Mine/Share use `https://www.brahmnetwork.com`; operator LAN unchanged. L2 amounts one line. Hide balances. Mine entry is `mineBrahma()`. Cap error says Brahma Coin. `public_launch` false. DNS/tunnel for brahmnetwork.com still operator work.
+- Wallet **1.0.36**: shrunk release (~3.3 MB); nine L2 balances on Home; Send asset picker; Hide L1/Hide L2; Mine uses public HTTPS when LAN HTTP is refused. Public download was `/wallet.apk?v=36` while origin was up.
 - Genesis L2: 5B whole units of each genesis token to the operator grant address (once). At every mine-schedule halving, a **shared 750M pool** of each genesis L2 is **split** across joined/mined wallets (not 750M each). Join memo dev:<phoneId> binds one claim per phone; 6th distinct inbound sender to one address burns that hub. Site Join serves /wallet.apk. Wallet hide L1/L2 separately.
 - `BRAH_ALLOW_LAN=1` does not 429 routed clients
 - Firewall script uses all Windows profiles (including Public)
@@ -42,6 +42,8 @@
 - Named-firm review (user action to hire; do not forge)
 
 **Known issues**
+
+- **2026-10-14:** `https://www.brahmnetwork.com` is **200** from VPS `brahm-l1` (`84.12.123.117`), height 49 tip `000000d837619491`. Laptop origin is a divergent height 67. Task `Brahm-Cloudflared` was connected (4 HA) and is now **Disabled**; Windows `cloudflared` service stays Stopped/Manual. `84.12.75.158` SSH still times out. Apex `brahmnetwork.com` has no address record. Peers 0, so `public_launch` stays false.
 
 - Operator with filesystem still owns the chain unless a second replica is catching up — and even then one operator disk can still rewrite the primary
 - 20-bit PoW is not a public hashrate market
