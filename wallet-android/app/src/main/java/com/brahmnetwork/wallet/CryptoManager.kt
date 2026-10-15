@@ -7,7 +7,10 @@ import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyPairGenerator
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumParameters
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPrivateKeyParameters
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPublicKeyParameters
-import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumSigner
+import com.brahmnetwork.legacy.dilithium.DilithiumParameters as LegacyDilithiumParameters
+import com.brahmnetwork.legacy.dilithium.DilithiumPrivateKeyParameters as LegacyPrivateKey
+import com.brahmnetwork.legacy.dilithium.DilithiumPublicKeyParameters as LegacyPublicKey
+import com.brahmnetwork.legacy.dilithium.DilithiumSigner as LegacySigner
 import org.bouncycastle.crypto.digests.SHAKEDigest
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -265,17 +268,33 @@ class CryptoManager {
     }
 
     fun signMessage(secretKey: ByteArray, message: ByteArray, publicKey: ByteArray): ByteArray {
-        val pub = DilithiumPublicKeyParameters(DilithiumParameters.dilithium3, publicKey)
-        val priv = DilithiumPrivateKeyParameters(DilithiumParameters.dilithium3, secretKey, pub)
-        val signer = DilithiumSigner()
+        // Keygen stays on BouncyCastle 1.78 so the address does not change.
+        // The public node only accepts the 3293-byte Dilithium3 signature, which
+        // 1.78 does not emit (it emits 3309). Sign with the 1.72 parameter set:
+        // tr is the first 32 bytes of the 64-byte 1.78 transcript.
+        require(secretKey.size == 4032 && publicKey.size == 1952) {
+            "Unexpected Dilithium key length"
+        }
+        fun slice(src: ByteArray, off: Int, len: Int) = src.copyOfRange(off, off + len)
+        val priv = LegacyPrivateKey(
+            LegacyDilithiumParameters.dilithium3,
+            slice(secretKey, 0, 32),
+            slice(secretKey, 32, 32),
+            slice(secretKey, 64, 32),
+            slice(secretKey, 128, 640),
+            slice(secretKey, 768, 768),
+            slice(secretKey, 1536, 2496),
+            slice(publicKey, 32, 1920)
+        )
+        val signer = LegacySigner()
         signer.init(true, priv)
         return signer.generateSignature(message)
     }
 
     fun verify(publicKey: ByteArray, message: ByteArray, signature: ByteArray): Boolean {
         return try {
-            val signer = DilithiumSigner()
-            signer.init(false, DilithiumPublicKeyParameters(DilithiumParameters.dilithium3, publicKey))
+            val signer = LegacySigner()
+            signer.init(false, LegacyPublicKey(LegacyDilithiumParameters.dilithium3, publicKey))
             signer.verifySignature(message, signature)
         } catch (e: Exception) {
             Log.w("CryptoManager", "ML-DSA verify failed: ${e.message}")

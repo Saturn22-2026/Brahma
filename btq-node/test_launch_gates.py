@@ -516,7 +516,7 @@ class LaunchGates(unittest.TestCase):
         self.assertNotIn("<script>", xss)
         self.assertIn("Private post-quantum testnet", page)
         self.assertIn("Get the wallet.", page)
-        self.assertIn("BUILD 1.0.38", page)
+        self.assertIn("BUILD 1.0.39", page)
         self.assertIn("Download Android APK", page)
         self.assertNotIn("JSON-RPC", page)
         self.assertNotIn("$", page)
