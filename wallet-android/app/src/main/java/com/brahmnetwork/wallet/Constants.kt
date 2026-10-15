@@ -92,16 +92,17 @@ object Constants {
 
     /**
      * Wallet RPC may stay on the operator LAN. Invite and APK links always use the
-     * named public host so a shared link is not a private address such as 192.168.168.18.
-     * Never emit USB/emulator loopback or trycloudflare.
+     * named public host. A private address such as 192.168.168.18 is never shareable.
+     * [onOperatorLan] cannot select a LAN host.
      */
-    fun shareableNodeBase(customRpc: String = "", onOperatorLan: Boolean = true): String {
+    fun shareableNodeBase(customRpc: String = "", onOperatorLan: Boolean = false): String {
         val https = publicHttps().trimEnd('/')
-        val fallback = if (onOperatorLan) LAN_RPC_URL.trimEnd('/') else https
-        val raw = customRpc.trim().ifBlank { fallback }
+        val raw = customRpc.trim()
+        if (onOperatorLan && raw.isBlank()) return https
+        if (raw.isBlank()) return https
         val base = raw.trimEnd('/')
         val host = try {
-            java.net.URI(if (base.endsWith("/")) base else "$base/").host
+            java.net.URI(if (base.endsWith("/")) base else "$base/").host?.lowercase()
         } catch (_: Exception) {
             null
         }
@@ -110,13 +111,22 @@ object Constants {
             || host == "localhost"
             || host == "10.0.2.2"
             || host.endsWith(".trycloudflare.com")
+            || isPrivateLanRpc(base)
+            || isPrivateOctetHost(host)
         ) {
-            return fallback
-        }
-        if (!onOperatorLan && isPrivateLanRpc(base)) {
             return https
         }
         return base
+    }
+
+    private fun isPrivateOctetHost(host: String): Boolean {
+        val parts = host.split(".")
+        if (parts.size != 4) return false
+        val octets = parts.map { it.toIntOrNull() ?: return false }
+        if (octets[0] == 192 && octets[1] == 168) return true
+        if (octets[0] == 10) return true
+        if (octets[0] == 172 && octets[1] in 16..31) return true
+        return false
     }
 
     fun shareClaimUrl(address: String, customRpc: String = ""): String =

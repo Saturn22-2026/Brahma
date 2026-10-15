@@ -1678,12 +1678,15 @@ class L1Handler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
 
-    def _send(self, code: int, content_type: str, body) -> None:
+    def _send(self, code: int, content_type: str, body, cache_control: str | None = None) -> None:
         if isinstance(body, str):
             body = body.encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", content_type)
         self._apply_cors()
+        if cache_control:
+            self.send_header("Cache-Control", cache_control)
+            self.send_header("CDN-Cache-Control", cache_control)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         if self.command == "HEAD":
@@ -1827,19 +1830,19 @@ class L1Handler(BaseHTTPRequestHandler):
             self._send(status, "application/json", json.dumps(payload))
             return
         if path == "/":
-            self._send(200, "text/html; charset=utf-8", home_html())
+            self._send(200, "text/html; charset=utf-8", home_html(), cache_control="no-store")
             return
         if path.startswith("/static/"):
             data, ctype = static_asset(path[len("/static/") :])
             if data is None:
                 self._send(404, "text/plain", "not found")
                 return
-            self._send(200, ctype, data)
+            self._send(200, ctype, data, cache_control="no-store")
             return
         if path in ("/claim", "/status"):
             refs = parse_qs(parsed.query).get("ref", [])
             ref = refs[0] if refs else ""
-            self._send(200, "text/html; charset=utf-8", claim_html(ref))
+            self._send(200, "text/html; charset=utf-8", claim_html(ref), cache_control="no-store")
             return
         self._send(404, "application/json", json.dumps({"error": "not found", "public_launch": False}))
 

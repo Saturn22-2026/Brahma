@@ -43,7 +43,6 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
     val firstMinePending by viewModel.firstMinePending.collectAsState()
     val joinedCount by viewModel.joinedCount.collectAsState()
     val meshPeers by viewModel.meshPeers.collectAsState()
-    val rpcUrl by viewModel.rpcUrl.collectAsState()
     val referralTreeCount by viewModel.referralTreeCount.collectAsState()
     val queuedTx by SentinelRuntime.queuedTx.collectAsState()
     val hideL1Balances by viewModel.hideL1Balances.collectAsState()
@@ -255,7 +254,9 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
     Spacer(Modifier.height(24.dp))
 
     val context = LocalContext.current
-    val inviteLink = remember(address, rpcUrl) { ShareActions.inviteMessage(address, rpcUrl) }
+    val inviteLink = remember(address) {
+        ShareActions.inviteMessage(address, com.brahmnetwork.wallet.Constants.publicHttps())
+    }
     val downloadLink = com.brahmnetwork.wallet.Constants.shareDownloadUrl()
     val meshInvite by SentinelRuntime.lastInvite.collectAsState()
     Card(

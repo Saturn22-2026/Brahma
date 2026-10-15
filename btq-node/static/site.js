@@ -389,9 +389,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   webEl=document.getElementById('invWeb'),apkEl=document.getElementById('invApk'),brahmEl=document.getElementById('invBrahm');
  let links={web:'',apk:'',brahm:''};
  function claimOrigin(){
-  const host=location.hostname||'';
-  const privateHost=host==='localhost'||host==='127.0.0.1'||host.startsWith('192.168.')||host.startsWith('10.')||/^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
-  return privateHost?'https://www.brahmnetwork.com':location.origin;
+  return 'https://www.brahmnetwork.com';
  }
  function parseAddr(raw){
   const s=(raw||'').trim();
