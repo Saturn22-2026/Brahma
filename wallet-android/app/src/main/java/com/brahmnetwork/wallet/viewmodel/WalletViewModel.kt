@@ -291,21 +291,8 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun shareBase(): String {
-        val onLan = onOperatorLan()
-        if (!onLan) {
-            return Constants.shareableNodeBase(Constants.publicHttps(), onOperatorLan = false)
-        }
-        val preferred = _rpcUrl.value.ifBlank {
-            prefs.getString("last_good_rpc", "").orEmpty().ifBlank {
-                com.brahmnetwork.wallet.sentinel.SentinelRuntime.discoveredRpcUrls().firstOrNull().orEmpty()
-            }
-        }
-        return Constants.shareableNodeBase(
-            preferred.ifBlank { Constants.LAN_RPC_URL },
-            onOperatorLan = true
-        )
-    }
+    private fun shareBase(): String =
+        Constants.shareableNodeBase(Constants.publicHttps(), onOperatorLan = false)
 
     fun shareNodeBase(): String = shareBase()
 

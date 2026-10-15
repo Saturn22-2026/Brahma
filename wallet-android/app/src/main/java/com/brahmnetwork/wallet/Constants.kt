@@ -91,7 +91,8 @@ object Constants {
     }
 
     /**
-     * Operator LAN: keep 192.168.168.16. GSM: public HTTPS.
+     * Wallet RPC may stay on the operator LAN. Invite and APK links always use the
+     * named public host so a shared link is not a private address such as 192.168.168.18.
      * Never emit USB/emulator loopback or trycloudflare.
      */
     fun shareableNodeBase(customRpc: String = "", onOperatorLan: Boolean = true): String {
@@ -119,10 +120,10 @@ object Constants {
     }
 
     fun shareClaimUrl(address: String, customRpc: String = ""): String =
-        "${shareableNodeBase(customRpc)}/claim?ref=$address"
+        "${shareableNodeBase(customRpc.ifBlank { publicHttps() }, onOperatorLan = false)}/claim?ref=$address"
 
     fun shareDownloadUrl(customRpc: String = ""): String =
-        "${shareableNodeBase(customRpc)}/wallet.apk"
+        "${shareableNodeBase(customRpc.ifBlank { publicHttps() }, onOperatorLan = false)}/wallet.apk"
 
     const val MESH_PORT = 18545
     const val L2_LAUNCH_BURN = 100.0

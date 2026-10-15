@@ -15,7 +15,7 @@ import com.google.zxing.qrcode.QRCodeWriter
 object ShareActions {
     fun inviteMessage(address: String, nodeBase: String = Constants.RPC_URL): String? {
         if (!CryptoManager.isChecksummedAddress(address)) return null
-        val base = Constants.shareableNodeBase(nodeBase)
+        val base = Constants.shareableNodeBase(nodeBase, onOperatorLan = false)
         if (!base.startsWith("http://") && !base.startsWith("https://")) return null
         return Constants.shareClaimUrl(address, base)
     }
