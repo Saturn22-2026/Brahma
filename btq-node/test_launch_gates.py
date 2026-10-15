@@ -4,8 +4,10 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import threading
 import time
 import unittest
+import urllib.request
 from pathlib import Path
 
 os.environ["BRAH_DATA_DIR"] = tempfile.mkdtemp(prefix="brah-gates-")
@@ -41,8 +43,12 @@ from l1_mainnet import (
     apk_download_allowed,
     assert_operator_hygiene,
     asset_units,
+    assetlinks_json,
     claim_html,
     canonical_rpc_method,
+    public_claim_url,
+    public_share_origin,
+    wallet_intent_url,
     home_html,
     static_asset,
     commit_signed,
@@ -495,7 +501,13 @@ class LaunchGates(unittest.TestCase):
         self.assertIn(addr, page)
         self.assertIn("brahm://claim?ref=%s" % addr, page)
         self.assertIn("https://www.brahmnetwork.com/wallet.apk", page)
+        self.assertIn(public_claim_url(addr), page)
+        self.assertIn("intent://claim?ref=%s" % addr, page)
+        self.assertIn("package=com.brahmnetwork.wallet", page)
+        self.assertIn("S.browser_fallback_url=", page)
         self.assertNotIn('href="/wallet.apk"', page)
+        self.assertNotIn("192.168.", page)
+        self.assertNotIn("localhost", page)
         self.assertIn("BRAHMNETWORK", page)
         bad = claim_html("http://evil.example/wallet.apk")
         self.assertIn("not a valid checksummed", bad)
@@ -503,10 +515,79 @@ class LaunchGates(unittest.TestCase):
         xss = claim_html("<script>alert(1)</script>")
         self.assertNotIn("<script>", xss)
         self.assertIn("Private post-quantum testnet", page)
-        self.assertIn("JSON-RPC", page)
+        self.assertIn("Get the wallet.", page)
+        self.assertIn("BUILD 1.0.38", page)
+        self.assertIn("Download Android APK", page)
+        self.assertNotIn("JSON-RPC", page)
         self.assertNotIn("$", page)
         self.assertNotIn("dRPC", page.lower())
         self.assertNotIn("market price", page.lower())
+
+    def test_share_link_is_one_public_claim_url(self):
+        from l1_mainnet import L1Handler, ThreadingL1Server
+
+        links = json.loads(assetlinks_json())
+        target = links[0]["target"]
+        self.assertEqual(target["package_name"], "com.brahmnetwork.wallet")
+        self.assertEqual(target["namespace"], "android_app")
+        fingerprint = target["sha256_cert_fingerprints"][0]
+        self.assertEqual(len(fingerprint.split(":")), 32)
+        _pk, _sk, addr = _key()
+        prev = os.environ.get("BRAH_PUBLIC_RPC")
+        os.environ["BRAH_PUBLIC_RPC"] = "https://www.brahmnetwork.com"
+        httpd = None
+        try:
+            self.assertEqual(public_share_origin(), "https://www.brahmnetwork.com")
+            self.assertEqual(
+                public_claim_url(addr),
+                "https://www.brahmnetwork.com/claim?ref=%s" % addr,
+            )
+            os.environ["BRAH_PUBLIC_RPC"] = "https://abc.trycloudflare.com/path"
+            self.assertEqual(public_share_origin(), "https://www.brahmnetwork.com")
+            os.environ["BRAH_PUBLIC_RPC"] = "https://www.brahmnetwork.com/claim?ref=nope"
+            self.assertEqual(public_share_origin(), "https://www.brahmnetwork.com")
+            os.environ["BRAH_PUBLIC_RPC"] = "https://www.brahmnetwork.com"
+            intent = wallet_intent_url(addr)
+            self.assertTrue(intent.startswith("intent://claim?ref=%s#" % addr))
+            self.assertIn("https%3A%2F%2Fwww.brahmnetwork.com%2Fwallet.apk", intent)
+            self.assertNotIn("192.168.", intent)
+            httpd = ThreadingL1Server(("127.0.0.1", 0), L1Handler)
+            port = httpd.server_address[1]
+            thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+            thread.start()
+            with urllib.request.urlopen(
+                "http://127.0.0.1:%s/claim?ref=%s" % (port, addr), timeout=10
+            ) as claim:
+                body = claim.read().decode()
+                self.assertEqual(claim.status, 200)
+                self.assertIn(public_claim_url(addr), body)
+                self.assertIn(intent, body)
+                self.assertIn("https://www.brahmnetwork.com/wallet.apk", body)
+                self.assertNotIn("192.168.", body)
+            with urllib.request.urlopen(
+                "http://127.0.0.1:%s/.well-known/assetlinks.json" % port, timeout=10
+            ) as assets:
+                payload = assets.read().decode()
+                self.assertIn("application/json", assets.headers.get("Content-Type", ""))
+                self.assertEqual(
+                    json.loads(payload)[0]["target"]["package_name"],
+                    "com.brahmnetwork.wallet",
+                )
+                self.assertEqual(assets.headers.get("Cache-Control"), "no-store")
+            with urllib.request.urlopen(
+                "http://127.0.0.1:%s/static/site.js?v=share-link" % port, timeout=10
+            ) as js:
+                script = js.read().decode()
+                self.assertIn("links={web:claim,", script)
+                self.assertEqual(js.headers.get("Cache-Control"), "no-store")
+        finally:
+            if httpd is not None:
+                httpd.shutdown()
+                httpd.server_close()
+            if prev is None:
+                os.environ.pop("BRAH_PUBLIC_RPC", None)
+            else:
+                os.environ["BRAH_PUBLIC_RPC"] = prev
 
     def test_home_site_is_brahma_branded(self):
         page = home_html()
@@ -535,8 +616,11 @@ class LaunchGates(unittest.TestCase):
         self.assertIn("brah_getStats", text)
         self.assertIn("BRAH1|", text)
         self.assertIn("return 'https://www.brahmnetwork.com';", text)
-        self.assertIn("Download the Brahma Coin wallet:", text)
+        self.assertIn("const claim=origin+'/claim?ref='+encodeURIComponent(addr);", text)
+        self.assertIn("links={web:claim,", text)
         self.assertNotIn("location.origin", text)
+        self.assertNotIn("192.168.", text)
+        self.assertIn('src="/static/site.js?v=build-138"', page)
         self.assertIn('href="https://www.brahmnetwork.com/wallet.apk"', page)
         self.assertNotIn('href="/wallet.apk', page)
         bad, _ = static_asset("../l1_mainnet.py")

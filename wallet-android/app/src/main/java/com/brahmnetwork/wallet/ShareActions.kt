@@ -15,9 +15,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 object ShareActions {
     fun inviteMessage(address: String, nodeBase: String = Constants.RPC_URL): String? {
         if (!CryptoManager.isChecksummedAddress(address)) return null
-        val base = Constants.shareableNodeBase(nodeBase, onOperatorLan = false)
-        if (!base.startsWith("http://") && !base.startsWith("https://")) return null
-        return Constants.shareClaimUrl(address, base)
+        val link = Constants.shareClaimUrl(address, nodeBase)
+        if (!link.startsWith("https://") || Constants.isPrivateLanRpc(link)) return null
+        if (!CryptoManager.isSafeClaimUrl(link)) return null
+        return link
     }
 
     fun shareInvite(
@@ -28,24 +29,33 @@ object ShareActions {
         signedFields: Map<String, String>? = null
     ) {
         val link = inviteMessage(address, nodeBase)
-        if (link == null || !CryptoManager.isSafeClaimUrl(link)) {
+        if (link == null) {
             Toast.makeText(
                 context,
-                "Need a checksummed Brahma Coin address and a valid node URL before sharing",
+                "Need a checksummed Brahma Coin address before sharing",
                 Toast.LENGTH_LONG
             ).show()
             return
         }
-        val download = Constants.shareDownloadUrl()
-        val message = "Download the Brahma Coin wallet:\n$download\n\nInvite:\n$link"
         val mesh = if (signedFields != null) SentinelRuntime.gossipInvite(signedFields) else false
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("Brahma Coin wallet", message))
-        shareText(context, message, title)
+        try {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip(ClipData.newPlainText("Brahma Coin invite", link))
+        } catch (_: Exception) {
+        }
+        val opened = try {
+            shareText(context, link, title)
+            true
+        } catch (_: Exception) {
+            false
+        }
         Toast.makeText(
             context,
-            if (mesh) "Link copied. Sentinel invite is on the LAN mesh."
-            else "Link copied. Open the share sheet or scan the QR.",
+            when {
+                !opened -> "Invite copied. The share sheet did not open."
+                mesh -> "Invite link copied. Sentinel invite is on the LAN mesh."
+                else -> "Invite link copied."
+            },
             Toast.LENGTH_LONG
         ).show()
     }
