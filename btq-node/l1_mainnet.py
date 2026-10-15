@@ -283,6 +283,14 @@ def static_asset(rel: str) -> tuple[bytes | None, str]:
     return path.read_bytes(), ctype
 
 
+def public_apk_url() -> str:
+    """Absolute wallet download. Never a private LAN host."""
+    base = (public_rpc_url() or "").strip().rstrip("/")
+    if not base.startswith("https://") or "trycloudflare.com" in base.lower():
+        base = "https://www.brahmnetwork.com"
+    return base + "/wallet.apk"
+
+
 def claim_html(ref_raw: str = "") -> str:
     ref_block = "<p>No referral address in this link.</p>"
     raw = (ref_raw or "").strip()
@@ -299,6 +307,7 @@ def claim_html(ref_raw: str = "") -> str:
                 "Do not trust this invite.</p>"
             )
     apk = resolve_apk() if apk_download_allowed() else None
+    download_url = public_apk_url()
     open_wallet = ""
     if raw:
         try:
@@ -310,24 +319,18 @@ def claim_html(ref_raw: str = "") -> str:
             )
         except ValueError:
             open_wallet = ""
+    digest_line = ""
     if apk is not None:
-        digest = apk_sha256(apk)
-        dl_block = (
-            "<ol>"
-            "<li><a href=\"/wallet.apk\">Download the Brahma Coin wallet APK</a> "
-            "and allow install from this browser.</li>"
-            "<li>Create a wallet in the app (or tap Open in Brahma Coin wallet first).</li>"
-            "<li>Tap Claim adoption, then Mine. A mine pays only after the node seals it.</li>"
-            "</ol>"
-            f"<p>SHA-256: <code>{html.escape(digest)}</code></p>"
-        )
-    elif apk_download_allowed():
-        dl_block = "<p>This node is allowed to serve the wallet, but no APK file was found.</p>"
-    else:
-        dl_block = (
-            "<p>Wallet download is off. Operator: build the APK and set "
-            "<code>BRAH_SERVE_APK=1</code>.</p>"
-        )
+        digest_line = f"<p>SHA-256: <code>{html.escape(apk_sha256(apk))}</code></p>"
+    dl_block = (
+        "<ol>"
+        f"<li><a href=\"{html.escape(download_url)}\">Download the Brahma Coin wallet APK</a> "
+        "and allow install from this browser.</li>"
+        "<li>Create a wallet in the app (or tap Open in Brahma Coin wallet first).</li>"
+        "<li>Tap Claim adoption, then Mine. A mine pays only after the node seals it.</li>"
+        "</ol>"
+        f"{digest_line}"
+    )
     height, joined, mined = "—", "—", "—"
     try:
         with _lock:

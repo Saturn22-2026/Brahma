@@ -36,10 +36,12 @@ object ShareActions {
             ).show()
             return
         }
+        val download = Constants.shareDownloadUrl()
+        val message = "Download the Brahma Coin wallet:\n$download\n\nInvite:\n$link"
         val mesh = if (signedFields != null) SentinelRuntime.gossipInvite(signedFields) else false
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("Brahma Coin invite", link))
-        shareText(context, link, title)
+        clipboard.setPrimaryClip(ClipData.newPlainText("Brahma Coin wallet", message))
+        shareText(context, message, title)
         Toast.makeText(
             context,
             if (mesh) "Link copied. Sentinel invite is on the LAN mesh."

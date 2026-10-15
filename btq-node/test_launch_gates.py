@@ -494,6 +494,8 @@ class LaunchGates(unittest.TestCase):
         self.assertIn("Verified referrer", page)
         self.assertIn(addr, page)
         self.assertIn("brahm://claim?ref=%s" % addr, page)
+        self.assertIn("https://www.brahmnetwork.com/wallet.apk", page)
+        self.assertNotIn('href="/wallet.apk"', page)
         self.assertIn("BRAHMNETWORK", page)
         bad = claim_html("http://evil.example/wallet.apk")
         self.assertIn("not a valid checksummed", bad)

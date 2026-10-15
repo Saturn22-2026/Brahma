@@ -256,6 +256,7 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
 
     val context = LocalContext.current
     val inviteLink = remember(address, rpcUrl) { ShareActions.inviteMessage(address, rpcUrl) }
+    val downloadLink = com.brahmnetwork.wallet.Constants.shareDownloadUrl()
     val meshInvite by SentinelRuntime.lastInvite.collectAsState()
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -264,9 +265,14 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Share invite link", fontWeight = FontWeight.Bold, color = Color(0xFF00FF88))
+                Text("Share wallet download", fontWeight = FontWeight.Bold, color = Color(0xFF00FF88))
                 Text(
-                    text = inviteLink ?: "Create a checksummed wallet to get a link",
+                    text = downloadLink,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                Text(
+                    text = inviteLink ?: "Create a checksummed wallet to get an invite",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )

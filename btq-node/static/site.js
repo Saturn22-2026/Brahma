@@ -386,8 +386,8 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
 (function(){
  const inp=document.getElementById('invAddr'),btn=document.getElementById('invGen'),
   out=document.getElementById('invOut'),
-  webEl=document.getElementById('invWeb'),brahmEl=document.getElementById('invBrahm');
- let links={web:'',brahm:''};
+  webEl=document.getElementById('invWeb'),apkEl=document.getElementById('invApk'),brahmEl=document.getElementById('invBrahm');
+ let links={web:'',apk:'',brahm:''};
  function claimOrigin(){
   const host=location.hostname||'';
   const privateHost=host==='localhost'||host==='127.0.0.1'||host.startsWith('192.168.')||host.startsWith('10.')||/^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
@@ -408,8 +408,11 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   if(!addr){
    toast('That does not look like a BRAHMNETWORK address — BRM1G plus 24 or 28 hex digits, lowercase body.');inp.focus();return;}
   links={web:`${claimOrigin()}/claim?ref=${addr}`,
+   apk:`${claimOrigin()}/wallet.apk`,
    brahm:`brahm://claim?ref=${addr}`};
-  webEl.textContent=links.web;brahmEl.textContent=links.brahm;
+  webEl.textContent=links.web;
+  if(apkEl)apkEl.textContent=links.apk;
+  brahmEl.textContent=links.brahm;
   out.classList.add('show');
   toast('Claim links built — referrers receive half the join amount.');});
  document.querySelectorAll('[data-inv]').forEach(b=>b.addEventListener('click',()=>{
