@@ -91,33 +91,33 @@ object Constants {
     }
 
     /**
-     * Wallet RPC may stay on the operator LAN. Invite and APK links always use the
-     * named public host. A private address such as 192.168.168.18 is never shareable.
-     * [onOperatorLan] cannot select a LAN host.
+     * Origin used in every invite. Scheme and host only, always HTTPS.
+     * A baked RPC path, a LAN address, or a quick tunnel cannot become the share host.
      */
-    fun shareableNodeBase(customRpc: String = "", onOperatorLan: Boolean = false): String {
-        val https = publicHttps().trimEnd('/')
-        val raw = customRpc.trim()
-        if (onOperatorLan && raw.isBlank()) return https
-        if (raw.isBlank()) return https
-        val base = raw.trimEnd('/')
-        val host = try {
-            java.net.URI(if (base.endsWith("/")) base else "$base/").host?.lowercase()
+    fun publicShareOrigin(): String {
+        val fallback = "https://www.brahmnetwork.com"
+        val raw = publicHttps().trim()
+        val uri = try {
+            java.net.URI(raw)
         } catch (_: Exception) {
-            null
+            return fallback
         }
-        if (host.isNullOrBlank()
-            || host == "127.0.0.1"
-            || host == "localhost"
-            || host == "10.0.2.2"
-            || host.endsWith(".trycloudflare.com")
-            || isPrivateLanRpc(base)
-            || isPrivateOctetHost(host)
-        ) {
-            return https
-        }
-        return base
+        val host = uri.host?.lowercase()?.trim().orEmpty()
+        if (!uri.scheme.equals("https", ignoreCase = true) || host.isBlank()) return fallback
+        if (host == "127.0.0.1" || host == "localhost" || host == "10.0.2.2") return fallback
+        if (host.endsWith(".trycloudflare.com") || isPrivateOctetHost(host)) return fallback
+        return "https://$host"
     }
+
+    /**
+     * Wallet RPC may stay on the operator LAN. Invite links never do.
+     * [customRpc] and [onOperatorLan] are ignored so a phone on a private
+     * address cannot put that address in a shared link.
+     */
+    fun shareableNodeBase(
+        @Suppress("UNUSED_PARAMETER") customRpc: String = "",
+        @Suppress("UNUSED_PARAMETER") onOperatorLan: Boolean = false
+    ): String = publicShareOrigin()
 
     private fun isPrivateOctetHost(host: String): Boolean {
         val parts = host.split(".")
@@ -129,11 +129,16 @@ object Constants {
         return false
     }
 
-    fun shareClaimUrl(address: String, customRpc: String = ""): String =
-        "${shareableNodeBase(customRpc.ifBlank { publicHttps() }, onOperatorLan = false)}/claim?ref=$address"
+    /** One public invite. Empty until the address is a checksummed Brahma Coin address. */
+    fun shareClaimUrl(address: String, customRpc: String = ""): String {
+        if (!CryptoManager.isChecksummedAddress(address)) return ""
+        val ref = CryptoManager.toBrahAddress(address)
+        if (!CryptoManager.isChecksummedAddress(ref)) return ""
+        return "${shareableNodeBase(customRpc, onOperatorLan = false)}/claim?ref=$ref"
+    }
 
     fun shareDownloadUrl(customRpc: String = ""): String =
-        "${shareableNodeBase(customRpc.ifBlank { publicHttps() }, onOperatorLan = false)}/wallet.apk"
+        "${shareableNodeBase(customRpc, onOperatorLan = false)}/wallet.apk"
 
     const val MESH_PORT = 18545
     const val L2_LAUNCH_BURN = 100.0

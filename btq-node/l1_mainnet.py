@@ -23,7 +23,7 @@ from collections import deque
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from socketserver import ThreadingMixIn
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 from envutil import env
 
@@ -283,12 +283,65 @@ def static_asset(rel: str) -> tuple[bytes | None, str]:
     return path.read_bytes(), ctype
 
 
+PUBLIC_SHARE_ORIGIN = "https://www.brahmnetwork.com"
+WALLET_PACKAGE = "com.brahmnetwork.wallet"
+# SHA-256 of the release signing certificate in the public brahma-wallet.apk.
+WALLET_CERT_SHA256 = (
+    "F5:34:48:B2:84:EC:8C:C7:78:1D:6C:59:55:4F:B3:BF:"
+    "C6:62:BB:FF:B5:E1:60:3E:4A:79:5E:F2:AC:A8:09:96"
+)
+
+
+def public_share_origin() -> str:
+    """Scheme and host only. Never a private address, loopback, or quick tunnel."""
+    base = (public_rpc_url() or "").strip()
+    parsed = urlparse(base)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme != "https" or not host or "trycloudflare.com" in host:
+        return PUBLIC_SHARE_ORIGIN
+    if host in ("127.0.0.1", "localhost", "::1"):
+        return PUBLIC_SHARE_ORIGIN
+    try:
+        ip = ipaddress.ip_address(host)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            return PUBLIC_SHARE_ORIGIN
+    except ValueError:
+        pass
+    return f"https://{host}"
+
+
 def public_apk_url() -> str:
     """Absolute wallet download. Never a private LAN host."""
-    base = (public_rpc_url() or "").strip().rstrip("/")
-    if not base.startswith("https://") or "trycloudflare.com" in base.lower():
-        base = "https://www.brahmnetwork.com"
-    return base + "/wallet.apk"
+    return public_share_origin() + "/wallet.apk"
+
+
+def public_claim_url(addr: str) -> str:
+    return public_share_origin() + "/claim?ref=" + quote(addr, safe="")
+
+
+def wallet_intent_url(addr: str) -> str:
+    """Opens the installed wallet. If it is missing, the browser downloads the APK."""
+    ref = quote(addr, safe="")
+    fallback = quote(public_apk_url(), safe="")
+    return (
+        f"intent://claim?ref={ref}"
+        f"#Intent;scheme=brahm;package={WALLET_PACKAGE};"
+        f"S.browser_fallback_url={fallback};end"
+    )
+
+
+def assetlinks_json() -> str:
+    body = [
+        {
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+                "namespace": "android_app",
+                "package_name": WALLET_PACKAGE,
+                "sha256_cert_fingerprints": [WALLET_CERT_SHA256],
+            },
+        }
+    ]
+    return json.dumps(body)
 
 
 def claim_html(ref_raw: str = "") -> str:
@@ -312,10 +365,15 @@ def claim_html(ref_raw: str = "") -> str:
     if raw:
         try:
             addr = normalize_address(raw)
+            claim = public_claim_url(addr)
+            intent = wallet_intent_url(addr)
             open_wallet = (
+                f'<p><a href="{html.escape(intent, quote=True)}">'
+                "Open in Brahma Coin wallet</a></p>"
                 f'<p><a href="brahm://claim?ref={html.escape(addr)}">'
-                "Open in Brahma Coin wallet (saves this referrer)</a> · "
-                "</p>"
+                "Open with the brahm:// invite</a></p>"
+                "<p>Invite link: "
+                f'<a href="{html.escape(claim, quote=True)}">{html.escape(claim)}</a></p>'
             )
         except ValueError:
             open_wallet = ""
@@ -1838,6 +1896,9 @@ class L1Handler(BaseHTTPRequestHandler):
                 self._send(404, "text/plain", "not found")
                 return
             self._send(200, ctype, data, cache_control="no-store")
+            return
+        if path == "/.well-known/assetlinks.json":
+            self._send(200, "application/json", assetlinks_json(), cache_control="no-store")
             return
         if path in ("/claim", "/status"):
             refs = parse_qs(parsed.query).get("ref", [])
