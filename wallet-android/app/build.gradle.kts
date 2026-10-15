@@ -52,8 +52,8 @@ android {
         applicationId = "com.brahmnetwork.wallet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 43
-        versionName = "1.0.37"
+        versionCode = 44
+        versionName = "1.0.38"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -63,8 +63,26 @@ android {
         buildConfigField("String", "PUBLIC_RPC_URL", "\"$publicRpc\"")
     }
 
+    val releaseStore = System.getenv("BRAH_KEYSTORE").orEmpty()
+    val releaseStorePass = System.getenv("BRAH_KEYSTORE_PASSWORD").orEmpty()
+    val releaseAlias = System.getenv("BRAH_KEY_ALIAS").orEmpty().ifBlank { "brahma" }
+    val releaseKeyPass = System.getenv("BRAH_KEY_PASSWORD").orEmpty().ifBlank { releaseStorePass }
+    if (releaseStore.isNotBlank()) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(releaseStore)
+                storePassword = releaseStorePass
+                keyAlias = releaseAlias
+                keyPassword = releaseKeyPass
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (releaseStore.isNotBlank()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

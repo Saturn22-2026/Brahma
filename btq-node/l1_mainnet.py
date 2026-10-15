@@ -285,10 +285,12 @@ def static_asset(rel: str) -> tuple[bytes | None, str]:
 
 PUBLIC_SHARE_ORIGIN = "https://www.brahmnetwork.com"
 WALLET_PACKAGE = "com.brahmnetwork.wallet"
-# SHA-256 of the release signing certificate in the public brahma-wallet.apk.
+WALLET_VERSION_NAME = "1.0.38"
+WALLET_VERSION_CODE = "44"
+# SHA-256 of the 1.0.38 release certificate. Phones with 1.0.36 must uninstall first.
 WALLET_CERT_SHA256 = (
-    "F5:34:48:B2:84:EC:8C:C7:78:1D:6C:59:55:4F:B3:BF:"
-    "C6:62:BB:FF:B5:E1:60:3E:4A:79:5E:F2:AC:A8:09:96"
+    "E7:74:C1:2F:4D:4E:C3:36:24:EE:05:F7:85:2F:96:FE:"
+    "C4:14:88:B3:6C:12:59:62:C9:30:B5:01:06:C5:DE:8A"
 )
 
 
@@ -345,85 +347,97 @@ def assetlinks_json() -> str:
 
 
 def claim_html(ref_raw: str = "") -> str:
-    ref_block = "<p>No referral address in this link.</p>"
+    """Public invite page. One download, one claim URL, no RPC dump."""
     raw = (ref_raw or "").strip()
-    if raw:
-        try:
-            addr = normalize_address(raw)
-            ref_block = (
-                "<p>Verified referrer (checksummed BRM1G): "
-                f"<code>{html.escape(addr)}</code></p>"
-            )
-        except ValueError:
-            ref_block = (
-                "<p>Referral is not a valid checksummed Brahma Coin address. "
-                "Do not trust this invite.</p>"
-            )
-    apk = resolve_apk() if apk_download_allowed() else None
-    download_url = public_apk_url()
-    open_wallet = ""
+    addr = ""
+    ref_block = (
+        "<p class=\"ref empty\">No referral address in this link. "
+        "The download still installs the wallet.</p>"
+    )
+    open_block = ""
     if raw:
         try:
             addr = normalize_address(raw)
             claim = public_claim_url(addr)
             intent = wallet_intent_url(addr)
-            open_wallet = (
-                f'<p><a href="{html.escape(intent, quote=True)}">'
-                "Open in Brahma Coin wallet</a></p>"
-                f'<p><a href="brahm://claim?ref={html.escape(addr)}">'
-                "Open with the brahm:// invite</a></p>"
-                "<p>Invite link: "
-                f'<a href="{html.escape(claim, quote=True)}">{html.escape(claim)}</a></p>'
+            ref_block = (
+                "<p class=\"ref\">Verified referrer (checksummed BRM1G)</p>"
+                f"<p class=\"addr\">{html.escape(addr)}</p>"
+                "<p class=\"invite\">Invite link "
+                f"<a href=\"{html.escape(claim, quote=True)}\">{html.escape(claim)}</a></p>"
+            )
+            open_block = (
+                f"<a class=\"btn ghost\" href=\"{html.escape(intent, quote=True)}\">"
+                "Open in Brahma Coin wallet</a>"
+                f"<p class=\"fine\"><a href=\"brahm://claim?ref={html.escape(addr)}\">"
+                "brahm://claim?ref="
+                f"{html.escape(addr)}</a></p>"
             )
         except ValueError:
-            open_wallet = ""
+            ref_block = (
+                "<p class=\"ref bad\">Referral is not a valid checksummed "
+                "Brahma Coin address. Do not trust this invite.</p>"
+            )
+    download_url = public_apk_url()
     digest_line = ""
+    apk = resolve_apk() if apk_download_allowed() else None
     if apk is not None:
-        digest_line = f"<p>SHA-256: <code>{html.escape(apk_sha256(apk))}</code></p>"
-    dl_block = (
-        "<ol>"
-        f"<li><a href=\"{html.escape(download_url)}\">Download the Brahma Coin wallet APK</a> "
-        "and allow install from this browser.</li>"
-        "<li>Create a wallet in the app (or tap Open in Brahma Coin wallet first).</li>"
-        "<li>Tap Claim adoption, then Mine. A mine pays only after the node seals it.</li>"
-        "</ol>"
-        f"{digest_line}"
-    )
-    height, joined, mined = "—", "—", "—"
+        digest_line = f"<p class=\"fine\">SHA-256 {html.escape(apk_sha256(apk))}</p>"
+    height, joined = "—", "—"
     try:
         with _lock:
             state = load_or_init()
             height = str(int(state["chain_height"]))
             joined = str(int(state.get("joined_count", 0)))
-            mined = from_units(int(state["total_mined"]))
     except Exception:
         pass
-    pub = html.escape(public_rpc_url() or "this host")
     return (
-        "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>"
+        "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/>"
         "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/>"
-        "<title>BRAHMNETWORK</title>"
-        "<style>body{font-family:sans-serif;background:#000;color:#fff;margin:24px;max-width:42rem}"
-        "a{color:#00FF88}code{color:#00FF88;word-break:break-all}li{margin:10px 0}"
-        ".muted{color:#9a9a9a}nav a{margin-right:1rem}</style>"
-        "</head><body>"
-        "<h1>BRAHMNETWORK</h1>"
-        "<p>Private post-quantum testnet. Canonical ledger is this Python node. "
-        "Not Bitcoin, not Ethereum, not a public mainnet. Coin: Brahma Coin.</p>"
-        f"<p>Height <code>{html.escape(height)}</code> · joined <code>{html.escape(joined)}</code> · "
-        f"mined <code>{html.escape(mined)}</code> Brahma Coin</p>"
-        "<p class=\"muted\">Balances are Brahma Coin units (1 Brahma Coin = 100,000,000). "
-        "Dilithium3 spends. <code>public_launch</code> is false.</p>"
-        "<nav><a href=\"/\">Home</a><a href=\"/claim\">Claim</a>"
-        "<a href=\"/explorer\">Explorer</a><a href=\"/rpc\">RPC</a></nav>"
-        "<h2>JSON-RPC</h2>"
-        "<p>POST JSON-RPC to <code>/</code> on this same host. "
-        f"Public URL: <code>{pub}</code></p>"
-        "<p class=\"muted\">Methods: <code>brah_submitTx</code>, <code>brah_getAccount</code>, "
-        "<code>brah_getStats</code>, <code>brah_getBlocks</code>, <code>eth_getBalance</code>. "
-        "Not an Ethereum RPC provider.</p>"
-        f"{ref_block}{dl_block}{open_wallet}"
-        "</body></html>"
+        "<title>Get Brahma Coin</title>"
+        "<style>"
+        ":root{--bg:#0c0b09;--ink:#f4efe6;--mut:#9a907f;--gold:#e4ac3f;--line:#2a261f}"
+        "*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);"
+        "font-family:Georgia,'Times New Roman',serif}"
+        "a{color:var(--gold)}header,main{max-width:40rem;margin:0 auto;padding:0 24px}"
+        "header{display:flex;justify-content:space-between;align-items:baseline;"
+        "padding-top:28px;font-family:ui-sans-serif,sans-serif;"
+        "letter-spacing:.18em;font-size:12px}"
+        "header a{color:var(--mut);text-decoration:none}"
+        "h1{font-weight:400;font-size:64px;line-height:.95;margin:28px 0 12px}"
+        ".kicker{font-family:ui-sans-serif,sans-serif;letter-spacing:.2em;"
+        "font-size:12px;color:var(--gold);margin-top:48px}"
+        ".lede,.ref,.invite,.fine{font-family:ui-sans-serif,sans-serif;"
+        "font-size:16px;line-height:1.5;color:var(--mut)}"
+        ".addr{font-family:ui-monospace,monospace;font-size:15px;word-break:break-all;"
+        "border:1px solid var(--line);padding:14px 16px}"
+        ".ref.bad{color:#e7b3a2}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0}"
+        ".btn{display:inline-block;background:var(--gold);color:#1a1408;text-decoration:none;"
+        "font-family:ui-sans-serif,sans-serif;letter-spacing:.12em;font-size:13px;"
+        "padding:16px 22px}.btn.ghost{background:transparent;color:var(--gold);"
+        "border:1px solid var(--gold)}"
+        ".fine{font-size:13px}.stat{font-family:ui-sans-serif,sans-serif;color:var(--mut);"
+        "font-size:13px;letter-spacing:.08em}"
+        "</style></head><body>"
+        "<header><span>BRAHMA NETWORK</span><a href=\"/\">Home</a></header>"
+        "<main>"
+        f"<p class=\"kicker\">BRAHMNETWORK · BUILD {html.escape(WALLET_VERSION_NAME)}</p>"
+        "<h1>Get the wallet.</h1>"
+        "<p class=\"lede\">Private post-quantum testnet. Coin: Brahma Coin. "
+        "This page is the invite. It is not a public mainnet.</p>"
+        f"{ref_block}"
+        "<div class=\"actions\">"
+        f"<a class=\"btn\" href=\"{html.escape(download_url)}\">Download Android APK</a>"
+        f"{open_block}"
+        "</div>"
+        f"<p class=\"stat\">Height {html.escape(height)} · joined {html.escape(joined)} · "
+        f"build {html.escape(WALLET_VERSION_NAME)} ({html.escape(WALLET_VERSION_CODE)})</p>"
+        f"{digest_line}"
+        "<p class=\"fine\">Opening this page does not move coins. Install the wallet, "
+        "create an address, then claim adoption. The first 10,000 joins pay 100 Brahma Coin "
+        "to the new wallet and 50 to the referrer after the node seals the join. "
+        "Phones that already have build 1.0.36 must uninstall it before installing this build.</p>"
+        "</main></body></html>"
     )
 
 _lock = threading.Lock()
