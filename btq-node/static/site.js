@@ -405,9 +405,12 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   const addr=parseAddr(inp.value);
   if(!addr){
    toast('That does not look like a BRAHMNETWORK address — BRM1G plus 24 or 28 hex digits, lowercase body.');inp.focus();return;}
-  links={web:`${claimOrigin()}/claim?ref=${addr}`,
-   apk:`${claimOrigin()}/wallet.apk`,
-   brahm:`brahm://claim?ref=${addr}`};
+  const origin=claimOrigin();
+  const apk=origin+'/wallet.apk';
+  const claim=origin+'/claim?ref='+addr;
+  links={web:'Download the Brahma Coin wallet:\n'+apk+'\n\nInvite:\n'+claim,
+   apk:apk,
+   brahm:'brahm://claim?ref='+addr};
   webEl.textContent=links.web;
   if(apkEl)apkEl.textContent=links.apk;
   brahmEl.textContent=links.brahm;

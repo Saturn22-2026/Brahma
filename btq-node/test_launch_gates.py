@@ -535,6 +535,7 @@ class LaunchGates(unittest.TestCase):
         self.assertIn("brah_getStats", text)
         self.assertIn("BRAH1|", text)
         self.assertIn("return 'https://www.brahmnetwork.com';", text)
+        self.assertIn("Download the Brahma Coin wallet:", text)
         self.assertNotIn("location.origin", text)
         self.assertIn('href="https://www.brahmnetwork.com/wallet.apk"', page)
         self.assertNotIn('href="/wallet.apk', page)
