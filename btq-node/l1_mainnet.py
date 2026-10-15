@@ -285,8 +285,8 @@ def static_asset(rel: str) -> tuple[bytes | None, str]:
 
 PUBLIC_SHARE_ORIGIN = "https://www.brahmnetwork.com"
 WALLET_PACKAGE = "com.brahmnetwork.wallet"
-WALLET_VERSION_NAME = "1.0.38"
-WALLET_VERSION_CODE = "44"
+WALLET_VERSION_NAME = "1.0.39"
+WALLET_VERSION_CODE = "45"
 # SHA-256 of the 1.0.38 release certificate. Phones with 1.0.36 must uninstall first.
 WALLET_CERT_SHA256 = (
     "E7:74:C1:2F:4D:4E:C3:36:24:EE:05:F7:85:2F:96:FE:"

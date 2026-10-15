@@ -52,8 +52,8 @@ android {
         applicationId = "com.brahmnetwork.wallet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 44
-        versionName = "1.0.38"
+        versionCode = 45
+        versionName = "1.0.39"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -130,6 +130,7 @@ dependencies {
     
     // Network
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation(files("libs/legacy-dilithium.jar"))
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.zxing:core:3.5.3")
