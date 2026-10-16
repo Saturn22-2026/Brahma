@@ -28,9 +28,6 @@ from crypto_mldsa import (
 )
 from generate_genesis_keys import accounts_path
 from ai_council import (
-    L2_HALVING_AIRDROP,
-    L2_OPERATOR_GRANT,
-    L2_OPERATOR_GRANT_ADDR,
     block_reward,
     mine_halving_band,
 )
@@ -55,7 +52,6 @@ from l1_mainnet import (
     learn_public_host_from_headers,
     load_blocks_from,
     load_or_init,
-    maybe_grant_operator_l2,
         mine_nonce,
         mine_payout_units,
         meets_pow,
@@ -370,28 +366,15 @@ class LaunchGates(unittest.TestCase):
             else:
                 os.environ["BRAH_JOIN_MAX_PER_HOUR"] = prev
 
-    def test_donate_requires_empower_cosign(self):
+    def test_donation_protocol_removed(self):
+        # The donation protocol no longer exists; donate transactions are rejected.
         state = _fresh_state()
-        state["donation_unlock"] = 0
         pk_c, sk_c, council = _key()
-        pk_e, sk_e, empower = _key()
         dest_pk, dest_sk, dest = _key()
-        acc = accounts_path()
-        data = json.loads(acc.read_text(encoding="utf-8"))
-        data["council"] = council
-        data["empower"] = empower
-        acc.write_text(json.dumps(data), encoding="utf-8")
-        account(state, "POOL_DONATION")["0"] = to_units(1000)
-        save_state(state)
+        self.assertNotIn("POOL_DONATION", state["balances"])
         raw = _signed(state, pk_c, sk_c, council, "donate", to=dest, amount=100)
         with self.assertRaises(ValueError):
             commit_signed(state, raw)
-        nonce = int(raw["nonce"])
-        msg = canonical_message(int(state["chain_id"]), nonce, "donate", council, dest, "0", 100, "")
-        raw["cosign_public_key"] = pk_e.hex()
-        raw["cosign_signature"] = sign_dilithium3(sk_e, msg).hex()
-        commit_signed(state, raw)
-        self.assertEqual(int(account(state, dest)["0"]), 100)
 
     def test_negative_send_rejected(self):
         state = _fresh_state()
@@ -757,10 +740,12 @@ class LaunchGates(unittest.TestCase):
         state = _fresh_state()
         self.assertTrue(state.get("l2_retired"))
         self.assertEqual(state.get("l2_assets"), {})
-        self.assertFalse(maybe_grant_operator_l2(state))
-        self.assertFalse(maybe_l2_halving_airdrop(state))
+        pk, sk, addr = _key()
         for asset_id in range(1, 10):
-            self.assertEqual(asset_units(account(state, L2_OPERATOR_GRANT_ADDR), str(asset_id)), 0)
+            self.assertEqual(asset_units(account(state, addr), str(asset_id)), 0)
+        # launching an L2 memecoin is rejected
+        with self.assertRaises(ValueError):
+            commit_signed(state, _signed(state, pk, sk, addr, "launch_l2", memo="Nope|NOPE"))
 
     def test_active_burn(self):
         state = _fresh_state()

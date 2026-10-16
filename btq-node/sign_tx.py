@@ -25,11 +25,6 @@ def main() -> int:
     parser.add_argument("--amount-units", type=int, default=0)
     parser.add_argument("--memo", default="")
     parser.add_argument("--asset", default="0")
-    parser.add_argument(
-        "--cosign-label",
-        default="",
-        help="Second key for donate (TREASURY_EMPOWER)",
-    )
     args = parser.parse_args()
     sec = secrets_path()
     if not sec.exists():
@@ -37,9 +32,6 @@ def main() -> int:
         return 1
     data = json.loads(sec.read_text(encoding="utf-8"))
     row = _row(data, args.label)
-    if args.kind == "donate" and not args.cosign_label:
-        print("donate requires --cosign-label TREASURY_EMPOWER", file=sys.stderr)
-        return 1
     state = load_or_init()
     addr = row["address"]
     nonce = int(account(state, addr).get("nonce", 0))
@@ -65,10 +57,6 @@ def main() -> int:
         "algo": "Dilithium3",
         "pow_nonce": pow_nonce,
     }
-    if args.kind == "donate":
-        crow = _row(data, args.cosign_label)
-        out["cosign_public_key"] = crow["public_key"]
-        out["cosign_signature"] = sign_dilithium3(bytes.fromhex(crow["secret_key"]), msg).hex()
     print(json.dumps(out, indent=2))
     return 0
 

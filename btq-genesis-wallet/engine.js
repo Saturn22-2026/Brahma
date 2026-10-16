@@ -84,7 +84,7 @@ function loadOrCreateKeys() {
 }
 
 function defaultBalances() {
-    return { BTQ: 0, HOMIE: 0, POOKIE: 0, CGOD: 0 };
+    return { BTQ: 0 };
 }
 
 function defaultNonces() {
@@ -95,7 +95,7 @@ function defaultNonces() {
 const BlockchainState = {
     tokenName: "Bitcoin Quantum",
     symbol: "BTQ",
-    balances: { ...defaultBalances(), ...(config.balances || {}) },
+    balances: { ...defaultBalances(), BTQ: (config.balances && config.balances.BTQ) || 0 },
     nonces: { ...defaultNonces(), ...(config.nonces || {}) },
     keys: loadOrCreateKeys(),
     genesisStatus: config.genesisStatus || "None",
@@ -143,15 +143,6 @@ function startBackgroundDaemons() {
         persistWallet();
         process.stdout.write(`\r\x1b[36m[AI Miner] Mined 50 BTQ (Block #${BlockchainState.nonces.mining})\x1b[0m\n > `);
     }, 10000);
-
-    // AI Airdrop: Captures social airdrops every 15 seconds
-    const airdropTokens = ["HOMIE", "POOKIE", "CGOD"];
-    setInterval(() => {
-        const token = airdropTokens[Math.floor(Math.random() * airdropTokens.length)];
-        const amount = Math.floor(Math.random() * 50) + 10;
-        BlockchainState.addBalance(token, amount);
-        process.stdout.write(`\r\x1b[35m[AI Airdrop] Captured ${amount} ${token} social drop!\x1b[0m\n > `);
-    }, 15000);
 
     // Omni-Faucet: Auto-claims 100 BTQ every 20 seconds
     setInterval(() => {
