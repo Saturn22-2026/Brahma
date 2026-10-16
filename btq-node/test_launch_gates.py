@@ -218,7 +218,7 @@ class LaunchGates(unittest.TestCase):
         state = _fresh_state()
         pool = account(state, "POOL_MINING")
         self.assertIsInstance(pool["0"], int)
-        self.assertEqual(pool["0"], to_units(45_000_000))
+        self.assertEqual(pool["0"], to_units(50_000_000))
 
     def test_signed_pow_send_moves_units(self):
         state = _fresh_state()
@@ -329,6 +329,7 @@ class LaunchGates(unittest.TestCase):
 
     def test_legacy_float_units_refused(self):
         state = _fresh_state()
+        state["units_per_brah"] = 1
         state["units_per_btq"] = 1
         save_state(state)
         try:
@@ -336,6 +337,7 @@ class LaunchGates(unittest.TestCase):
                 load_or_init()
             self.assertIn("units scale", str(ctx.exception))
         finally:
+            state["units_per_brah"] = UNITS_PER_BRAH
             state["units_per_btq"] = UNITS_PER_BRAH
             save_state(state)
 
