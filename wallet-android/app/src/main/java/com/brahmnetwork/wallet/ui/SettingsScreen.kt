@@ -309,7 +309,7 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
 
     Spacer(Modifier.height(48.dp))
     Text(
-        text = "Brahma Coin · BRAHMNETWORK v1.0.34",
+        text = "Brahma Coin · BRAHMNETWORK v${com.brahmnetwork.wallet.BuildConfig.VERSION_NAME}",
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.labelSmall,
         color = Color.DarkGray,
