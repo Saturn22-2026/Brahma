@@ -177,6 +177,11 @@ def matching_canonical_message(
     if public_key_hex and signature_hex:
         pk = _parse_hex(public_key_hex)
         sig = _parse_hex(signature_hex)
+        pk_ok = pubkey_matches_address(pk, from_addr)
+        if not pk_ok and len(pk) > 1952:
+            pk_ok = pubkey_matches_address(pk[-1952:], from_addr)
+        if require_sig and not pk_ok:
+            raise ValueError("Public key does not match from address")
         for msg in candidates:
             if verify_dilithium3(pk, msg, sig):
                 return msg
@@ -203,8 +208,42 @@ _BC_JAVA = env(
 )
 
 
+def _verify_bc_mldsa65(public_key: bytes, message: bytes, signature: bytes) -> bool:
+    """Verify a BouncyCastle 1.78 Dilithium3 signature.
+
+    The wallet's bcprov 1.78.1 signs ML-DSA-65 (1952-byte key, 3309-byte sig).
+    dilithium-py's Dilithium3 check is the older 3293-byte scheme and rejects these.
+    BC samples the challenge from the first 32 bytes of c~, then compares the full
+    48-byte c~. FIPS verify uses all 48 bytes as the challenge seed, so it also
+    rejects a valid wallet signature.
+    """
+    if len(public_key) != 1952 or len(signature) != 3309:
+        return False
+    try:
+        from dilithium_py.ml_dsa import ML_DSA_65
+    except ImportError:
+        return False
+    d = ML_DSA_65
+    try:
+        rho, t1 = d._unpack_pk(public_key)
+        c_tilde, z, h = d._unpack_sig(signature)
+    except Exception:
+        return False
+    if h.sum_hint() > d.omega or z.check_norm_bound(d.gamma_1 - d.beta):
+        return False
+    A_hat = d._expand_matrix_from_seed(rho)
+    tr = d._h(public_key, 64)
+    mu = d._h(tr + message, 64)
+    c = d.R.sample_in_ball(c_tilde[:32], d.tau).to_ntt()
+    t1n = t1.scale(1 << d.d).to_ntt()
+    acc = ((A_hat @ z.to_ntt()) - t1n.scale(c)).from_ntt()
+    w_prime = h.use_hint(acc, 2 * d.gamma_2)
+    got = d._h(mu + w_prime.bit_pack_w(d.gamma_2), d.c_tilde_bytes)
+    return got == c_tilde
+
+
 def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
-    """Wallet signs with BC Dilithium3 (3309-byte sig). dilithium-py cannot check those."""
+    """Java fallback when dilithium-py has no ML-DSA module. Linux classpath uses ':'."""
     cls = _BC_ROOT / "bc_verify.class"
     if not cls.exists() or not Path(_BC_JAVA).exists() or not Path(_BC_JAR).exists():
         return False
@@ -214,7 +253,7 @@ def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
             (t / "pk.hex").write_text(pk.hex(), encoding="ascii")
             (t / "sig.hex").write_text(signature.hex(), encoding="ascii")
             (t / "msg.hex").write_text(message.hex(), encoding="ascii")
-            cp = f"{_BC_ROOT};{_BC_JAR}"
+            cp = os.pathsep.join((str(_BC_ROOT), _BC_JAR))
             proc = subprocess.run(
                 [
                     _BC_JAVA,
@@ -240,7 +279,15 @@ def verify_dilithium3(public_key: bytes, message: bytes, signature: bytes) -> bo
     candidates = [public_key]
     if len(public_key) > 1952:
         candidates.append(public_key[-1952:])
-    if Dilithium3 is not None and len(signature) != 3309:
+    if len(signature) == 3309:
+        with _MLDSA_LOCK:
+            for pk in candidates:
+                try:
+                    if _verify_bc_mldsa65(pk, message, signature):
+                        return True
+                except Exception:
+                    continue
+    elif Dilithium3 is not None:
         with _MLDSA_LOCK:
             for pk in candidates:
                 try:

@@ -29,8 +29,9 @@ fun ColumnScope.ReceiveScreen(viewModel: WalletViewModel) {
     val rpcUrl by viewModel.rpcUrl.collectAsState()
     val context = LocalContext.current
     val live = status == "Live"
-    val qr = remember(address) {
-        if (address.isBlank()) null else ShareActions.qrBitmap(address)
+    val inviteLink = remember(address) { ShareActions.inviteMessage(address) }
+    val qr = remember(inviteLink) {
+        if (inviteLink.isNullOrBlank()) null else ShareActions.qrBitmap(inviteLink)
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -49,7 +50,11 @@ fun ColumnScope.ReceiveScreen(viewModel: WalletViewModel) {
         }
     }
     Spacer(Modifier.height(8.dp))
-    Text("Scan or share your live Brahma Coin address.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+    Text(
+        text = inviteLink ?: "Create a checksummed wallet to get an invite link.",
+        style = MaterialTheme.typography.bodySmall,
+        color = Color.Gray
+    )
     Spacer(Modifier.height(24.dp))
 
     Box(

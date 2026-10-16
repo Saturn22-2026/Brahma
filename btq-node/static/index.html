@@ -440,7 +440,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <a href="#/wallet">Wallet</a>
     <a href="#/join">Join</a>
   </nav>
-  <a class="btn solid sm" href="#/join">Get the app</a>
+  <a class="btn solid sm" href="/claim">Get the app</a>
   <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
 </header>
 
@@ -527,8 +527,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <p class="overline rv"><i>03</i>REACH THE NODE</p>
       <h2 class="sec rv">Where it works.</h2>
       <div class="endpoints">
-        <div class="ep rv"><i>OPERATOR WI-FI</i><b>http://192.168.168.16:8545</b><p>On the operator LAN (192.168.168.*) the wallet prefers the local node directly.</p></div>
-        <div class="ep rv" style="transition-delay:.1s"><i>GSM / INTERNET</i><b>https://www.brahmnetwork.com</b><p>Works only if the host actually reaches the node origin. The named host must forward to the node.</p></div>
+        <div class="ep rv"><i>RELEASE WALLET</i><b>https://www.brahmnetwork.com</b><p>The release build uses this host on home Wi-Fi and on mobile data.</p></div>
+        <div class="ep rv" style="transition-delay:.1s"><i>INVITE</i><b>https://www.brahmnetwork.com/claim</b><p>A share link is this host plus a checksummed referrer. It is not a private address.</p></div>
         <div class="ep rv" style="transition-delay:.2s"><i>NO INTERNET — MESH</i><b>Sentinel · TCP 18545 · BT · Wi-Fi Aware</b><p>Sign and hash on the phone, gossip the packet. Any node that hears it seals it.</p></div>
       </div>
     </div>
@@ -767,7 +767,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <p class="overline"><i>—</i>HOW THE PHONE REACHES A NODE</p>
       <h2 class="sec">Three roads.<br>One chain.</h2>
       <div class="endpoints">
-        <div class="ep"><i>LAN — OPERATOR PC</i><b>http://192.168.168.16:8545</b><p>On the operator Wi-Fi (192.168.168.*) the wallet prefers the local node. Lowest latency, no middleman.</p></div>
+        <div class="ep"><i>RELEASE WALLET</i><b>https://www.brahmnetwork.com</b><p>Home Wi-Fi and mobile data both use this host. The share link is /claim with a checksummed referrer.</p></div>
         <div class="ep"><i>GSM — INTERNET</i><b>https://www.brahmnetwork.com</b><p>Only if Cloudflare actually reaches the node. If the origin is down, the road is down — and the site won't pretend otherwise.</p></div>
         <div class="ep"><i>MESH — NO INTERNET</i><b>Sentinel · TCP 18545 · Bluetooth · Wi-Fi Aware</b><p>Sign and search PoW on the phone, gossip the signed packet. A node that hears the packet seals it.</p></div>
       </div>
@@ -810,7 +810,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 <section class="view" id="view-wallet">
   <div class="wrap">
     <div class="page-head compact">
-      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.34</p>
+      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.39</p>
       <h1 class="rv" style="transition-delay:.08s">The chain,<br>in a <em>pocket.</em></h1>
       <p class="lede rv" style="transition-delay:.16s">The app is called Brahma Coin. It signs with Dilithium3, searches real proof of work on the phone, seals over RPC or mesh, and never shows a price — because there isn't one. The phone below is a bit-search demo: real SHA-256 in this tab, not the node's block header.</p>
       <p class="rv" style="margin-top:28px"><span class="chip">BIT-SEARCH DEMO — REAL SHA-256 IN THIS TAB · NOT THE NODE HEADER</span></p>
@@ -820,7 +820,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="rv">
         <div class="phone">
           <div class="scr" id="scr">
-            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.34</span></div>
+            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.39</span></div>
             <div class="ptabs">
               <button class="ptab on" data-pt="home">HOME</button>
               <button class="ptab" data-pt="mine">MINE</button>
@@ -911,7 +911,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <p class="lede rv" style="transition-delay:.16s">There is no countdown, because public launch is FALSE — and this site doesn't lie. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.</p>
       <div class="checklist rv" style="transition-delay:.24s">
         <div><span class="cbox"></span><span><b>Two independent operators</b><p>Separate humans, separate machines — two processes on one PC are not two operators.</p></span><span class="st">PENDING</span></div>
-        <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com forwarding to the node origin at http://127.0.0.1:8545.</p></span><span class="st">PENDING</span></div>
+        <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com is serving this node.</p></span><span class="st">LIVE</span></div>
         <div><span class="cbox"></span><span><b>Launch explicitly flipped on</b><p>Declared, never defaulted. Until then the honest label stays: private testnet.</p></span><span class="st">FALSE</span></div>
       </div>
     </div>
@@ -921,7 +921,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.6v16.8c0 .5.5.8.9.5l10-8.2c.3-.3.3-.8 0-1.1l-10-8.4c-.4-.3-.9 0-.9.4z"/></svg>
         <span><small>DIRECT DOWNLOAD</small><b>Android APK</b></span>
       </a>
-      <span class="dl-note">ANDROID FIRST — BUILD 1.0.34 · APP LABEL: BRAHMA COIN · OPENS /wallet.apk</span>
+      <span class="dl-note">ANDROID FIRST — BUILD 1.0.39 · APP LABEL: BRAHMA COIN · https://www.brahmnetwork.com/wallet.apk</span>
     </div>
 
     <div class="faq">
@@ -931,7 +931,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="fq rv"><button class="fq-q">Is mining like Bitcoin?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         <div class="fq-a"><div><p>Same idea — work plus a sealed chain. Different numbers: ~20-bit phone proof of work, ~8 second blocks, a 100,000,000 cap, a 5,000,000 yearly mine cap, an adoption pool, and permanent burns for L2 launches.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">Can I use it on mobile data?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Yes, if https://www.brahmnetwork.com actually reaches the node. On operator Wi-Fi the wallet still prefers the LAN node at http://192.168.168.16:8545.</p></div></div></div>
+        <div class="fq-a"><div><p>Yes. The release wallet uses https://www.brahmnetwork.com, including on home Wi-Fi.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">What if I have no internet at all?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         <div class="fq-a"><div><p>The phone signs and searches proof of work offline, then gossips the signed packet over Sentinel mesh — LAN TCP 18545, Bluetooth, Wi-Fi Aware. A node that hears the packet seals it. Gossip is not payment; the block is payment.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">What happens at a halving?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -967,7 +967,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 </footer>
 
 <div id="toasts"></div>
-<script src="/static/site.js"></script>
+<script src="/static/site.js?v=build-138"></script>
 </body>
 </html>
 
