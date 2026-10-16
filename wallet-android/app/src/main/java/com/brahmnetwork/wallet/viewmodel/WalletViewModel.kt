@@ -183,11 +183,10 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             if (!CryptoManager.isAllowedRpcUrl(normalized, debug)) return
             if (normalized !in urls) urls.add(normalized)
         }
-        if (onOperatorLan()) {
+        if (debug && onOperatorLan()) {
             add(Constants.LAN_RPC_URL)
             add(prefs.getString("rpc_url", "").orEmpty())
-            if (urls.isEmpty()) add(Constants.LAN_RPC_URL)
-            return BrahRpc { urls }.also { wireRpc(it) }
+            if (urls.isNotEmpty()) return BrahRpc { urls }.also { wireRpc(it) }
         }
         add(Constants.publicHttps())
         val custom = prefs.getString("rpc_url", "").orEmpty()

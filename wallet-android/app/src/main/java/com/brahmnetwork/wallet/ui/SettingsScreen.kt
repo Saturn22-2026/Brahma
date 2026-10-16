@@ -165,11 +165,11 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     IconButton(onClick = {
-                        val download = com.brahmnetwork.wallet.Constants.shareDownloadUrl()
-                        val message = "Download the Brahma Coin wallet:\n$download\n\nInvite:\n$referralLink"
-                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        val clip = android.content.ClipData.newPlainText("Brahma Coin wallet", message)
-                        clipboard.setPrimaryClip(clip)
+                        if (referralLink.startsWith("https://")) {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("Brahma Coin invite", referralLink)
+                            clipboard.setPrimaryClip(clip)
+                        }
                     }) {
                         Icon(Icons.Default.ContentCopy, null, tint = Color.Gray)
                     }
