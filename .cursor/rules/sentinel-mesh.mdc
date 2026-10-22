@@ -1,0 +1,8 @@
+---
+description: Sentinel MY NETWORK mesh is the Brah gossip layer
+globs: btq-node/**/*.py,wallet-android/**/*.kt
+---
+
+Sentinel DTN is inlined in `btq-node/sentinel_mesh.py` and `wallet-android/.../sentinel/`. The old `sentinel-dao/` import tree was removed.
+
+Keep DTN behavior: store-and-forward, TTL 10, 2 MB max payload, 100 packets / 60s rate limit, re-gossip every 60s. Do not use Sentinel Ed25519 as Brah consensus signing (ML-DSA stays). A gossiped mine block is not paid until node height increases. New L2 launches are closed (no burn-to-launch).

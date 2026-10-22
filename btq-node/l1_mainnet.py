@@ -19,6 +19,7 @@ import sys
 import threading
 import time
 import ssl
+from datetime import datetime, timedelta, timezone
 from collections import deque
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -36,8 +37,9 @@ from ai_council import (
     L2_OPERATOR_GRANT_ADDR,
     CONSOLIDATION_BURN_SENDERS,
     NEW_WALLET_JOIN_BRAH,
+    NEW_WALLET_JOIN_L2,
+    REWARDS_POOL,
     block_reward,
-    donations_unlocked,
     mine_halving_band,
     reward_rates,
     whale_tax_units,
@@ -59,6 +61,7 @@ from crypto_mldsa import (
     checksum_address,
     is_brah_address,
     load_or_create_identity,
+    assert_key_owns_address,
     matching_canonical_message,
     normalize_address,
     sibling_address,
@@ -87,8 +90,272 @@ MAX_MEMO_LEN = 256
 PROTOCOL_POOLS = frozenset({
     "POOL_MINING",
     "POOL_AIRDROP",
-    "POOL_DONATION",
+    "POOL_EMPOWER_FIRST_100",
+    "POOL_EMPOWER_NEXT_100",
+    "POOL_STRATEGIC_BURN",
+    "POOL_FOUNDER_FIRST",
 })
+
+EMPOWER_FIRST_SHARE = 30_000
+EMPOWER_NEXT_SHARE = 20_000
+STRATEGIC_MONTHLY_BURN = 100_000
+
+
+def month_key(ts: int) -> str:
+    dt = datetime.fromtimestamp(int(ts), timezone.utc)
+    return f"{dt.year:04d}-{dt.month:02d}"
+
+
+def first_friday_utc(year: int, month: int) -> int:
+    day = datetime(year, month, 1, tzinfo=timezone.utc)
+    offset = (4 - day.weekday()) % 7
+    return int((day + timedelta(days=offset)).timestamp())
+
+
+def note_wallet(state: dict, addr: str) -> None:
+    """Record the first time a user address joins, mines, or receives."""
+    if not addr or is_protocol(addr) or not is_brah_address(addr):
+        return
+    try:
+        keyed = normalize_address(addr)
+    except ValueError:
+        return
+    order = state.setdefault("wallet_order", [])
+    body = keyed[5:29]
+    for item in order:
+        try:
+            if normalize_address(str(item))[5:29] == body:
+                return
+        except ValueError:
+            continue
+    order.append(keyed)
+
+
+def backfill_wallet_order(state: dict) -> None:
+    if state.get("wallet_order"):
+        return
+    if CHAIN_PATH.exists():
+        for line in CHAIN_PATH.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                block = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            miner = str(block.get("miner") or "")
+            if miner and miner != "GENESIS":
+                note_wallet(state, miner)
+            for tx in block.get("txs") or []:
+                if not isinstance(tx, dict):
+                    continue
+                kind = str(tx.get("kind") or "")
+                if kind == "mine":
+                    note_wallet(state, str(tx.get("from") or ""))
+                elif kind in ("join", "reward", "faucet"):
+                    note_wallet(state, str(tx.get("from") or ""))
+                    _device, memo_ref = parse_join_memo(str(tx.get("memo") or ""))
+                    if memo_ref:
+                        note_wallet(state, memo_ref)
+                elif kind == "send":
+                    note_wallet(state, str(tx.get("to") or ""))
+    for bucket in ("claimed_rewards", "first_mined"):
+        blob = state.get(bucket) or {}
+        if isinstance(blob, dict):
+            for addr in blob.keys():
+                note_wallet(state, str(addr))
+
+
+def _move_exact(state: dict, addr: str, expected: int, dests: list) -> None:
+    if not addr or expected <= 0:
+        return
+    acct = account(state, addr)
+    if int(acct.get("0") or 0) != expected:
+        return
+    acct["0"] = 0
+    for pool, units in dests:
+        dest = account(state, pool)
+        dest["0"] = int(dest.get("0") or 0) + int(units)
+
+
+def apply_economics_v2(state: dict) -> bool:
+    """Move untouched genesis treasuries into protocol pools. Spent coins stay spent."""
+    if state.get("economics_v2"):
+        return False
+    balances = state.setdefault("balances", {})
+    donation = balances.get("POOL_DONATION")
+    if isinstance(donation, dict):
+        amount = int(donation.get("0") or 0)
+        if amount > 0:
+            to_air = amount // 2
+            to_mine = amount - to_air
+            mine = account(state, "POOL_MINING")
+            air = account(state, "POOL_AIRDROP")
+            mine["0"] = int(mine.get("0") or 0) + to_mine
+            air["0"] = int(air.get("0") or 0) + to_air
+            state["mining_cap"] = int(state.get("mining_cap") or 0) + to_mine
+        balances.pop("POOL_DONATION", None)
+    keyed = {}
+    try:
+        keyed = load_keyed_accounts()
+    except Exception:
+        keyed = {}
+    _move_exact(
+        state,
+        str(keyed.get("founder") or ""),
+        to_units(2_000_000),
+        [("POOL_FOUNDER_FIRST", to_units(2_000_000))],
+    )
+    _move_exact(
+        state,
+        str(keyed.get("empower") or ""),
+        to_units(5_000_000),
+        [
+            ("POOL_EMPOWER_FIRST_100", to_units(3_000_000)),
+            ("POOL_EMPOWER_NEXT_100", to_units(2_000_000)),
+        ],
+    )
+    _move_exact(
+        state,
+        str(keyed.get("strategic") or ""),
+        to_units(3_000_000),
+        [("POOL_STRATEGIC_BURN", to_units(3_000_000))],
+    )
+    state["economics_v2"] = True
+    state.setdefault("founder_paid", False)
+    state.setdefault("empower_first_paid", [])
+    state.setdefault("empower_next_paid", [])
+    state.setdefault("strategic_burned_months", [])
+    if not state.get("strategic_burn_start"):
+        state["strategic_burn_start"] = month_key(int(time.time()))
+    backfill_wallet_order(state)
+    state.setdefault("wallet_order", [])
+    return True
+
+
+def maybe_strategic_burn(state: dict, now: int | None = None) -> bool:
+    """Burn 100,000 Brahma on the first Friday of each month, UTC. Catch up missed months."""
+    start = str(state.get("strategic_burn_start") or "")
+    if len(start) != 7 or "-" not in start:
+        return False
+    now_ts = int(time.time() if now is None else now)
+    try:
+        year, month = (int(part) for part in start.split("-", 1))
+    except ValueError:
+        return False
+    end = datetime.fromtimestamp(now_ts, timezone.utc)
+    done = {str(item) for item in (state.get("strategic_burned_months") or [])}
+    pool = account(state, "POOL_STRATEGIC_BURN")
+    step = to_units(STRATEGIC_MONTHLY_BURN)
+    dirty = False
+    while (year, month) <= (end.year, end.month):
+        key = f"{year:04d}-{month:02d}"
+        if key not in done and first_friday_utc(year, month) <= now_ts:
+            bal = int(pool.get("0") or 0)
+            if bal <= 0:
+                break
+            burn = min(step, bal)
+            pool["0"] = bal - burn
+            state["burned_brah"] = int(state.get("burned_brah") or 0) + burn
+            done.add(key)
+            dirty = True
+        month += 1
+        if month == 13:
+            month = 1
+            year += 1
+    if dirty:
+        state["strategic_burned_months"] = sorted(done)
+    return dirty
+
+
+def maybe_pay_locked_awards(state: dict) -> bool:
+    """When the mining pool is empty, pay founder and the first 200 wallets."""
+    if not state.get("economics_v2"):
+        return False
+    mining = (state.get("balances") or {}).get("POOL_MINING")
+    if not isinstance(mining, dict) or int(mining.get("0") or 0) > 0:
+        return False
+    order = list(state.get("wallet_order") or [])
+    dirty = False
+    if order and not state.get("founder_paid"):
+        pool = account(state, "POOL_FOUNDER_FIRST")
+        amt = int(pool.get("0") or 0)
+        if amt > 0:
+            pool["0"] = 0
+            dest = account(state, order[0])
+            dest["0"] = int(dest.get("0") or 0) + amt
+            state["founder_paid"] = True
+            dirty = True
+    paid_first = {int(i) for i in (state.get("empower_first_paid") or [])}
+    share = to_units(EMPOWER_FIRST_SHARE)
+    pool = account(state, "POOL_EMPOWER_FIRST_100")
+    for index, addr in enumerate(order[:100]):
+        if index in paid_first:
+            continue
+        if int(pool.get("0") or 0) < share:
+            break
+        pool["0"] = int(pool["0"]) - share
+        dest = account(state, addr)
+        dest["0"] = int(dest.get("0") or 0) + share
+        paid_first.add(index)
+        dirty = True
+    state["empower_first_paid"] = sorted(paid_first)
+    paid_next = {int(i) for i in (state.get("empower_next_paid") or [])}
+    share_next = to_units(EMPOWER_NEXT_SHARE)
+    pool_next = account(state, "POOL_EMPOWER_NEXT_100")
+    for offset, addr in enumerate(order[100:200]):
+        slot = 100 + offset
+        if slot in paid_next:
+            continue
+        if int(pool_next.get("0") or 0) < share_next:
+            break
+        pool_next["0"] = int(pool_next["0"]) - share_next
+        dest = account(state, addr)
+        dest["0"] = int(dest.get("0") or 0) + share_next
+        paid_next.add(slot)
+        dirty = True
+    state["empower_next_paid"] = sorted(paid_next)
+    return dirty
+
+
+def maybe_release_l2_on_mining_empty(state: dict) -> bool:
+    """When POOL_MINING is empty, split remaining operator-grant L2 across joined/mined wallets."""
+    if state.get("l2_mining_empty_released"):
+        return False
+    mining = (state.get("balances") or {}).get("POOL_MINING")
+    if not isinstance(mining, dict) or int(mining.get("0") or 0) > 0:
+        return False
+    ensure_l2(state)
+    maybe_grant_operator_l2(state)
+    users = sorted(active_l2_users(state))
+    if not users:
+        return False
+    grant = account(state, L2_OPERATOR_GRANT_ADDR)
+    n = len(users)
+    for asset_id in L2_BOOTSTRAP_IDS:
+        total = int(grant.get(asset_id, 0) or 0)
+        if total <= 0:
+            continue
+        share = total // n
+        remainder = total - share * n
+        grant[asset_id] = 0
+        if share > 0:
+            for addr in users:
+                dest = account(state, addr)
+                dest[asset_id] = int(dest.get(asset_id, 0) or 0) + share
+        if remainder > 0:
+            dest = account(state, users[0])
+            dest[asset_id] = int(dest.get(asset_id, 0) or 0) + remainder
+    state["l2_mining_empty_released"] = True
+    return True
+
+
+def settle_protocol(state: dict, now: int | None = None) -> bool:
+    return (
+        maybe_strategic_burn(state, now)
+        or maybe_pay_locked_awards(state)
+        or maybe_release_l2_on_mining_empty(state)
+    )
+
 
 ROOT = Path(__file__).resolve().parent
 GENESIS_PATH = ROOT / "genesis.json"
@@ -215,13 +482,68 @@ def allow_cors_origin(origin: str) -> str:
     return ""
 
 
+def _header(headers, name: str) -> str:
+    if headers is None:
+        return ""
+    try:
+        value = headers.get(name)
+    except Exception:
+        return ""
+    return str(value or "")
+
+
+def is_public_edge_request(headers) -> bool:
+    """True when Cloudflare (or another reverse proxy) forwarded this request.
+
+    cloudflared origin is 127.0.0.1, so client_address is loopback for GSM traffic.
+    The explorer must not follow that loopback. The wallet APK stays on the public download path.
+    """
+    proto = _header(headers, "X-Forwarded-Proto").split(",")[0].strip().lower()
+    if proto:
+        return True
+    if _header(headers, "CF-Connecting-IP") or _header(headers, "CF-RAY"):
+        return True
+    host = _header(headers, "Host").split(":")[0].strip().lower()
+    if host in ("www.brahmnetwork.com", "brahmnetwork.com"):
+        return True
+    pub = public_rpc_url()
+    if pub:
+        pub_host = (urlparse(pub).hostname or "").lower()
+        if host and pub_host and host == pub_host:
+            return True
+    return False
+
+
+def should_send_hsts(headers) -> bool:
+    proto = _header(headers, "X-Forwarded-Proto").split(",")[0].strip().lower()
+    if proto == "https":
+        return True
+    host = _header(headers, "Host").split(":")[0].strip().lower()
+    if host in ("www.brahmnetwork.com", "brahmnetwork.com"):
+        return True
+    pub = public_rpc_url()
+    if pub and urlparse(pub).scheme == "https":
+        pub_host = (urlparse(pub).hostname or "").lower()
+        if host and pub_host and host == pub_host:
+            return True
+    return False
+
+
 def explorer_allowed(ip: str) -> bool:
     if ip in ("127.0.0.1", "::1", "localhost"):
         return True
     parsed = _rpc_ip(ip)
     if parsed is not None and parsed.is_loopback:
         return True
-    return env("EXPLORER") == "1"
+    if env("EXPLORER") == "1" and env("ALLOW_LAN") == "1" and parsed is not None and parsed.is_private:
+        return True
+    return False
+
+
+def explorer_visible(ip: str, headers) -> bool:
+    if is_public_edge_request(headers):
+        return False
+    return explorer_allowed(ip)
 
 
 def resolve_apk() -> Path | None:
@@ -239,6 +561,11 @@ def resolve_apk() -> Path | None:
 
 def apk_download_allowed() -> bool:
     return env("SERVE_APK") == "1"
+
+
+def apk_visible(headers) -> bool:
+    # The public site is the download path for a new phone. Explorer stays off that edge.
+    return apk_download_allowed()
 
 
 def apk_sha256(path: Path) -> str:
@@ -276,6 +603,11 @@ def static_asset(rel: str) -> tuple[bytes | None, str]:
         ".css": "text/css; charset=utf-8",
         ".html": "text/html; charset=utf-8",
         ".svg": "image/svg+xml",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".webp": "image/webp",
+        ".ico": "image/x-icon",
     }
     ctype = types.get(suffix)
     if ctype is None:
@@ -292,14 +624,21 @@ def public_apk_url() -> str:
 
 
 def claim_html(ref_raw: str = "") -> str:
+    # Public invite URLs must be the same site as /. The ref is applied in site.js
+    # (pathIsClaim + applyInviteRef) so /claim?ref= uses the full Join page.
+    if (ROOT / "static" / "index.html").is_file():
+        return home_html()
+    origin = (public_rpc_url() or "https://www.brahmnetwork.com").rstrip("/")
     ref_block = "<p>No referral address in this link.</p>"
     raw = (ref_raw or "").strip()
     if raw:
         try:
             addr = normalize_address(raw)
+            https_claim = f"{origin}/claim?ref={html.escape(addr)}"
             ref_block = (
                 "<p>Verified referrer (checksummed BRM1G): "
                 f"<code>{html.escape(addr)}</code></p>"
+                f"<p>Share this invite: <code>{https_claim}</code></p>"
             )
         except ValueError:
             ref_block = (
@@ -314,8 +653,7 @@ def claim_html(ref_raw: str = "") -> str:
             addr = normalize_address(raw)
             open_wallet = (
                 f'<p><a href="brahm://claim?ref={html.escape(addr)}">'
-                "Open in Brahma Coin wallet (saves this referrer)</a> · "
-                "</p>"
+                "Open in Brahma Coin wallet (saves this referrer and claims)</a></p>"
             )
         except ValueError:
             open_wallet = ""
@@ -364,7 +702,7 @@ def claim_html(ref_raw: str = "") -> str:
         "<p class=\"muted\">Methods: <code>brah_submitTx</code>, <code>brah_getAccount</code>, "
         "<code>brah_getStats</code>, <code>brah_getBlocks</code>, <code>eth_getBalance</code>. "
         "Not an Ethereum RPC provider.</p>"
-        f"{ref_block}{dl_block}{open_wallet}"
+        f"{ref_block}{open_wallet}{dl_block}"
         "</body></html>"
     )
 
@@ -632,16 +970,23 @@ def ensure_l2(state: dict) -> bool:
         ("units_per_brah", UNITS_PER_BRAH),
         ("l2_operator_grant_done", False),
         ("l2_halving_band_paid", -1),
+        ("l2_mining_empty_released", False),
     ):
         if field not in state:
             state[field] = default
             dirty = True
-    # Bootstrap grew to id 9 after the one-shot grant; credit Santi only if missing.
-    if state.get("l2_operator_grant_done"):
+    # The one-shot grant ran before every bootstrap id existed, then a retire
+    # pass zeroed them. Restore each missing genesis balance once. Santi (id 9)
+    # was the only id restored after that, so 1–8 stayed at 0.
+    if state.get("l2_operator_grant_done") and not state.get("l2_bootstrap_grant_restored"):
         grant = account(state, L2_OPERATOR_GRANT_ADDR)
-        if int(grant.get("9", 0)) <= 0:
-            grant["9"] = L2_OPERATOR_GRANT
-            dirty = True
+        for asset_id, _name, _symbol in L2_BOOTSTRAP:
+            key = str(asset_id)
+            if int(grant.get(key, 0)) <= 0:
+                grant[key] = L2_OPERATOR_GRANT
+                dirty = True
+        state["l2_bootstrap_grant_restored"] = True
+        dirty = True
     return dirty
 
 
@@ -652,6 +997,48 @@ def credit_bootstrap_l2(state: dict, addr: str, amount: int) -> None:
         return
     for asset_id in L2_BOOTSTRAP_IDS:
         acct[asset_id] = int(acct.get(asset_id, 0)) + qty
+
+
+def _join_l2_missing(acct: dict) -> bool:
+    """True when the account has none of the genesis memecoin balances."""
+    return all(int(acct.get(asset_id, 0) or 0) <= 0 for asset_id in L2_BOOTSTRAP_IDS)
+
+
+def credit_join_l2(state: dict, addr: str) -> bool:
+    """Mint NEW_WALLET_JOIN_L2 of each genesis memecoin to a first-time joiner."""
+    qty = int(NEW_WALLET_JOIN_L2)
+    if qty <= 0 or not addr or is_protocol(addr):
+        return False
+    try:
+        keyed = normalize_address(addr) if is_brah_address(addr) else addr
+    except ValueError:
+        keyed = addr
+    acct = account(state, keyed)
+    if not _join_l2_missing(acct):
+        return False
+    credit_bootstrap_l2(state, keyed, qty)
+    credited = state.setdefault("join_l2_credited", {})
+    if isinstance(credited, dict):
+        credited[keyed] = qty
+    return True
+
+
+def maybe_backfill_join_l2(state: dict) -> bool:
+    """One-shot: give existing claimed joiners the memecoin allocation if they still have none."""
+    if state.get("join_l2_backfill_done"):
+        return False
+    claimed = state.get("claimed_rewards") or {}
+    dirty = False
+    if isinstance(claimed, dict):
+        for addr in list(claimed.keys()):
+            if not addr or is_protocol(addr):
+                continue
+            if not is_brah_address(addr):
+                continue
+            if credit_join_l2(state, addr):
+                dirty = True
+    state["join_l2_backfill_done"] = True
+    return dirty
 
 
 def active_l2_users(state: dict) -> list[str]:
@@ -678,30 +1065,52 @@ def active_l2_users(state: dict) -> list[str]:
 
 
 def maybe_grant_operator_l2(state: dict) -> bool:
-    """Memecoins are retired. Do not mint another operator grant."""
-    return False
+    """One operator grant of each genesis memecoin. Never a second grant."""
+    if state.get("l2_operator_grant_done"):
+        return False
+    grant = account(state, L2_OPERATOR_GRANT_ADDR)
+    for asset_id, _name, _symbol in L2_BOOTSTRAP:
+        key = str(asset_id)
+        if int(grant.get(key, 0)) <= 0:
+            grant[key] = L2_OPERATOR_GRANT
+    state["l2_operator_grant_done"] = True
+    state["l2_bootstrap_grant_restored"] = True
+    return True
 
 
 def retire_memecoins(state: dict) -> bool:
-    """Zero every non-Brahma asset balance once. Memecoins are no longer part of the wallet."""
-    if state.get("l2_retired"):
+    """Memecoins stay. A chain that already zeroed them gets the nine and the operator grant back once."""
+    if not state.get("l2_retired"):
         return False
-    balances = state.get("balances") or {}
-    if isinstance(balances, dict):
-        for acct in balances.values():
-            if not isinstance(acct, dict):
-                continue
-            for key in list(acct.keys()):
-                if str(key).isdigit() and str(key) != "0":
-                    acct[key] = 0
-    state["l2_assets"] = {}
-    state["l2_retired"] = True
+    state["l2_retired"] = False
+    ensure_l2(state)
+    grant = account(state, L2_OPERATOR_GRANT_ADDR)
+    for asset_id, _name, _symbol in L2_BOOTSTRAP:
+        key = str(asset_id)
+        if int(grant.get(key, 0)) <= 0:
+            grant[key] = L2_OPERATOR_GRANT
+    state["l2_operator_grant_done"] = True
+    state["l2_bootstrap_grant_restored"] = True
     return True
 
 
 def maybe_l2_halving_airdrop(state: dict) -> bool:
-    """Memecoin airdrops are retired."""
-    return False
+    """At each mine-schedule halving, split 750M of each genesis L2 across joined/mined wallets."""
+    ensure_l2(state)
+    band = mine_halving_band(int(state.get("joined_count", 0)))
+    last = int(state.get("l2_halving_band_paid", -1))
+    if band <= last:
+        return False
+    crossings = band - last
+    users = active_l2_users(state)
+    pool = int(L2_HALVING_AIRDROP_SHARE) * crossings
+    if users and pool > 0:
+        share = pool // len(users)
+        if share > 0:
+            for addr in users:
+                credit_bootstrap_l2(state, addr, share)
+    state["l2_halving_band_paid"] = band
+    return True
 
 
 def parse_join_memo(memo: str) -> tuple[str, str]:
@@ -905,12 +1314,15 @@ def named_public_rpc() -> str:
 
 
 def mainnet_ready_report() -> dict:
-    peers = _peer_net.peer_count() if _peer_net is not None else 0
+    live = _peer_net.peer_count() if _peer_net is not None else 0
+    seeds = _peer_net.seed_count() if _peer_net is not None else 0
     named = named_public_rpc()
-    ready = peers >= 1 and bool(named)
+    # A BRAH_PEERS seed is not a live operator. Ready needs a signed HELLO.
+    ready = live >= 1 and bool(named)
     launched = env("PUBLIC_LAUNCH") == "1" and ready
     return {
-        "peers": peers,
+        "peers": live,
+        "seed_peers": seeds,
         "named_public_rpc": bool(named),
         "protocol_locked": True,
         "mainnet_ready": ready,
@@ -1010,12 +1422,13 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
             raise ValueError("Already claimed adoption reward")
         pool = account(state, "POOL_AIRDROP")
         already = int(state.get("rewards_paid", 0))
-        cap = to_units(25_000_000)
+        cap = to_units(REWARDS_POOL)
         if already + pay_ref > cap or int(pool["0"]) < pay_ref:
             raise ValueError("Rewards pool empty")
         pool["0"] = int(pool["0"]) - pay_ref
         bonus = account(state, ref)
         bonus["0"] = int(bonus["0"]) + pay_ref
+        note_wallet(state, ref)
         state.setdefault("referrals", {})
         state["referrals"][ref] = int(state["referrals"].get(ref, 0)) + 1
         claimed[slot] = ref
@@ -1031,7 +1444,7 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
     total = join_amt + pay_ref
     pool = account(state, "POOL_AIRDROP")
     already = int(state.get("rewards_paid", 0))
-    cap = to_units(25_000_000)
+    cap = to_units(REWARDS_POOL)
     if already + total > cap or int(pool["0"]) < total:
         raise ValueError("Rewards pool empty")
     pool["0"] = int(pool["0"]) - total
@@ -1040,6 +1453,7 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
     if pay_ref > 0:
         bonus = account(state, ref)
         bonus["0"] = int(bonus["0"]) + pay_ref
+        note_wallet(state, ref)
         state.setdefault("referrals", {})
         state["referrals"][ref] = int(state["referrals"].get(ref, 0)) + 1
     claimed[slot] = ref
@@ -1048,40 +1462,16 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
     state["joined_count"] = int(state.get("joined_count", 0)) + 1
     state["rewards_paid"] = already + total
     _bind_device()
+    l2_ok = credit_join_l2(state, addr)
     maybe_l2_halving_airdrop(state)
-    return f"Adoption reward {from_units(join_amt)} Brahma Coin" + (
+    l2_note = f" + {int(NEW_WALLET_JOIN_L2)} of each memecoin" if l2_ok else ""
+    return f"Adoption reward {from_units(join_amt)} Brahma Coin{l2_note}" + (
         f" + {from_units(pay_ref)} to referrer" if pay_ref else ""
     )
 
 
 def launch_l2(state: dict, creator: str, name: str, symbol: str) -> dict:
-    ensure_l2(state)
-    name = (name or "").strip()
-    symbol = (symbol or "").strip().upper()
-    if len(name) < 2 or len(symbol) < 2:
-        raise ValueError("Name and symbol required")
-    if not symbol.isalnum():
-        raise ValueError("Symbol must be alphanumeric")
-    for asset in state["l2_assets"].values():
-        if str(asset.get("symbol", "")).upper() == symbol:
-            raise ValueError("L2 symbol already exists")
-    burn = l2_burn_units()
-    acct = account(state, creator)
-    if int(acct.get("0", 0)) < burn:
-        raise ValueError(f"Need {from_units(burn)} Brahma Coin burn to launch an L2 memecoin")
-    acct["0"] = int(acct["0"]) - burn
-    state["burned_brah"] = int(state.get("burned_brah") or state.get("burned_btq") or 0) + burn
-    asset_id = int(state.get("next_l2_id", 10))
-    record = {
-        "id": asset_id,
-        "name": name,
-        "symbol": symbol,
-        "creator": creator,
-        "burned": burn,
-    }
-    state["l2_assets"][str(asset_id)] = record
-    state["next_l2_id"] = asset_id + 1
-    return record
+    raise ValueError("New L2 launches are closed")
 
 
 def apply_recorded_tx(state: dict, tx: dict) -> None:
@@ -1102,7 +1492,10 @@ def apply_recorded_tx(state: dict, tx: dict) -> None:
             raise ValueError("invalid recipient")
         asset_id = str(tx.get("asset", "0"))
         if asset_id != "0":
-            raise ValueError("Memecoins removed")
+            known = set(L2_BOOTSTRAP_IDS)
+            known.update(str(key) for key in (state.get("l2_assets") or {}))
+            if asset_id not in known:
+                raise ValueError("Unknown memecoin")
         src = account(state, sender)
         if asset_units(src, asset_id) < amount:
             raise ValueError("Insufficient balance")
@@ -1112,25 +1505,13 @@ def apply_recorded_tx(state: dict, tx: dict) -> None:
         dst[asset_id] = asset_units(dst, asset_id) + (amount - tax)
         if tax > 0:
             state["burned_brah"] = int(state.get("burned_brah") or state.get("burned_btq") or 0) + tax
+        note_wallet(state, receiver)
         note_consolidation_send(state, receiver, sender)
     elif kind in ("join", "reward", "faucet"):
         apply_rewards(state, tx["from"], tx.get("memo") or "")
+        note_wallet(state, tx["from"])
     elif kind == "donate":
-        keyed = load_keyed_accounts()
-        if not addresses_equal(tx["from"], str(keyed.get("council") or "")):
-            raise ValueError("Only the council key may donate")
-        if not donations_unlocked(int(state.get("donation_unlock", 0)), int(time.time())):
-            raise ValueError("Donation lock (730 days) still active")
-        amount = int(tx["amount"])
-        if amount <= 0:
-            raise ValueError("amount must be positive")
-        if not is_brah_address(str(tx.get("to") or "")):
-            raise ValueError("invalid recipient")
-        pool = account(state, "POOL_DONATION")
-        if int(pool["0"]) < amount:
-            raise ValueError("Donation pool empty")
-        pool["0"] = int(pool["0"]) - amount
-        account(state, tx["to"])["0"] = int(account(state, tx["to"])["0"]) + amount
+        raise ValueError("Donation pool removed")
     elif kind == "mint_qusd":
         raise ValueError("QUSD removed")
     elif kind == "burn":
@@ -1145,9 +1526,9 @@ def apply_recorded_tx(state: dict, tx: dict) -> None:
         src["0"] = asset_units(src, "0") - amount
         state["burned_brah"] = int(state.get("burned_brah") or state.get("burned_btq") or 0) + amount
     elif kind == "launch_l2":
-        raise ValueError("Memecoins removed")
+        raise ValueError("New L2 launches are closed")
     elif kind == "mine":
-        pass
+        note_wallet(state, tx["from"])
     else:
         raise ValueError(f"Unknown tx kind: {kind}")
     applied[hid] = True
@@ -1162,8 +1543,8 @@ def parse_signed_tx(state: dict, raw: dict, *, verify: bool = True) -> dict:
     if asset.lower() in ("latest", "brah", "brahma", "brahma coin", "0"):
         asset = "0"
     memo = str(raw.get("memo") or raw.get("referrer") or "")
-    if kind == "launch_l2" and not memo:
-        memo = f"{raw.get('name', '')}|{raw.get('symbol', '')}"
+    if kind == "launch_l2":
+        raise ValueError("New L2 launches are closed")
     if kind in ("join", "faucet", "reward") and not memo:
         memo = str(raw.get("referrer") or "")
     amount_in = raw.get("amount_units", raw.get("amount", 0))
@@ -1197,6 +1578,7 @@ def parse_signed_tx(state: dict, raw: dict, *, verify: bool = True) -> dict:
     nonce = int(raw.get("nonce", acct.get("nonce", 0)))
     if nonce != int(acct.get("nonce", 0)):
         raise ValueError(f"Bad nonce (expected {acct.get('nonce', 0)})")
+    public_key_hex = str(raw.get("public_key") or "")
     msg = matching_canonical_message(
         int(state["chain_id"]),
         nonce,
@@ -1206,24 +1588,13 @@ def parse_signed_tx(state: dict, raw: dict, *, verify: bool = True) -> dict:
         asset,
         amount,
         memo,
-        public_key_hex=str(raw.get("public_key") or ""),
+        public_key_hex=public_key_hex,
         signature_hex=str(raw.get("signature") or ""),
         require_sig=verify,
     )
+    assert_key_owns_address(signed_from, public_key_hex)
     if kind == "donate":
-        keyed = load_keyed_accounts()
-        if not addresses_equal(from_addr, str(keyed.get("council") or "")):
-            raise ValueError("Only the council key may donate")
-        empower = str(keyed.get("empower") or "")
-        if not empower:
-            raise ValueError("Empower key missing")
-        if verify:
-            verify_spend(
-                checksum_address(empower) if is_brah_address(empower) else empower,
-                str(raw.get("cosign_public_key") or ""),
-                str(raw.get("cosign_signature") or ""),
-                msg,
-            )
+        raise ValueError("Donation pool removed")
     tx = {
         "kind": kind,
         "from": from_addr,
@@ -1266,7 +1637,7 @@ def reset_year_if_needed(state: dict) -> None:
         state["mined_this_year"] = 0
 
 
-def seal_block(state: dict, miner: str, txs: list, reward: int, pow_nonce: int) -> dict:
+def seal_block(state: dict, miner: str, txs: list, reward: int, pow_nonce: int, *, require_pow: bool = True) -> dict:
     reset_year_if_needed(state)
     if reward:
         if int(state["total_mined"]) + reward > int(state["mining_cap"]):
@@ -1283,25 +1654,34 @@ def seal_block(state: dict, miner: str, txs: list, reward: int, pow_nonce: int) 
         state["mined_this_year"] = int(state["mined_this_year"]) + reward
         mark_first_mined(state, miner)
     header, root = block_header(state, miner, txs, reward)
-    bits = int(state["pow_bits"])
-    if not meets_pow(header, int(pow_nonce), bits):
-        raise ValueError("PoW invalid — client must solve the header")
-    block_hash = sha256_hex(f"{header}:{int(pow_nonce)}")
+    if require_pow:
+        bits = int(state["pow_bits"])
+        if not meets_pow(header, int(pow_nonce), bits):
+            raise ValueError("PoW invalid — client must solve the header")
+        nonce = int(pow_nonce)
+    else:
+        # A signed payment seals immediately. It does not retarget mining.
+        bits = 0
+        nonce = 0
+    block_hash = sha256_hex(f"{header}:{nonce}")
     state["chain_height"] = int(state["chain_height"]) + 1
-    maybe_retarget(state)
+    if require_pow:
+        maybe_retarget(state)
     block = {
         "index": state["chain_height"],
         "timestamp": int(time.time()),
         "previous_hash": state["tip_hash"],
         "miner": miner,
-        "nonce": int(pow_nonce),
+        "nonce": nonce,
         "hash": block_hash,
         "tx_root": root,
         "txs": txs,
         "reward": reward,
         "pow_bits": bits,
+        "instant": not require_pow,
     }
     state["tip_hash"] = block_hash
+    settle_protocol(state)
     append_block(block)
     save_state(state)
     announce("BLOCK", block)
@@ -1311,15 +1691,19 @@ def seal_block(state: dict, miner: str, txs: list, reward: int, pow_nonce: int) 
 
 def commit_signed(state: dict, raw: dict, *, verify: bool = True) -> tuple[dict, dict]:
     tx = parse_signed_tx(state, raw, verify=verify)
-    reward = mine_payout_units(state, tx["from"]) if tx["kind"] == "mine" else 0
-    if raw.get("pow_nonce") is None:
-        raise ValueError("pow_nonce required (client PoW)")
-    pow_nonce = int(raw["pow_nonce"])
-    header, _root = block_header(state, tx["from"], [tx], reward)
-    if not meets_pow(header, pow_nonce, int(state["pow_bits"])):
-        raise ValueError("PoW invalid — client must solve the header")
+    mining = tx["kind"] == "mine"
+    reward = mine_payout_units(state, tx["from"]) if mining else 0
+    if mining:
+        if raw.get("pow_nonce") is None:
+            raise ValueError("pow_nonce required (client PoW)")
+        pow_nonce = int(raw["pow_nonce"])
+        header, _root = block_header(state, tx["from"], [tx], reward)
+        if not meets_pow(header, pow_nonce, int(state["pow_bits"])):
+            raise ValueError("PoW invalid — client must solve the header")
+    else:
+        pow_nonce = 0
     apply_recorded_tx(state, tx)
-    block = seal_block(state, tx["from"], [tx], reward, pow_nonce)
+    block = seal_block(state, tx["from"], [tx], reward, pow_nonce, require_pow=mining)
     _rail_note_sealed(state, tx)
     return tx, block
 
@@ -1369,7 +1753,10 @@ def _apply_extension(state: dict, block: dict) -> bool:
     except (KeyError, TypeError, ValueError):
         return False
     bits = int(block.get("pow_bits") or state["pow_bits"])
-    if not meets_pow(header, nonce, bits):
+    if tx["kind"] == "mine":
+        if not meets_pow(header, nonce, bits):
+            return False
+    elif reward != 0:
         return False
     if block.get("hash") != sha256_hex(f"{header}:{nonce}"):
         return False
@@ -1402,6 +1789,7 @@ def _apply_extension(state: dict, block: dict) -> bool:
     stored["reward"] = reward
     stored["miner"] = miner
     stored["pow_bits"] = int(block.get("pow_bits") or state["pow_bits"])
+    settle_protocol(state)
     append_block(stored)
     save_state(state)
     return True
@@ -1445,6 +1833,8 @@ def ingest_block(block: dict) -> None:
         if idx == height and height >= 1:
             chain = load_all_blocks()
             if chain and str(block.get("previous_hash") or "") == str(chain[-1].get("previous_hash") or ""):
+                if chain[-1].get("instant"):
+                    return
                 if _prefer_block(block, chain[-1]):
                     try:
                         state = _replay_prefix(chain[:-1])
@@ -1525,15 +1915,6 @@ def build_initial_state(genesis: dict) -> tuple[dict, dict]:
         acct = empty_account()
         acct["0"] = to_units(amount_coins)
         balances[name] = acct
-    founder = empty_account()
-    founder["0"] = to_units(eco["founder"])
-    balances[keyed["founder"]] = founder
-    empower = empty_account()
-    empower["0"] = to_units(eco["empower"])
-    balances[keyed["empower"]] = empower
-    strategic = empty_account()
-    strategic["0"] = to_units(eco["strategic"])
-    balances[keyed["strategic"]] = strategic
     each = to_units(eco["genesis_wallet_each"])
     for addr in keyed.get("distribution") or []:
         acct = empty_account()
@@ -1562,7 +1943,6 @@ def build_initial_state(genesis: dict) -> tuple[dict, dict]:
         "mined_this_year": 0,
         "retarget_height": 0,
         "retarget_time": now,
-        "donation_unlock": now + int(eco["donation_unlock_days"]) * 86400,
         "pow_bits": int(eco["pow_difficulty_bits"]),
         "block_reward": to_units(eco.get("block_reward", 0.00014)),
         "yearly_cap": to_units(eco["yearly_mine_cap"]),
@@ -1582,7 +1962,15 @@ def build_initial_state(genesis: dict) -> tuple[dict, dict]:
         "next_l2_id": 10,
         "l2_operator_grant_done": False,
         "l2_halving_band_paid": -1,
+        "l2_mining_empty_released": False,
         "council": keyed.get("council"),
+        "economics_v2": True,
+        "wallet_order": [],
+        "founder_paid": False,
+        "empower_first_paid": [],
+        "empower_next_paid": [],
+        "strategic_burned_months": [],
+        "strategic_burn_start": month_key(now),
         "l2_assets": {
             str(asset_id): {
                 "id": asset_id,
@@ -1596,10 +1984,21 @@ def build_initial_state(genesis: dict) -> tuple[dict, dict]:
     }, genesis_block
 
 
+def _unit_scale(value) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def refuse_legacy_state(state: dict) -> dict:
     migrate_brand_state(state)
-    scale = int(state.get("units_per_brah") or state.get("units_per_btq") or 0)
-    if scale != UNITS_PER_BRAH:
+    scales = []
+    for key in ("units_per_brah", "units_per_btq"):
+        if key in state and state.get(key) is not None:
+            scales.append(_unit_scale(state.get(key)))
+    scale = scales[0] if scales else 0
+    if scale != UNITS_PER_BRAH or any(item != UNITS_PER_BRAH for item in scales):
         raise RuntimeError(
             "Legacy state refused (units scale != 1e8). "
             "Set BRAH_DATA_DIR to a new directory and generate genesis keys."
@@ -1620,7 +2019,9 @@ def refuse_legacy_state(state: dict) -> dict:
 def apply_l2_credits(state: dict) -> bool:
     granted = maybe_grant_operator_l2(state)
     airdropped = maybe_l2_halving_airdrop(state)
-    return granted or airdropped
+    backfilled = maybe_backfill_join_l2(state)
+    released = maybe_release_l2_on_mining_empty(state)
+    return granted or airdropped or backfilled or released
 
 
 def load_or_init():
@@ -1632,12 +2033,15 @@ def load_or_init():
         state = refuse_legacy_state(state)
         meta_dirty = bool(state.pop("_l2_meta_dirty", False))
         retired = retire_memecoins(state)
-        if apply_l2_credits(state) or meta_dirty or retired:
+        econ = apply_economics_v2(state)
+        settled = settle_protocol(state)
+        if apply_l2_credits(state) or meta_dirty or retired or econ or settled:
             save_state(state)
         return state
     state, genesis_block = build_initial_state(genesis)
     retire_memecoins(state)
     apply_l2_credits(state)
+    settle_protocol(state)
     save_state(state)
     with open(CHAIN_PATH, "w", encoding="utf-8") as fh:
         fh.write(json.dumps(genesis_block) + "\n")
@@ -1678,6 +2082,30 @@ class L1Handler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
 
+    def _apply_security_headers(self) -> None:
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "no-referrer")
+        if should_send_hsts(self.headers):
+            self.send_header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+
+    def _maybe_https_redirect(self) -> bool:
+        proto = _header(self.headers, "X-Forwarded-Proto").split(",")[0].strip().lower()
+        if proto != "http":
+            return False
+        if not is_public_edge_request(self.headers):
+            return False
+        host = _header(self.headers, "Host").split(":")[0].strip()
+        if not host:
+            return False
+        location = "https://" + host + (self.path or "/")
+        self.send_response(301)
+        self.send_header("Location", location)
+        self._apply_security_headers()
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+        return True
+
     def _send(self, code: int, content_type: str, body, cache_control: str | None = None) -> None:
         if isinstance(body, str):
             body = body.encode("utf-8")
@@ -1687,6 +2115,7 @@ class L1Handler(BaseHTTPRequestHandler):
         if cache_control:
             self.send_header("Cache-Control", cache_control)
             self.send_header("CDN-Cache-Control", cache_control)
+        self._apply_security_headers()
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         if self.command == "HEAD":
@@ -1697,8 +2126,11 @@ class L1Handler(BaseHTTPRequestHandler):
             return
 
     def do_OPTIONS(self) -> None:
+        if self._maybe_https_redirect():
+            return
         self.send_response(200)
         self._apply_cors()
+        self._apply_security_headers()
         self.send_header("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
@@ -1710,13 +2142,15 @@ class L1Handler(BaseHTTPRequestHandler):
         if not rpc_allow(self.client_address[0]):
             self._send(429, "text/plain", "rate limited")
             return
+        if self._maybe_https_redirect():
+            return
         if self.client_address[0] in ("127.0.0.1", "::1"):
             learn_public_host_from_headers(self.headers)
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
         if path in ("/wallet.apk", "/download"):
-            if not apk_download_allowed():
-                self._send(404, "text/plain", "APK download disabled (set BRAH_SERVE_APK=1)")
+            if not apk_visible(self.headers):
+                self._send(404, "text/plain", "APK download disabled")
                 return
             apk = resolve_apk()
             if apk is None:
@@ -1749,6 +2183,7 @@ class L1Handler(BaseHTTPRequestHandler):
                     self.send_response(416)
                     self.send_header("Content-Range", f"bytes */{size}")
                     self._apply_cors()
+                    self._apply_security_headers()
                     self.end_headers()
                     return
             length = end - start + 1
@@ -1762,9 +2197,9 @@ class L1Handler(BaseHTTPRequestHandler):
                 self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
             self.send_header("Cache-Control", "no-store")
             self.send_header("CDN-Cache-Control", "no-store")
-            self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Accept-Ranges", "bytes")
             self._apply_cors()
+            self._apply_security_headers()
             self.end_headers()
             if self.command != "HEAD":
                 try:
@@ -1781,8 +2216,8 @@ class L1Handler(BaseHTTPRequestHandler):
                     return
             return
         if path in ("/explorer", "/blocks"):
-            if not explorer_allowed(self.client_address[0]):
-                self._send(404, "text/plain", "explorer is localhost-only (set BRAH_EXPLORER=1)")
+            if not explorer_visible(self.client_address[0], self.headers):
+                self._send(404, "text/plain", "explorer is localhost-only")
                 return
             with _lock:
                 page = explorer_html()
@@ -1849,6 +2284,8 @@ class L1Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if not rpc_allow(self.client_address[0]):
             self._send(429, "application/json", json.dumps({"error": "rate limited"}))
+            return
+        if self._maybe_https_redirect():
             return
         if self.client_address[0] in ("127.0.0.1", "::1"):
             learn_public_host_from_headers(self.headers)
@@ -1984,7 +2421,8 @@ class L1Handler(BaseHTTPRequestHandler):
                 "tip": state["tip_hash"][:16],
                 "p2p_peers": _peer_net.peer_count() if _peer_net is not None else 0,
                 "mesh": "sentinel-dtn",
-                "l2_launch_burn": from_units_float(l2_burn_units()),
+                "l2_launch_burn": 0,
+                "l2_launches_closed": True,
                 "burned_brah": from_units_float(int(state.get("burned_brah") or state.get("burned_btq") or 0)),
                 "l2_assets": [] if state.get("l2_retired") else list(state.get("l2_assets", {}).values()),
             }
@@ -2035,7 +2473,15 @@ class L1Handler(BaseHTTPRequestHandler):
                 raw = dict(raw)
                 raw["kind"] = "send"
             tx, block = commit_signed(state, raw, verify=verify)
-            return {"hash": tx["hash"], "height": block["index"]}
+            return {
+                "hash": tx["hash"],
+                "height": block["index"],
+                "sealed": True,
+                "instant": bool(block.get("instant")),
+                "from": tx["from"],
+                "to": tx["to"],
+                "amount_units": str(tx["amount"]),
+            }
         if method in ("brah_requestFaucet", "brah_faucet", "brah_joinRewards"):
             raw = params[0] if params and isinstance(params[0], dict) else {
                 "kind": "join",
@@ -2066,21 +2512,12 @@ class L1Handler(BaseHTTPRequestHandler):
         if method == "brah_mintQUSD":
             raise ValueError("QUSD removed")
         if method in ("brah_launchL2", "brah_launchMemecoin"):
-            raw = params[0] if params and isinstance(params[0], dict) else {
-                "kind": "launch_l2",
-                "from": params[0] if params else "",
-                "name": params[1] if len(params) > 1 else "",
-                "symbol": params[2] if len(params) > 2 else "",
-            }
-            raw = dict(raw)
-            raw["kind"] = "launch_l2"
-            tx, _block = commit_signed(state, raw, verify=verify)
-            name, _, symbol = tx["memo"].partition("|")
-            return {"id": state["next_l2_id"] - 1, "name": name, "symbol": symbol, "hash": tx["hash"]}
+            raise ValueError("New L2 launches are closed")
         if method in ("brah_listL2", "brah_getL2Assets"):
             ensure_l2(state)
             return {
-                "burn": from_units_float(l2_burn_units()),
+                "burn": 0,
+                "launches_closed": True,
                 "assets": list(state.get("l2_assets", {}).values()),
             }
         if method == "brah_getBlocks":
@@ -2092,7 +2529,12 @@ class L1Handler(BaseHTTPRequestHandler):
                 "tip": int(state["chain_height"]),
             }
         if method in RAIL_RPC_METHODS:
-            result = rpc_rail_dispatch(state, method, params)
+            result = rpc_rail_dispatch(
+                state,
+                method,
+                params,
+                api_meta=verify_api_key(self.headers.get("Authorization")),
+            )
             save_state(state)
             return result
         raise ValueError("Method not found")

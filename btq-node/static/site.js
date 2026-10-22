@@ -22,9 +22,11 @@ const GLYPHS={
  santi:'<circle cx="12" cy="12" r="7.2"/><path d="M12 6.5v11M6.5 12h11"/><circle cx="12" cy="12" r="2.2"/>'
 };
 const glyph=(id,color,size)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:${color}">${GLYPHS[id]}</svg>`;
-const LOTUS=(s=24)=>{let p='';for(let i=0;i<8;i++)p+=`<ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(${i*45} 12 12)"/>`;
- return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.4">${p}<circle cx="12" cy="12" r="2.3"/></svg>`;};
-document.querySelectorAll('.mark').forEach(m=>m.innerHTML=LOTUS(+m.dataset.s||26));
+const LOTUS=(s=24)=>`<img class="tk-mark" src="/static/brahma-mark.png" width="${s}" height="${s}" alt="" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover">`;
+document.querySelectorAll('.mark[data-s]').forEach(m=>{
+ if(m.querySelector('img'))return;
+ m.innerHTML=LOTUS(+m.dataset.s||26);
+});
 
 const fmt=n=>n.toLocaleString('en-US');
 const fmtAmt=x=>Number.isInteger(x)?fmt(x):String(parseFloat(x.toFixed(6)));
@@ -41,9 +43,25 @@ const VIEWS=['home','coin','nine','rewards','network','wallet','join'];
 const TITLES={home:'BRAHMNETWORK — Creation is mined.',coin:'Brahma Coin — BRAHMNETWORK',nine:'The Genesis Nine — BRAHMNETWORK',
  rewards:'Adoption & Referrals — BRAHMNETWORK',network:'Network & Launch Gates — BRAHMNETWORK',wallet:'Brahma Coin Wallet — BRAHMNETWORK',join:'Join the Testnet — BRAHMNETWORK'};
 let currentView='home';
+function pathIsClaim(){
+ const p=(location.pathname||'/').replace(/\/+$/,'')||'/';
+ return p==='/claim'||p==='/status';
+}
+function refFromUrl(){
+ const q=new URLSearchParams(location.search||'').get('ref');
+ if(q&&q.trim())return q.trim();
+ const h=location.hash||'';
+ const i=h.indexOf('?');
+ if(i>=0){
+  const fromHash=new URLSearchParams(h.slice(i+1)).get('ref');
+  if(fromHash&&fromHash.trim())return fromHash.trim();
+ }
+ return '';
+}
 function route(){
  let h=location.hash.replace(/^#\/?/,'').split('?')[0];
- if(!VIEWS.includes(h))h='home';
+ if(pathIsClaim()&&(!h||h==='home'))h='join';
+ if(!VIEWS.includes(h))h=pathIsClaim()?'join':'home';
  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
  document.getElementById('view-'+h).classList.add('on');
  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#/'+h));
@@ -71,6 +89,8 @@ mmenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
 
 (function(){
  const cv=document.getElementById('orbitCanvas');if(!cv)return;
+ const wrapEl=document.getElementById('orbWrap');
+ if(wrapEl&&wrapEl.hasAttribute('hidden'))return;
  const ctx=cv.getContext('2d'),wrap=document.getElementById('orbWrap'),tip=document.getElementById('orbTip');
  let W=600,H=520,cx=300,cy=260,S=1;
  function resize(){const r=wrap.getBoundingClientRect();W=r.width;H=r.height;
@@ -143,7 +163,7 @@ function renderDetail(){
  const c=COINS[cur];
  detail.style.setProperty('--coin',c.color);
  detail.innerHTML=`
-  <div class="d-top"><span class="d-idx">${String(cur+1).padStart(2,'0')} / 08 — L2 ON THE SAME BLOCKS</span>
+  <div class="d-top"><span class="d-idx">${String(cur+1).padStart(2,'0')} / 09 — L2 ON THE SAME BLOCKS</span>
    <div class="d-nav">
     <button data-dnav="-1" aria-label="Previous token"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
     <button data-dnav="1" aria-label="Next token"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
@@ -155,14 +175,14 @@ function renderDetail(){
    <div class="d-specs">
     <div><i>GENESIS GRANT</i><b>5,000,000,000</b></div>
     <div><i>LAYER</i><b>2 ON L1</b></div>
-    <div><i>PER HALVING DROP</i><b>750,000,000</b></div>
+    <div><i>HALVING AIRDROP</i><b>750,000,000 SHARED</b></div>
     <div><i>WHALE TAX</i><b>EXEMPT</b></div>
    </div>
-   <p class="d-note">CREATED BY A ONE-TIME OPERATOR GRANT TO A GENESIS L2 ADDRESS.<br>WALLETS THAT HAVE JOINED OR MINED RECEIVE 750,000,000 WHOLE UNITS AT EVERY MINE-SCHEDULE HALVING.<br>LAUNCH MORE: BURN 100 BRAHMA COIN · UNIQUE ALPHANUMERIC SYMBOL · BURN IS PERMANENT.</p>
+   <p class="d-note">CREATED BY A ONE-TIME OPERATOR GRANT TO A GENESIS L2 ADDRESS.<br>THE NINE STAY. AT EACH MINE HALVING A SHARED 750,000,000 POOL OF EACH GENESIS L2 SPLITS ACROSS JOINED/MINED WALLETS.<br>WHEN THE MINING POOL EMPTIES, REMAINING OPERATOR-GRANT L2 RELEASES THE SAME WAY.<br>NEW L2 LAUNCHES ARE CLOSED — NO BURN-TO-LAUNCH.</p>
   </div>`;
  const sw=detail.querySelector('.d-swap');sw.style.animation='none';void sw.offsetWidth;sw.style.animation='';
 }
-function selectCoin(i){cur=(i+8)%8;renderDetail();
+function selectCoin(i){cur=(i+COINS.length)%COINS.length;renderDetail();
  [...rail.children].forEach((el,j)=>el.classList.toggle('on',j===cur));}
 rail.addEventListener('click',e=>{const b=e.target.closest('.rail-item');if(b)selectCoin(+b.dataset.i);});
 detail.addEventListener('click',e=>{const b=e.target.closest('[data-dnav]');if(b)selectCoin(cur+ +b.dataset.dnav);});
@@ -371,7 +391,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   eW.textContent=fmtAmt(t.j);
   eR.textContent=fmtAmt(r);
   const win=(v>85000)?`${fmt(t.lo)} – ${fmt(t.hi)} (TAIL CONTINUES)`:`${fmt(t.lo)} – ${fmt(Math.min(t.hi,85000))}`;
-  eM.innerHTML=`TIER WINDOW — JOINS ${win}<br>REFERRER RECEIVES HALF · NODE LIMITS JOINS TO 20 / HOUR · PAID FROM THE 25,000,000 POOL`;
+  eM.innerHTML=`TIER WINDOW — JOINS ${win}<br>REFERRER RECEIVES HALF · NODE LIMITS JOINS TO 20 / HOUR · PAID FROM THE 30,000,000 POOL`;
   if(v<=85000){
    const i=v<=10000?0:v<=35000?1:v<=60000?2:3;
    const frac=i*0.25+((v-T[i][0])/(T[i][1]-T[i][0]))*0.25;
@@ -401,6 +421,11 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   const chk=sha256Hex('BRM1G'+body).slice(0,4);
   return 'BRM1G'+body+chk;
  }
+ function claimOrigin(){
+  const host=(location.hostname||'').toLowerCase();
+  if(host==='www.brahmnetwork.com'||host==='brahmnetwork.com') return location.origin;
+  return 'https://www.brahmnetwork.com';
+ }
  btn.addEventListener('click',()=>{
   const addr=parseAddr(inp.value);
   if(!addr){
@@ -416,6 +441,29 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   brahmEl.textContent=links.brahm;
   out.classList.add('show');
   toast('Claim links built — referrers receive half the join amount.');});
+ function applyInviteRef(){
+  const raw=refFromUrl();
+  if(!raw)return;
+  const addr=parseAddr(raw);
+  const box=document.getElementById('claimInvite');
+  const text=document.getElementById('claimInviteText');
+  const open=document.getElementById('claimOpenApp');
+  if(!addr){
+   if(box&&text){box.style.display='block';text.textContent='This invite is not a valid checksummed Brahma Coin address. Do not trust it.';}
+   if(open)open.removeAttribute('href');
+   return;
+  }
+  inp.value=addr;
+  links={web:`/claim?ref=${addr}`,brahm:`brahm://claim?ref=${addr}`};
+  webEl.textContent=claimOrigin()+links.web;brahmEl.textContent=links.brahm;
+  out.classList.add('show');
+  if(box&&text){
+   box.style.display='block';
+   text.textContent='Verified referrer '+addr+' — open the wallet to save this invite and claim adoption.';
+  }
+  if(open)open.setAttribute('href',links.brahm);
+ }
+ applyInviteRef();
  document.querySelectorAll('[data-inv]').forEach(b=>b.addEventListener('click',()=>{
   const k=b.dataset.inv;
   const txt=links[k];

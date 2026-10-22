@@ -4,12 +4,16 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import com.brahmnetwork.wallet.sentinel.SentinelRuntime
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -39,16 +44,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.brahmnetwork.wallet.viewmodel.VaultPasswordPrompt
 import androidx.fragment.app.FragmentActivity
+import com.brahmnetwork.wallet.ui.AppLockScreen
 import com.brahmnetwork.wallet.ui.HomeScreen
 import com.brahmnetwork.wallet.ui.MineScreen
 import com.brahmnetwork.wallet.ui.OnboardingScreen
 import com.brahmnetwork.wallet.ui.ReceiveScreen
 import com.brahmnetwork.wallet.ui.SendScreen
 import com.brahmnetwork.wallet.ui.SettingsScreen
-import com.brahmnetwork.wallet.viewmodel.AuthRequest
+import com.brahmnetwork.wallet.viewmodel.PasswordPurpose
 import com.brahmnetwork.wallet.viewmodel.WalletViewModel
 
 class MainActivity : FragmentActivity() {
@@ -60,6 +67,10 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
         requestMeshPermissions()
         SentinelRuntime.start(this, meshNodeId())
         applyClaimIntent(intent)
@@ -77,6 +88,13 @@ class MainActivity : FragmentActivity() {
                     WalletApp(viewModel)
                 }
             }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isChangingConfigurations) {
+            viewModel.lockSession()
         }
     }
 
@@ -121,58 +139,81 @@ private fun WalletApp(viewModel: WalletViewModel) {
     val address by viewModel.address.collectAsState()
     var tab by remember { mutableStateOf(WalletTab.Home) }
     val accent = Color(0xFF00FF88)
-    val activity = LocalContext.current as FragmentActivity
-    val authGate by viewModel.authGate.collectAsState()
-    val authFallback by viewModel.authFallback.collectAsState()
+    val passwordPrompt by viewModel.passwordPrompt.collectAsState()
+    val lockOnOpen by viewModel.lockOnOpen.collectAsState()
+    val sessionUnlocked by viewModel.sessionUnlocked.collectAsState()
+    val hasWalletPassword by viewModel.hasWalletPassword.collectAsState()
+    var vaultPassword by remember { mutableStateOf("") }
+    var vaultConfirm by remember { mutableStateOf("") }
 
-    LaunchedEffect(authGate) {
-        val req = authGate ?: return@LaunchedEffect
-        val title = when (req) {
-            is AuthRequest.SendTokens -> "Confirm send"
-            AuthRequest.ShowMnemonic -> "Reveal recovery phrase"
-        }
-        val subtitle = when (req) {
-            is AuthRequest.SendTokens -> "Unlock to sign and broadcast"
-            AuthRequest.ShowMnemonic -> "Unlock to show the 24-word phrase"
-        }
-        viewModel.clearAuthGate()
-        if (SecurityUtils.isDeviceAuthAvailable(activity)) {
-            SecurityUtils.showBiometricPrompt(
-                activity,
-                title,
-                subtitle,
-                onSuccess = { viewModel.executePendingAuth() },
-                onError = { err -> viewModel.reportAuthError(err) }
-            )
-        } else {
-            viewModel.showAuthFallback()
-        }
+    val locked = address.isNotBlank() && lockOnOpen && hasWalletPassword && !sessionUnlocked
+
+    LaunchedEffect(passwordPrompt) {
+        vaultPassword = ""
+        vaultConfirm = ""
     }
 
-    if (authFallback != null) {
+    if (!locked) passwordPrompt?.let { prompt ->
+        val creating = prompt is VaultPasswordPrompt.Create
+        val purpose = when (prompt) {
+            is VaultPasswordPrompt.Create -> prompt.purpose
+            is VaultPasswordPrompt.Enter -> prompt.purpose
+        }
+        val copy = passwordDialogCopy(creating, purpose)
         AlertDialog(
-            onDismissRequest = { viewModel.cancelAuth() },
-            title = { Text("Confirm") },
+            onDismissRequest = { viewModel.dismissPasswordPrompt() },
+            title = { Text(copy.first) },
             text = {
-                Text(
-                    when (authFallback) {
-                        is AuthRequest.SendTokens -> "No biometric or device lock available. Continue with this send?"
-                        AuthRequest.ShowMnemonic -> "No biometric or device lock available. Reveal the recovery phrase?"
-                        null -> ""
+                Column {
+                    Text(copy.second)
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = vaultPassword,
+                        onValueChange = { vaultPassword = it },
+                        label = { Text("Password") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    if (creating) {
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = vaultConfirm,
+                            onValueChange = { vaultConfirm = it },
+                            label = { Text("Confirm password") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
                     }
-                )
+                }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.executePendingAuth() }) { Text("Continue") }
+                TextButton(onClick = {
+                    viewModel.submitVaultPassword(vaultPassword, vaultConfirm)
+                    vaultPassword = ""
+                    vaultConfirm = ""
+                }) {
+                    Text(copy.third)
+                }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.cancelAuth() }) { Text("Cancel") }
+                TextButton(onClick = {
+                    vaultPassword = ""
+                    vaultConfirm = ""
+                    viewModel.dismissPasswordPrompt()
+                }) { Text("Cancel") }
             }
         )
     }
 
     if (address.isEmpty()) {
         OnboardingScreen(viewModel)
+        return
+    }
+
+    if (lockOnOpen && hasWalletPassword && !sessionUnlocked) {
+        AppLockScreen(viewModel)
         return
     }
 
@@ -224,5 +265,57 @@ private fun WalletApp(viewModel: WalletViewModel) {
                 WalletTab.Settings -> SettingsScreen(viewModel)
             }
         }
+    }
+}
+
+private fun passwordDialogCopy(
+    creating: Boolean,
+    purpose: PasswordPurpose
+): Triple<String, String, String> {
+    if (creating) {
+        val body = "At least 8 characters. This password is never stored. It also locks extra wallets on this phone."
+        return Triple("Create wallet password", body, "Save password")
+    }
+    return when (purpose) {
+        PasswordPurpose.Send -> Triple(
+            "Confirm send",
+            "Enter your wallet password to sign this send.",
+            "Send"
+        )
+        PasswordPurpose.Burn -> Triple(
+            "Confirm burn",
+            "Enter your wallet password to permanently destroy this amount.",
+            "Burn"
+        )
+        PasswordPurpose.LaunchL2 -> Triple(
+            "L2 launches closed",
+            "New L2 launches are closed. There is no burn-to-launch.",
+            "OK"
+        )
+        PasswordPurpose.ShowMnemonic -> Triple(
+            "Reveal recovery phrase",
+            "Enter your wallet password to show the 24-word phrase.",
+            "Show"
+        )
+        PasswordPurpose.AppUnlock -> Triple(
+            "Unlock wallet",
+            "Enter your wallet password.",
+            "Unlock"
+        )
+        PasswordPurpose.DisableAppLock -> Triple(
+            "Turn off lock on open",
+            "Enter your wallet password to stop asking at open.",
+            "Turn off"
+        )
+        PasswordPurpose.DisableSendLock -> Triple(
+            "Turn off send password",
+            "Enter your wallet password to send without asking.",
+            "Turn off"
+        )
+        else -> Triple(
+            "Wallet password",
+            "Enter your wallet password.",
+            "Unlock"
+        )
     }
 }

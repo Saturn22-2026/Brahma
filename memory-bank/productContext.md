@@ -1,0 +1,8 @@
+# Product context
+
+Explain **why** this product exists and the experience you want users to have.
+
+- **Problem**: Users need a wallet that can create/recover a Brahma identity, view balances (Brahma, L2 memecoins), mine, claim adoption rewards, and send — talking to a mesh of BRAHMNETWORK L1 nodes rather than one public Ethereum RPC. New L2 launches are closed (no burn-to-launch); the genesis nine stay.
+- **Primary users**: Operators of BRAHMNETWORK nodes and testers with an Android device on the same LAN as at least one peer. The public explainer is `GET /` on the node host (hash routes for Coin / Eight / Rewards / Network / Wallet / Join). `/claim` remains the machine-readable invite page the wallet opens.
+- **UX principles**: Onboarding first if no address; then Home / Send / Receive / Mine / Settings. Dark theme with green accent (`#00FF88`). Show Brahma Coin and L2 **units only** — never a dollar price and never a “no market price” line. Settings has a 14-day inactivity sweep switch and a **Hide balances** switch (also an eye on the Home balance card). Hidden amounts show `••••`. Mine status must match ledger height. App label: Brahma Coin. Footer: `Brahma Coin · BRAHMNETWORK v1.0.33`.
+- **Constraints**: Physical-device LAN RPC is `http://192.168.168.16:8545/` (cleartext HTTP) when the phone is on `192.168.168.*`. Public HTTPS is `https://www.brahmnetwork.com` → origin `http://127.0.0.1:8545` when the tunnel is up; trycloudflare is an ephemeral fallback. `http://127.0.0.1:8545` itself is the tunnel origin, not GSM. Dashboard URLs, `that-host`, and dRPC are not RPC. Emulators still use `http://10.0.2.2:8545/`. Mesh TCP port **18545**, UDP discovery **18547** (or P2P+2). Same-host replica uses P2P **18546** / RPC **8546** / UDP **18548**.

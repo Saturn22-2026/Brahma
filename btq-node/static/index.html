@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BRAHMNETWORK — Creation is mined.</title>
 <meta name="description" content="BRAHMNETWORK — a post-quantum Layer 1. Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone. Private testnet until the launch gates flip. Units only — never dollars.">
-<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23E4AC3F" stroke-width="1.4"><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(45 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(90 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(135 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(180 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(225 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(270 12 12)"/><ellipse cx="12" cy="5.9" rx="2.5" ry="3.9" transform="rotate(315 12 12)"/><circle cx="12" cy="12" r="2.3"/></svg>'>
+<link rel="icon" type="image/png" href="/static/brahma-mark.png">
+<link rel="apple-touch-icon" href="/static/brahma-mark.png">
+<meta property="og:image" content="/static/brahma-brand.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -38,9 +40,15 @@ h2.sec{font:450 clamp(34px,4.6vw,60px)/1.06 var(--serif);letter-spacing:-.015em;
   height:var(--nav);padding:0 28px;border-bottom:1px solid var(--line);
   background:rgba(13,11,8,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
-.brand .mark{display:grid;place-items:center;color:var(--gold)}
+.brand .mark{display:grid;place-items:center;width:34px;height:34px;flex:none}
+.brand .mark img,.f-brand .mark img{width:100%;height:100%;display:block;border-radius:50%;object-fit:cover}
 .brand .bt b{display:block;font:600 17px/1 var(--serif);letter-spacing:.03em}
 .brand .bt small{display:block;font:500 8px var(--mono);letter-spacing:.42em;color:var(--mut);margin-top:3px}
+.f-brand .mark{display:block;width:32px;height:32px;flex:none}
+.hero-brand{position:relative;width:100%;border:1px solid var(--line-strong);overflow:hidden;background:#050A18}
+.hero-brand img{display:block;width:100%;height:auto;min-height:clamp(280px,42vh,520px);object-fit:cover;object-position:center}
+.hero-brand-cap{margin-top:14px;font:400 9px var(--mono);letter-spacing:.24em;color:var(--mut);text-align:center}
+.tk img.tk-mark{width:17px;height:17px;border-radius:50%;object-fit:cover;flex:none}
 .nav{display:flex;gap:22px;align-items:center}
 .nav a{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);text-decoration:none;position:relative;padding:6px 0;transition:color .2s}
 .nav a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s}
@@ -428,8 +436,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 <div class="grain"></div>
 <header class="top">
   <a class="brand" href="#/home">
-    <span class="mark" data-s="27"></span>
-    <span class="bt"><b>BRAHMA</b><small>NETWORK</small></span>
+    <span class="mark"><img src="/static/brahma-mark.png" width="34" height="34" alt=""></span>
+    <span class="bt"><b>BRAHMA COIN</b><small>BRAHMNETWORK</small></span>
   </a>
   <nav class="nav">
     <a href="#/home">Home</a>
@@ -475,11 +483,14 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       </div>
     </div>
     <div class="rv" style="transition-delay:.2s">
-      <div class="orb-wrap" id="orbWrap">
+      <div class="hero-brand">
+        <img src="/static/brahma-brand.jpg" width="1024" height="765" alt="Brahma Coin — BRAHMNETWORK Layer 1">
+      </div>
+      <p class="hero-brand-cap">BRAHMA COIN · BRAHMNETWORK · LAYER 1</p>
+      <div class="orb-wrap" id="orbWrap" hidden aria-hidden="true">
         <canvas id="orbitCanvas"></canvas>
         <div class="orb-tip" id="orbTip"></div>
       </div>
-      <p class="orb-cap">THE BRAHMA SYSTEM — DRAG TO TILT · HOVER A COIN · CLICK TO INSPECT</p>
     </div>
   </div>
 
@@ -504,8 +515,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       </div>
       <div class="mrow rv"><span class="mnum">01 /</span><h3>Post-quantum identity</h3><p>The ledger is a Python node. Wallets sign with Dilithium3 (ML-DSA-65). Addresses are checksummed BRM1G. One Brahma Coin is 100,000,000 base units.</p></div>
       <div class="mrow rv"><span class="mnum">02 /</span><h3>Honest by design</h3><p>This is a private testnet, and the site says so. Before any mainnet claim: two independent operators, a named public host live, and launch explicitly flipped on. Two processes on one PC are not two operators.</p></div>
-      <div class="mrow rv"><span class="mnum">03 /</span><h3>Pools are organs</h3><p>POOL_MINING, POOL_AIRDROP and POOL_DONATION cannot send as a user — they are protocol organs, not wallets you can drain. The donation pool sits locked for 730 days, then moves only by council key with empower cosign.</p></div>
-      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 10% of circulating supply burns 25% of itself. The wallet has an active burn button. Memecoins are retired.</p></div>
+      <div class="mrow rv"><span class="mnum">03 /</span><h3>Pools are organs</h3><p>Mining, adoption, founder, empowerment, and the strategic burn are protocol organs. They cannot send as a user. There is no donation pool.</p></div>
+      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 10% of circulating supply burns 25% of itself. The wallet has an active burn button. The nine L2 memecoins stay on the same blocks.</p></div>
     </div>
   </section>
 
@@ -515,9 +526,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <h2 class="sec rv">From pocket<br>to protocol.</h2>
       <div class="flow">
         <div class="fs rv"><div class="ftx"><i>01</i><b>Download</b><p>Create or recover a Dilithium identity. An app recovery phrase — not BIP-39.</p></div></div>
-        <div class="fs rv" style="transition-delay:.1s"><div class="ftx"><i>02</i><b>Claim</b><p>One join claim per address, paid from the 25,000,000 adoption pool. Referrers get half.</p></div></div>
+        <div class="fs rv" style="transition-delay:.1s"><div class="ftx"><i>02</i><b>Claim</b><p>One join claim per address, paid from the 30,000,000 adoption pool. Referrers get half.</p></div></div>
         <div class="fs rv" style="transition-delay:.2s"><div class="ftx"><i>03</i><b>Mine</b><p>The phone searches ~20 bits of proof of work. The node seals; the reward pays.</p></div></div>
-        <div class="fs rv" style="transition-delay:.3s"><div class="ftx"><i>04</i><b>Halve</b><p>Block reward halves as the network grows. Each halving splits a shared 750M pool of every genesis L2.</p></div></div>
+        <div class="fs rv" style="transition-delay:.3s"><div class="ftx"><i>04</i><b>Halve</b><p>Block reward halves as joined users grow — 0.00014, then 0.00007, then 0.000035, on toward zero.</p></div></div>
       </div>
     </div>
   </section>
@@ -572,24 +583,24 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="alloc-sec rv">
       <p class="overline"><i>—</i>ALLOCATION — EVERY UNIT ACCOUNTED FOR</p>
       <div class="alloc">
-        <div style="width:45%;background:#E4AC3F" title="Mining pool — 45,000,000"></div>
-        <div style="width:25%;background:#C98F2F" title="Adoption / referral pool — 25,000,000"></div>
-        <div style="width:10%;background:#A97622" title="Donation pool — 10,000,000"></div>
+        <div style="width:50%;background:#E4AC3F" title="Mining pool — 50,000,000"></div>
+        <div style="width:30%;background:#C98F2F" title="Adoption / referral pool — 30,000,000"></div>
         <div style="width:10%;background:#8A651E" title="50 genesis wallets — 10,000,000"></div>
-        <div style="width:5%;background:#6E4F1A" title="Empower treasury — 5,000,000"></div>
-        <div style="width:3%;background:#563E18" title="Strategic treasury — 3,000,000"></div>
-        <div style="width:2%;background:#413015" title="Founder treasury — 2,000,000"></div>
+        <div style="width:3%;background:#6E4F1A" title="First 100 wallets — 3,000,000"></div>
+        <div style="width:2%;background:#563E18" title="Next 100 wallets — 2,000,000"></div>
+        <div style="width:3%;background:#413015" title="Strategic burn — 3,000,000"></div>
+        <div style="width:2%;background:#2A1F10" title="Founder — 2,000,000"></div>
       </div>
       <div class="alloc-legend">
-        <div><span class="sw" style="background:#E4AC3F"></span><b>MINING POOL</b><span class="amt">45,000,000</span></div>
-        <div><span class="sw" style="background:#C98F2F"></span><b>ADOPTION / REFERRAL POOL</b><span class="amt">25,000,000</span></div>
-        <div><span class="sw" style="background:#A97622"></span><b>DONATION POOL — LOCKED 730 DAYS</b><span class="amt">10,000,000</span></div>
+        <div><span class="sw" style="background:#E4AC3F"></span><b>MINING POOL</b><span class="amt">50,000,000</span></div>
+        <div><span class="sw" style="background:#C98F2F"></span><b>ADOPTION / REFERRAL POOL</b><span class="amt">30,000,000</span></div>
         <div><span class="sw" style="background:#8A651E"></span><b>50 GENESIS WALLETS × 200,000</b><span class="amt">10,000,000</span></div>
-        <div><span class="sw" style="background:#6E4F1A"></span><b>EMPOWER — PROTOCOL TREASURY</b><span class="amt">5,000,000</span></div>
-        <div><span class="sw" style="background:#563E18"></span><b>STRATEGIC — PROTOCOL TREASURY</b><span class="amt">3,000,000</span></div>
-        <div><span class="sw" style="background:#413015"></span><b>FOUNDER — PROTOCOL TREASURY</b><span class="amt">2,000,000</span></div>
+        <div><span class="sw" style="background:#6E4F1A"></span><b>FIRST 100 WALLETS AFTER MINING</b><span class="amt">3,000,000</span></div>
+        <div><span class="sw" style="background:#563E18"></span><b>NEXT 100 WALLETS AFTER MINING</b><span class="amt">2,000,000</span></div>
+        <div><span class="sw" style="background:#413015"></span><b>STRATEGIC BURN — 100,000 EACH FIRST FRIDAY</b><span class="amt">3,000,000</span></div>
+        <div><span class="sw" style="background:#2A1F10"></span><b>FOUNDER — WALLET 1 WHEN MINING ENDS</b><span class="amt">2,000,000</span></div>
       </div>
-      <p class="snote">POOL_MINING, POOL_AIRDROP AND POOL_DONATION CANNOT SEND AS A USER.<br>THEY ARE PROTOCOL ORGANS, NOT WALLETS YOU CAN DRAIN.</p>
+      <p class="snote">MINING, ADOPTION, FOUNDER, EMPOWERMENT, AND THE STRATEGIC BURN CANNOT SEND AS A USER.<br>WHEN THE MINING POOL EMPTIES, REMAINING OPERATOR-GRANT L2 SPLITS ACROSS JOINED/MINED WALLETS.<br>100,000 BRAHMA LEAVES CIRCULATION ON THE FIRST FRIDAY OF EACH MONTH, UTC. NO PRICE.</p>
     </div>
 
     <section class="alloc-sec rv" style="margin-top:90px">
@@ -608,7 +619,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
           <div class="sched">
             <div><span>FIRST-EVER MINE ON AN ADDRESS</span><b class="gold">BLOCK REWARD + 1 · ONCE (1.00014 WHILE 0.00014)</b></div>
             <div><span>WHILE JOINED USERS ≤ 10,000</span><b class="gold">0.00014 / BLOCK</b></div>
-            <div><span>HALVES EVERY 100,000 JOINS</span><b>0.05 → 0.025 → 0.0125 …</b></div>
+            <div><span>HALVES EVERY 100,000 JOINS AFTER 10,000</span><b>0.00014 → 0.00007 → 0.000035 …</b></div>
             <div><span>AFTER MANY HALVINGS</span><b>REWARD REACHES 0</b></div>
             <div><span>YEARLY CAP</span><b>5,000,000 / YEAR — UNUSED STAYS IN POOL</b></div>
           </div>
@@ -644,12 +655,12 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>03</i>LAYER 2 — TOKENS ON THE SAME BLOCKS</p>
       <h1 class="rv" style="transition-delay:.08s">The <em>Nine.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">Layer 2 here means extra tokens on the same L1 — not a separate chain. The genesis nine were created by a one-time operator grant of 5 billion units each. At every mine-schedule halving, a shared 750,000,000 pool of each genesis L2 is split across those wallets — not 750M each.</p>
+      <p class="lede rv" style="transition-delay:.16s">Layer 2 here means extra tokens on the same L1 — not a separate chain. The genesis nine stay. Each was created by a one-time operator grant of 5 billion units. At every mine-schedule halving, a shared 750,000,000 pool of each genesis L2 is split across joined/mined wallets — not 750M each. When the mining pool is empty, the remaining operator-grant L2 is released and split the same way. New L2 launches are closed.</p>
       <div class="nine-strip rv" style="transition-delay:.24s">
-        <div><b>9</b><span>GENESIS TOKENS</span></div>
+        <div><b>9</b><span>GENESIS TOKENS — STAY</span></div>
         <div><b>5,000,000,000</b><span>UNITS EACH — OPERATOR GRANT</span></div>
-        <div><b>750,000,000</b><span>SHARED POOL PER MINE HALVING</span></div>
-        <div><b>100</b><span>BRAHMA COIN BURN TO LAUNCH AN L2</span></div>
+        <div><b>750,000,000</b><span>SHARED HALVING AIRDROP</span></div>
+        <div><b>CLOSED</b><span>NEW L2 LAUNCHES</span></div>
       </div>
     </div>
     <div class="nine-grid">
@@ -660,10 +671,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 
     <div class="launchl2 rv">
       <div>
-        <h3>Launch your own L2.</h3>
-        <p>Memecoins are retired. Burn Brahma Coin from the wallet. A send over 10% of circulating supply burns 25% of itself.</p>
+        <h3>The nine stay.</h3>
+        <p>New L2 launches are closed — there is no burn-to-launch. Active burn in the wallet still removes Brahma Coin from circulation. A send over 10% of circulating supply burns 25% of itself.</p>
       </div>
-      <div class="burnb">BURN 100<span>BRAHMA COIN — PERMANENT</span></div>
+      <div class="burnb">NINE STAY<span>NO LAUNCH · NO BURN-TO-LAUNCH</span></div>
     </div>
   </div>
 </section>
@@ -671,9 +682,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 <section class="view" id="view-rewards">
   <div class="wrap">
     <div class="page-head compact">
-      <p class="overline rv"><i>04</i>ADOPTION POOL — 25,000,000 BRAHMA COIN</p>
+      <p class="overline rv"><i>04</i>ADOPTION POOL — 30,000,000 BRAHMA COIN</p>
       <h1 class="rv" style="transition-delay:.08s">Early hands<br>eat <em>first.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 25,000,000 adoption pool. One claim per address and one per phone. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the join amount.</p>
+      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 30,000,000 adoption pool. One claim per address and one per phone. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the join amount.</p>
     </div>
 
     <div class="ladder rv" id="ladder">
@@ -710,14 +721,14 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <p class="c-era" id="cEra">TIER II — SECOND WAVE</p>
         <div class="c-row"><i>YOUR JOIN CLAIM</i><b id="cWallet">50</b></div>
         <div class="c-row small"><i>EACH REFERRAL PAYS THE REFERRER</i><b id="cRef">25</b></div>
-        <div class="c-meta" id="cMeta">TIER WINDOW — JOINS 10,001 – 35,000<br>PAID FROM THE 25,000,000 ADOPTION POOL · NODE LIMIT 20 JOINS / HOUR</div>
+        <div class="c-meta" id="cMeta">TIER WINDOW — JOINS 10,001 – 35,000<br>PAID FROM THE 30,000,000 ADOPTION POOL · NODE LIMIT 20 JOINS / HOUR</div>
       </div>
     </div>
 
     <div class="rules">
       <div class="rule rv"><i>ONE PER ADDRESS</i><b>One claim, ever</b><p>The join claim is paid once per address, from the adoption pool. No farming, no resets.</p></div>
-      <div class="rule rv" style="transition-delay:.08s"><i>POOL EMPTY → STOP</i><b>Joins stop paying</b><p>When the 25,000,000 adoption pool runs dry, new joins simply stop paying. The chain doesn't borrow to reward.</p></div>
-      <div class="rule rv" style="transition-delay:.16s"><i>PER HALVING</i><b>750,000,000 × 8</b><p>At every mine-schedule halving, a shared 750,000,000 pool of each genesis L2 is split across wallets that joined or mined — not Brahma Coin.</p></div>
+      <div class="rule rv" style="transition-delay:.08s"><i>POOL EMPTY → STOP</i><b>Joins stop paying</b><p>When the 30,000,000 adoption pool runs dry, new joins simply stop paying. The chain doesn't borrow to reward.</p></div>
+      <div class="rule rv" style="transition-delay:.16s"><i>L2</i><b>NINE STAY · 750M SHARED</b><p>The nine genesis L2 tokens remain. At every mine-schedule halving, a shared 750,000,000 pool of each is split across joined/mined wallets. When mining L1 is gone, the remaining operator-grant L2 releases the same way. New L2 launches are closed.</p></div>
     </div>
 
     <div class="forge rv" style="margin-top:100px;margin-bottom:110px">
@@ -810,7 +821,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 <section class="view" id="view-wallet">
   <div class="wrap">
     <div class="page-head compact">
-      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.34</p>
+      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.53</p>
       <h1 class="rv" style="transition-delay:.08s">The chain,<br>in a <em>pocket.</em></h1>
       <p class="lede rv" style="transition-delay:.16s">The app is called Brahma Coin. It signs with Dilithium3, searches real proof of work on the phone, seals over RPC or mesh, and never shows a price — because there isn't one. The phone below is a bit-search demo: real SHA-256 in this tab, not the node's block header.</p>
       <p class="rv" style="margin-top:28px"><span class="chip">BIT-SEARCH DEMO — REAL SHA-256 IN THIS TAB · NOT THE NODE HEADER</span></p>
@@ -820,7 +831,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="rv">
         <div class="phone">
           <div class="scr" id="scr">
-            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.34</span></div>
+            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.53</span></div>
             <div class="ptabs">
               <button class="ptab on" data-pt="home">HOME</button>
               <button class="ptab" data-pt="mine">MINE</button>
@@ -840,7 +851,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
               <div class="homerow"><span>REWARD NOW</span><b id="rewNow">0.00014 / BLOCK</b></div>
               <div class="homerow"><span>SIM HEIGHT</span><b id="netH">1,024,809</b></div>
               <div class="homerow"><span>SIM JOINED</span><b id="netJ">8,412</b></div>
-              <p class="l2note">L2 AIRDROP — 750,000,000 SHARED × 9 GENESIS TOKENS<br>SPLIT ACROSS JOINED/MINED WALLETS AT EACH MINE HALVING · HIDE L1 AND L2 SEPARATELY; NEXT-MINE STAYS VISIBLE.</p>
+              <p class="l2note">L2 — NINE GENESIS TOKENS STAY · 750,000,000 SHARED PER HALVING<br>HIDE L1 AND L2 SEPARATELY · NEXT-MINE STAYS VISIBLE · JOIN 100 · REFERRER 50</p>
             </div>
             <div class="pbody hidden" id="pt-mine">
               <div class="lblrow"><span>DIFFICULTY — BITS (NODE RANGE 18–24)</span><span id="tgtEl">2^20</span></div>
@@ -888,11 +899,11 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <div class="net-row">
           <div><b>~8 s</b><span>BLOCK TARGET (RETARGET)</span></div>
           <div><b>5,000,000</b><span>YEARLY MINE CAP</span></div>
-          <div><b>45,000,000</b><span>MINING POOL, ALL YEARS</span></div>
+          <div><b>50,000,000</b><span>MINING POOL, ALL YEARS</span></div>
         </div>
         <div class="scrtable">
           <div><i>ONBOARDING</i><p>Create or recover a Dilithium identity — app recovery phrase, not BIP-39.</p></div>
-          <div><i>HOME</i><p>Brahma Coin + L2 balances, claim adoption, launch L2, share invite.</p></div>
+          <div><i>HOME</i><p>Brahma Coin + L2 balances, claim adoption, share invite.</p></div>
           <div><i>SEND</i><p>Transfer Brahma Coin or an L2. Whale tax applies to Brahma Coin only.</p></div>
           <div><i>RECEIVE</i><p>Address + QR.</p></div>
           <div><i>MINE</i><p>Local proof of work, then seal over RPC or mesh gossip.</p></div>
@@ -909,6 +920,11 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <p class="overline rv"><i>07</i>GENESIS ACCESS</p>
       <h1 class="rv" style="transition-delay:.08s">Ready before<br>the <em>flip.</em></h1>
       <p class="lede rv" style="transition-delay:.16s">There is no countdown, because public launch is FALSE — and this site doesn't lie. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.</p>
+      <div id="claimInvite" class="rv" style="display:none;margin-top:28px">
+        <p class="chip" id="claimInviteChip">INVITE LINK</p>
+        <p id="claimInviteText" style="margin-top:12px"></p>
+        <p style="margin-top:16px"><a class="dl" id="claimOpenApp" href="#"><span><small>OPEN APP</small><b>Claim in Brahma Coin wallet</b></span></a></p>
+      </div>
       <div class="checklist rv" style="transition-delay:.24s">
         <div><span class="cbox"></span><span><b>Two independent operators</b><p>Separate humans, separate machines — two processes on one PC are not two operators.</p></span><span class="st">PENDING</span></div>
         <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com forwarding to the node origin at http://127.0.0.1:8545.</p></span><span class="st">PENDING</span></div>
@@ -921,7 +937,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.6v16.8c0 .5.5.8.9.5l10-8.2c.3-.3.3-.8 0-1.1l-10-8.4c-.4-.3-.9 0-.9.4z"/></svg>
         <span><small>DIRECT DOWNLOAD</small><b>Android APK</b></span>
       </a>
-      <span class="dl-note">ANDROID FIRST — BUILD 1.0.34 · APP LABEL: BRAHMA COIN · OPENS /wallet.apk</span>
+      <span class="dl-note">ANDROID — BUILD 1.0.53 · SIGNS THE 3,293-BYTE DILITHIUM3 THE CHAIN ACCEPTS · IF 1.0.36 IS INSTALLED, UNINSTALL IT, THEN INSTALL THIS AND RECOVER THE PHRASE · JOIN PAYS 100, REFERRER 50</span>
     </div>
 
     <div class="faq">
@@ -929,15 +945,15 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="fq rv"><button class="fq-q">How does it get value?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         <div class="fq-a"><div><p>It does not have a market value. Users grow units by mining and adoption. A price would be a later market — not something the node or the wallet shows. This site shows units only.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">Is mining like Bitcoin?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Same idea — work plus a sealed chain. Different numbers: ~20-bit phone proof of work, ~8 second blocks, a 100,000,000 cap, a 5,000,000 yearly mine cap, an adoption pool, and permanent burns for L2 launches.</p></div></div></div>
+        <div class="fq-a"><div><p>Same idea — work plus a sealed chain. Different numbers: ~20-bit phone proof of work, ~8 second blocks, a 100,000,000 cap, a 5,000,000 yearly mine cap, an adoption pool, and whale-tax burns on oversized Brahma sends.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">Can I use it on mobile data?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Yes, if https://www.brahmnetwork.com actually reaches the node. On operator Wi-Fi the wallet still prefers the LAN node at http://192.168.168.16:8545.</p></div></div></div>
+        <div class="fq-a"><div><p>Yes. The release wallet mines through https://www.brahmnetwork.com, including on home Wi-Fi. A debug build on operator Wi-Fi tries the LAN node first, then the same public host.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">What if I have no internet at all?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         <div class="fq-a"><div><p>The phone signs and searches proof of work offline, then gossips the signed packet over Sentinel mesh — LAN TCP 18545, Bluetooth, Wi-Fi Aware. A node that hears the packet seals it. Gossip is not payment; the block is payment.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">What happens at a halving?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Two things. The mine schedule halves per the join ladder — 0.00014 becomes 0.00007, then 0.000035, on toward zero. And a shared 750,000,000 pool of each of the nine genesis L2 tokens is split across those wallets.</p></div></div></div>
-      <div class="fq rv"><button class="fq-q">How do I launch my own L2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>Use the Burn button in the wallet. The amount leaves circulation and cannot be returned. A send over 10% of circulating supply also burns 25% of that send.</p></div></div></div>
+        <div class="fq-a"><div><p>The mine schedule halves per the join ladder — 0.00014 becomes 0.00007, then 0.000035, on toward zero. And a shared 750,000,000 pool of each of the nine genesis L2 tokens is split across wallets that joined or mined — not 750M each.</p></div></div></div>
+      <div class="fq rv"><button class="fq-q">Can I launch my own L2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="fq-a"><div><p>No. New L2 launches are closed — there is no burn-to-launch. The nine genesis tokens stay. Use the Burn button only to permanently remove Brahma Coin. A send over 10% of circulating supply also burns 25% of that send.</p></div></div></div>
     </div>
 
     <p class="fine rv">BRAHMNETWORK IS A PRIVATE TESTNET. NO EXCHANGE, NO USD, NO MARKET PRICE — UNITS ONLY. NO PAUSE OR MINT BY AN OWNER. NOT DECENTRALIZED UNTIL TWO INDEPENDENT OPERATORS, A LIVE NAMED HOST, AND AN EXPLICIT LAUNCH FLIP EXIST. NOTHING HERE IS INVESTMENT ADVICE. CREATE RESPONSIBLY.</p>
@@ -949,7 +965,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   <div class="wrap">
     <div class="f-grid">
       <div>
-        <div class="f-brand"><span class="mark" data-s="26"></span><span><b>BRAHMA</b><small>NETWORK</small></span></div>
+        <div class="f-brand"><span class="mark"><img src="/static/brahma-mark.png" width="32" height="32" alt=""></span><span><b>BRAHMA COIN</b><small>BRAHMNETWORK</small></span></div>
         <p class="f-disc">A post-quantum Layer 1 — Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone, nine L2 tokens on the same blocks. Private testnet until the gates flip. Units only, never dollars.</p>
       </div>
       <div class="f-links">

@@ -20,12 +20,73 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     val mnemonic by viewModel.mnemonic.collectAsState()
     val isHardwareCold by viewModel.isHardwareColdStorage.collectAsState()
     val hideL1Balances by viewModel.hideL1Balances.collectAsState()
+    val hideL2Balances by viewModel.hideL2Balances.collectAsState()
     var recoveryPhrase by remember { mutableStateOf("") }
     var showCreateDialog by remember { mutableStateOf(false) }
     var showRecoverDialog by remember { mutableStateOf(false) }
     val isVisible by viewModel.isMnemonicVisible.collectAsState()
+    val hostsMany by viewModel.hostsManyWallets.collectAsState()
+    val canManageVault by viewModel.canManageVault.collectAsState()
+    val walletAddress by viewModel.address.collectAsState()
+    val walletSlots by viewModel.walletSlots.collectAsState()
+    val canReturn by viewModel.canReturnToPrimary.collectAsState()
+    val walletStatus by viewModel.status.collectAsState()
+    val separateLocked by viewModel.separateWalletsLocked.collectAsState()
+
+    val lockOnOpen by viewModel.lockOnOpen.collectAsState()
+    val sendLock by viewModel.sendLock.collectAsState()
 
     Text("Security & Recovery", style = MaterialTheme.typography.headlineSmall)
+    Spacer(Modifier.height(16.dp))
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF111111))
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Lock, null, tint = if (lockOnOpen) Color(0xFF00FF88) else Color.Gray)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Lock wallet on open", fontWeight = FontWeight.Bold)
+                Text(
+                    "Ask for the wallet password whenever you leave the app.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+            }
+            Switch(
+                checked = lockOnOpen,
+                onCheckedChange = { viewModel.setLockOnOpen(it) },
+                colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00FF88))
+            )
+        }
+    }
+
+    Spacer(Modifier.height(16.dp))
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF111111))
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Send, null, tint = if (sendLock) Color(0xFF00FF88) else Color.Gray)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Require password to send", fontWeight = FontWeight.Bold)
+                Text(
+                    "Every L1 and L2 send and burn asks for the wallet password. There is no skip.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+            }
+            Switch(
+                checked = sendLock,
+                onCheckedChange = { viewModel.setSendLock(it) },
+                colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00FF88))
+            )
+        }
+    }
+
     Spacer(Modifier.height(16.dp))
 
     val rpcUrl by viewModel.rpcUrl.collectAsState()
@@ -100,6 +161,31 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
             Switch(
                 checked = hideL1Balances,
                 onCheckedChange = { viewModel.setHideL1Balances(it) },
+                colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00FF88))
+            )
+        }
+    }
+
+    Spacer(Modifier.height(16.dp))
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF111111))
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.VisibilityOff, null, tint = if (hideL2Balances) Color(0xFF00FF88) else Color.Gray)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Hide L2 memecoins", fontWeight = FontWeight.Bold)
+                Text(
+                    "Hides Amrith, Kiaan, Alesha, BoujieClique, QuarterMile, Bonn, 5thAvenue, Thiro, and Santi on Home.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+            }
+            Switch(
+                checked = hideL2Balances,
+                onCheckedChange = { viewModel.setHideL2Balances(it) },
                 colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00FF88))
             )
         }
@@ -220,6 +306,55 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     HorizontalDivider(color = Color(0xFF222222))
     Spacer(Modifier.height(24.dp))
 
+    if (walletSlots.size > 1) {
+        Text("Wallets on this device", style = MaterialTheme.typography.titleMedium, color = Color(0xFF00FF88))
+        Text(
+            if (separateLocked) {
+                "The other wallets are locked. Opening one asks for the password. The first wallet does not. ${walletSlots.size} of ${com.brahmnetwork.wallet.DeviceWallets.MAX}."
+            } else {
+                "Set a password before opening another wallet. The first wallet stays unlocked. ${walletSlots.size} of ${com.brahmnetwork.wallet.DeviceWallets.MAX}."
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
+        if (!separateLocked) {
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { viewModel.requestVaultPassword() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FF88), contentColor = Color.Black)
+            ) {
+                Text("Set a password for the other wallets")
+            }
+        }
+        if (walletStatus.contains("wallet", ignoreCase = true)) {
+            Spacer(Modifier.height(8.dp))
+            Text(walletStatus, style = MaterialTheme.typography.bodySmall, color = Color(0xFF00FF88))
+        }
+        Spacer(Modifier.height(8.dp))
+        WalletAddressMenu(viewModel)
+        Spacer(Modifier.height(24.dp))
+        HorizontalDivider(color = Color(0xFF222222))
+        Spacer(Modifier.height(24.dp))
+    }
+
+    if (canReturn) {
+        Button(
+            onClick = { viewModel.switchDeviceWallet(viewModel.primaryWalletAddress()) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FF88), contentColor = Color.Black)
+        ) {
+            Text("Return to the first wallet")
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Only the first wallet on this device can add the other wallets.",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
+        Spacer(Modifier.height(24.dp))
+    }
+
     Text("Import Existing Wallet", style = MaterialTheme.typography.titleMedium, color = Color.White)
     OutlinedTextField(
         value = recoveryPhrase,
@@ -237,11 +372,14 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     )
     Spacer(Modifier.height(12.dp))
     Button(
-        onClick = { if (recoveryPhrase.isNotEmpty()) showRecoverDialog = true },
+        onClick = {
+            if (recoveryPhrase.isEmpty()) return@Button
+            if (walletAddress.isNotBlank()) viewModel.recoverWallet(recoveryPhrase, false) else showRecoverDialog = true
+        },
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
     ) {
-        Text("Recover Identity")
+        Text(if (walletAddress.isNotBlank()) "Add this phrase to the 60" else "Recover Identity")
     }
 
     if (showRecoverDialog) {
@@ -263,6 +401,29 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     }
 
     Spacer(Modifier.height(40.dp))
+    when {
+        canManageVault -> TextButton(
+            onClick = { viewModel.createWallet(true, false) },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(
+                "Add a wallet (${walletSlots.size}/${com.brahmnetwork.wallet.DeviceWallets.MAX})",
+                color = Color.Red
+            )
+        }
+        !hostsMany -> TextButton(
+            onClick = { showCreateDialog = true },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Generate Brand New Identity", color = Color.Red)
+        }
+        else -> Text(
+            "Only the first wallet can add wallets. Return to the first wallet to add more.",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 16.dp)
+        )
+    }
 
     OutlinedButton(
         onClick = {
@@ -275,13 +436,6 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     }
 
     Spacer(Modifier.height(12.dp))
-    TextButton(
-        onClick = { showCreateDialog = true },
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-    ) {
-        Text("Generate Brand New Identity", color = Color.Red)
-    }
-
     TextButton(
         onClick = { viewModel.wipeWallet() },
         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -309,7 +463,7 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
 
     Spacer(Modifier.height(48.dp))
     Text(
-        text = "Brahma Coin · BRAHMNETWORK v1.0.34",
+        text = "Brahma Coin · BRAHMNETWORK v1.0.52",
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.labelSmall,
         color = Color.DarkGray,
