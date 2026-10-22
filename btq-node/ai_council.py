@@ -32,6 +32,8 @@ L2_BOOTSTRAP_IDS = tuple(str(i) for i in range(1, 10))
 # Distinct inbound senders before the hub address is wiped (anti scrap-phone farm).
 CONSOLIDATION_BURN_SENDERS = 6
 NEW_WALLET_JOIN_BRAH = 100.0
+# Whole units of each genesis memecoin credited on first join.
+NEW_WALLET_JOIN_L2 = 1_000
 
 
 def mine_halving_band(joined_count: int) -> int:

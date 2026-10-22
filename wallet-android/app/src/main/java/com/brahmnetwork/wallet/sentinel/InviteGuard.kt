@@ -33,6 +33,7 @@ object InviteGuard {
             if (!CryptoManager.sameWalletAddress(crypto.deriveAddress(pk), ref)) return false
             val sig = CryptoManager.fromHex(sigHex)
             crypto.verify(pk, CryptoManager.inviteCanonical(ref, claim, apk, ts), sig)
+                || crypto.verify(pk, "BRMINVITE|$ref|$claim|$apk|$ts".toByteArray(Charsets.UTF_8), sig)
                 || crypto.verify(pk, "BTQINVITE|$ref|$claim|$apk|$ts".toByteArray(Charsets.UTF_8), sig)
         } catch (_: Exception) {
             false

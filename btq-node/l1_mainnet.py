@@ -2049,9 +2049,9 @@ def load_or_init():
 
 
 def canonical_rpc_method(method) -> str:
-    """Map legacy btq_* RPC names to brah_*. Leave brah_* and eth_* unchanged."""
+    """Map brm_* / legacy btq_* RPC names to brah_*. Leave brah_* and eth_* unchanged."""
     name = str(method or "")
-    if name.startswith("btq_"):
+    if name.startswith("brm_") or name.startswith("btq_"):
         return "brah_" + name[4:]
     return name
 

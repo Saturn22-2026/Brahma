@@ -4,7 +4,8 @@ Wallet signs with BouncyCastle Dilithium3 (labeled ML-DSA-65 in the app).
 The node refuses a spend unless the public key hashes to from-address and
 the Dilithium3 signature checks over the canonical message.
 Canonical addresses are BRM1G. Canonical message is BRAH1|.
-Older BTQ1G / BTQ1| / BTQHELLO / BTQINVITE forms still verify so height-8
+Also accept BRM1| / BRMHELLO / BRMINVITE (brm rename aliases).
+Older BTQ1G / BTQ1| / BTQHELLO / BTQINVITE forms still verify so existing
 history and old phones do not fork.
 """
 from __future__ import annotations
@@ -37,11 +38,17 @@ ADDR_PREFIX = "BRM1G"
 LEGACY_ADDR_PREFIX = "BTQ1G"
 ADDR_PREFIXES = (ADDR_PREFIX, LEGACY_ADDR_PREFIX)
 MSG_PREFIX = "BRAH1|"
+BRM_MSG_PREFIX = "BRM1|"
 LEGACY_MSG_PREFIX = "BTQ1|"
+MSG_PREFIXES = (MSG_PREFIX, BRM_MSG_PREFIX, LEGACY_MSG_PREFIX)
 HELLO_PREFIX = "BRAHHELLO"
+BRM_HELLO_PREFIX = "BRMHELLO"
 LEGACY_HELLO_PREFIX = "BTQHELLO"
+HELLO_PREFIXES = (HELLO_PREFIX, BRM_HELLO_PREFIX, LEGACY_HELLO_PREFIX)
 INVITE_PREFIX = "BRAHINVITE"
+BRM_INVITE_PREFIX = "BRMINVITE"
 LEGACY_INVITE_PREFIX = "BTQINVITE"
+INVITE_PREFIXES = (INVITE_PREFIX, BRM_INVITE_PREFIX, LEGACY_INVITE_PREFIX)
 
 
 def _addr_body(pk: bytes) -> str:
@@ -83,6 +90,21 @@ def pubkey_matches_address(pk: bytes, addr: str) -> bool:
     if addr == prefix + body:
         return True
     return addr == prefix + body + _addr_checksum(body, prefix)
+
+
+def assert_key_owns_address(from_addr: str, public_key_hex: str) -> None:
+    """Refuse spends whose public key does not hash to from (either HRP)."""
+    pk = _parse_hex(public_key_hex)
+    if pubkey_matches_address(pk, from_addr):
+        return
+    try:
+        if pubkey_matches_address(pk, normalize_address(from_addr)):
+            return
+        if pubkey_matches_address(pk, sibling_address(from_addr)):
+            return
+    except ValueError:
+        pass
+    raise ValueError("Public key does not match from address")
 
 
 def is_brah_address(addr: str) -> bool:
@@ -165,14 +187,12 @@ def matching_canonical_message(
     signature_hex: str = "",
     require_sig: bool = False,
 ) -> bytes:
-    """Prefer BRAH1|; accept a BTQ1| signature so existing blocks still ingest."""
+    """Prefer BRAH1|; also accept BRM1| and legacy BTQ1| signatures."""
     candidates = [
         _format_canonical_message(
-            MSG_PREFIX, chain_id, nonce, kind, from_addr, to_addr, asset, amount_units, memo
-        ),
-        _format_canonical_message(
-            LEGACY_MSG_PREFIX, chain_id, nonce, kind, from_addr, to_addr, asset, amount_units, memo
-        ),
+            prefix, chain_id, nonce, kind, from_addr, to_addr, asset, amount_units, memo
+        )
+        for prefix in MSG_PREFIXES
     ]
     if public_key_hex and signature_hex:
         pk = _parse_hex(public_key_hex)
@@ -193,20 +213,46 @@ def _parse_hex(value: str) -> bytes:
 
 
 _BC_ROOT = Path(__file__).resolve().parent
-_BC_JAR = env(
-    "BCPROV_JAR",
+_BC_JAVA_FALLBACK = r"C:\Users\Navesh\.jdks\jbr-17.0.14\bin\java.exe"
+_BC_JAR_FALLBACKS = (
+    str(_BC_ROOT / "bcprov-jdk18on-1.72.jar"),
+    r"C:\Users\Navesh\.gradle\caches\modules-2\files-2.1\org.bouncycastle\bcprov-jdk18on\1.72\d8dc62c28a3497d29c93fee3e71c00b27dff41b4\bcprov-jdk18on-1.72.jar",
     r"C:\Users\Navesh\.gradle\caches\modules-2\files-2.1\org.bouncycastle\bcprov-jdk18on\1.78.1\39e9e45359e20998eb79c1828751f94a818d25f8\bcprov-jdk18on-1.78.1.jar",
 )
-_BC_JAVA = env(
-    "JAVA",
-    r"C:\Users\Navesh\.jdks\jbr-17.0.14\bin\java.exe",
-)
+
+
+def bouncycastle_classpath(root, jar: str) -> str:
+    """Classpath for bc_verify: node dir + jar, joined with the OS separator."""
+    return os.pathsep.join([str(root), str(jar)])
+
+
+def bouncycastle_java() -> str:
+    """Prefer BRAH_JAVA / BRM_JAVA / BTQ_JAVA when the path exists; else JBR 17 or java on PATH."""
+    preferred = env("JAVA")
+    if preferred and Path(preferred).exists():
+        return preferred
+    if Path(_BC_JAVA_FALLBACK).exists():
+        return _BC_JAVA_FALLBACK
+    return "java"
+
+
+def bouncycastle_jar() -> str | None:
+    """Prefer BRAH_BCPROV_JAR when present; else 1.72 beside the node, then known cache paths."""
+    preferred = env("BCPROV_JAR")
+    if preferred and Path(preferred).exists():
+        return preferred
+    for path in _BC_JAR_FALLBACKS:
+        if Path(path).exists():
+            return path
+    return preferred
 
 
 def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
-    """Wallet signs with BC Dilithium3 (3309-byte sig). dilithium-py cannot check those."""
+    """Wallet signs with BC Dilithium3. dilithium-py cannot check those."""
     cls = _BC_ROOT / "bc_verify.class"
-    if not cls.exists() or not Path(_BC_JAVA).exists() or not Path(_BC_JAR).exists():
+    java = bouncycastle_java()
+    jar = bouncycastle_jar()
+    if not cls.exists() or not jar or not Path(java).exists() or not Path(jar).exists():
         return False
     try:
         with tempfile.TemporaryDirectory(prefix="brah-bc-") as tmp:
@@ -214,10 +260,10 @@ def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
             (t / "pk.hex").write_text(pk.hex(), encoding="ascii")
             (t / "sig.hex").write_text(signature.hex(), encoding="ascii")
             (t / "msg.hex").write_text(message.hex(), encoding="ascii")
-            cp = f"{_BC_ROOT};{_BC_JAR}"
+            cp = bouncycastle_classpath(_BC_ROOT, jar)
             proc = subprocess.run(
                 [
-                    _BC_JAVA,
+                    java,
                     "-cp",
                     cp,
                     "bc_verify",
@@ -340,7 +386,7 @@ def verify_invite(payload: dict, now: int | None = None) -> bool:
         return False
     pk_hex = str(payload.get("public_key") or "")
     sig_hex = str(payload.get("signature") or "")
-    for prefix in (INVITE_PREFIX, LEGACY_INVITE_PREFIX):
+    for prefix in INVITE_PREFIXES:
         msg = f"{prefix}|{ref}|{claim}|{apk}|{int(ts)}".encode("utf-8")
         try:
             verify_spend(ref, pk_hex, sig_hex, msg)
@@ -371,7 +417,7 @@ def verify_hello(payload: dict, now: int | None = None) -> bool:
         sig = _parse_hex(str(payload.get("signature") or ""))
     except ValueError:
         return False
-    for prefix in (HELLO_PREFIX, LEGACY_HELLO_PREFIX):
+    for prefix in HELLO_PREFIXES:
         msg = f"{prefix}|{node}|{int(port)}|{int(ts)}".encode("utf-8")
         if verify_dilithium3(pk, msg, sig):
             return True

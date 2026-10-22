@@ -5,13 +5,21 @@ globs: wallet-android/**/*.{kt,xml,kts},btq-node/**/*.{py,json},memory-bank/**/*
 
 Coin display name is **Brahma Coin**. L1 network name is **BRAHMNETWORK**. Public HTTPS is `https://www.brahmnetwork.com`.
 
-Keep (changing these breaks the live ledger or the installed app):
+Prefer **BRM** / **BRAH** / **Brahma** in new code and docs. Keep **BTQ** acceptance so the live ledger and old phones do not fork. Inventory: `docs/BRM_RENAME.md`.
 
-- JSON-RPC methods `btq_*`
-- Android `applicationId` / package `com.btq.wallet`
-- Folders `btq-node/`, `btq-data/` and env `BTQ_*`
-- Canonical message prefix `BTQ1|`
-- Mesh prefixes `BTQINVITE`, `BTQHELLO`, `BTQF`
+Keep (changing these breaks the live ledger or installed apps):
+
+- Folders `btq-node/`, `btq-data/` and install paths `/opt/btq`, `/var/lib/btq` (disk rename is a separate cutover)
 - Live balance keys that already start with `BTQ1G`
+- Legacy accept forever (or until hard fork): `BTQ1|`, `BTQHELLO`, `BTQINVITE`, `BTQF`, RPC `btq_*`, env `BTQ_*`
+- Android `applicationId` / package `com.brahmnetwork.wallet` (do not revert to `com.btq.wallet`)
 
-New wallets derive `BRM1G`. `is_btq_address` / `isBtqAddress` accept both. Same body under either HRP is one account. Do not rewrite `btq-data` chain/state.
+Aliases (already wired — emit canonical BRAH/BRM, accept all three where listed):
+
+- JSON-RPC: `brah_*` canonical; `brm_*` and `btq_*` map to `brah_*`
+- Env: `BRAH_*` → `BRM_*` → `BTQ_*`
+- Message verify: `BRAH1|`, `BRM1|`, `BTQ1|`
+- Mesh: emit `BRAHHELLO` / `BRAHINVITE` / `BRAHF`; accept `BRMHELLO` / `BRMINVITE` / `BRMF` and BTQ forms
+- Addresses: new wallets derive `BRM1G`; `is_btq_address` / `isBtqAddress` accept both. Same body under either HRP is one account.
+
+Do not rewrite `btq-data` chain/state. Systemd alias unit: `brm-l1.service` (same paths as `btq-l1.service`).

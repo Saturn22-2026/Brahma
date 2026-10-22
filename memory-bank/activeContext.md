@@ -6,6 +6,9 @@ Coin is **Brahma Coin**, L1 is **BRAHMNETWORK**. Parallel, isolated work: `polym
 
 **Latest (policy + download)**:
 
+- **US/EU/PRC compliance refresh (2026-10-22):** `docs/COMPLIANCE_GAP_PACK.md` + canvas now include **China (PRC)** as prohibition / out-of-market (Feb 2026 eight-dept notice: no onshore VC business, mining ban, no illegal offshore→境内 service). US/EU rows refreshed (MiCA Art. 59, OFAC, GENIUS N/A). `AUDIT_READINESS` condition **#9** + §H geo-exclusion residual. Not legal advice; geo/ToS blocks not shipped in code.
+- **BTQ→BRM aliases (2026-10-22):** Prefer BRM/BRAH without forking the live ledger. `envutil`: `BRAH_`→`BRM_`→`BTQ_`. RPC `brm_*`/`btq_*`→`brah_*`. Crypto + wallet mesh accept `BRM1|`/`BRMHELLO`/`BRMINVITE`/`BRMF` alongside BRAH/BTQ. `brm-l1.service` alias unit. Inventory: `docs/BRM_RENAME.md`. Folders `btq-node`/`btq-data` and live `BTQ1G` keys stay.
+- **White paper + audit close-out (2026-10-22):** `docs/WHITEPAPER.md`, `docs/PRIVACY_POLICY.md`, `docs/AUDIT_READINESS.md`; public `/static/whitepaper.html` + `/static/privacy.html`; site footer links. Eight compliance gaps tracked: drafts close white paper/privacy/launch-policy/perimeter memo; AML/KYC/OFAC still need licences/vendors. **Launch truth:** live `brah_getStats.public_launch` must match marketing — if site says private testnet, unset `BRAH_PUBLIC_LAUNCH` on the public VPS or update copy.
 - **L2 launches closed (2026-10-22):** No new L2 launches and no burn-to-launch. `launch_l2` / `brah_launchL2` / parse refuse with “New L2 launches are closed”. Stats `l2_launch_burn=0`, `l2_launches_closed=true`. Wallet `launchL2` fails closed. Site/README updated. Genesis nine + 750M shared halving airdrop + mining-empty L2 release stay. Active Brah burn button stays.
 - **README synced (2026-10-22):** Root README matches economics v2 + 750M shared L2 halving airdrop + mining-empty L2 release + whale tax at **10%** + new L2 launches closed.
 - **L2 release on mining empty (2026-10-22):** When `POOL_MINING` hits 0, `maybe_release_l2_on_mining_empty` splits remaining operator-grant L2 (up to 5B each genesis token) across joined/mined wallets once (`l2_mining_empty_released`). Runs with settle/apply_l2_credits. Site copy updated.
@@ -60,7 +63,7 @@ Coin is **Brahma Coin**, L1 is **BRAHMNETWORK**. Parallel, isolated work: `polym
 **Decisions (recent)**:
 
 - Coin display name is Brahma. Network name is BRAHMNETWORK. Public HTTPS is `https://www.brahmnetwork.com`.
-- Keep `brah_*` RPC, `BTQ1|` messages, `com.brah.wallet`, `BRAH_*` env, mesh prefixes (`BTQINVITE`, `BTQHELLO`, `BrahF`).
+- Prefer BRM/BRAH; keep BTQ accept. Canonical RPC `brah_*` (aliases `brm_*`/`btq_*`). Env `BRAH_*`→`BRM_*`→`BTQ_*`. Emit `BRAH1|`/`BRAHHELLO`/`BRAHF`; accept BRM+BTQ forms. Package `com.brahmnetwork.wallet`. See `docs/BRM_RENAME.md`.
 - New wallets `BRM1G`. Existing `BTQ1G` balances stay. Same body under either HRP is one account.
 - 100M cap stays. Users grow Brahma by mining at **0.00014 / block** (then half every 100,000 joins after 10,000). Referrals + join tiers + L2 memecoin halvings stay for adoption.
 - Offline: sign + PoW locally after one online sync; gossip until a node seals.

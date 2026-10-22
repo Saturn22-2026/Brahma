@@ -25,7 +25,7 @@ class MeshAssembler {
 
     fun accept(message: ByteArray): String? {
         val text = String(message, Charsets.UTF_8)
-        if (!text.startsWith("BRAHF|") && !text.startsWith("BTQF|")) {
+        if (!text.startsWith("BRAHF|") && !text.startsWith("BRMF|") && !text.startsWith("BTQF|")) {
             return text
         }
         val parts = text.split("|", limit = 5)

@@ -165,6 +165,8 @@ class LaunchGates(unittest.TestCase):
         self.assertEqual(canonical_rpc_method("brah_getAccount"), "brah_getAccount")
         self.assertEqual(canonical_rpc_method("brah_getAccount"), "brah_getAccount")
         self.assertEqual(canonical_rpc_method("brah_submitTx"), "brah_submitTx")
+        self.assertEqual(canonical_rpc_method("brm_getAccount"), "brah_getAccount")
+        self.assertEqual(canonical_rpc_method("btq_submitTx"), "brah_submitTx")
         self.assertEqual(canonical_rpc_method("eth_getBalance"), "eth_getBalance")
 
     def test_bind_referrer_after_join_without_memo(self):

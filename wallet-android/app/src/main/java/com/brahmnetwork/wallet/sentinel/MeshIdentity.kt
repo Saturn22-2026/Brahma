@@ -44,6 +44,7 @@ class MeshIdentity private constructor(
             val pk = CryptoManager.fromHex(publicKeyHex)
             val sig = CryptoManager.fromHex(signatureHex)
             crypto.verify(pk, MeshHello.canonical(nodeId, tcpPort, ts), sig)
+                || crypto.verify(pk, MeshHello.canonical(nodeId, tcpPort, ts, "BRMHELLO"), sig)
                 || crypto.verify(pk, MeshHello.canonical(nodeId, tcpPort, ts, "BTQHELLO"), sig)
         } catch (_: Exception) {
             false

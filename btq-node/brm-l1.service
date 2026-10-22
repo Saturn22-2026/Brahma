@@ -1,0 +1,25 @@
+[Unit]
+Description=BRAHMNETWORK Python L1 operator node (brm-l1 alias)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=btq
+Group=btq
+WorkingDirectory=/opt/btq/btq-node
+Environment=BRAH_DATA_DIR=/var/lib/btq
+Environment=BRAH_BIND=127.0.0.1
+Environment=BRAH_RPC_PORT=8545
+Environment=BRAH_P2P_PORT=18545
+Environment=BRAH_EXPLORER=0
+Environment=BRAH_SERVE_APK=1
+# Paths stay under /opt/btq until a coordinated disk rename. Prefer BRAH_* or BRM_* env.
+# Do not set BRAH_PUBLIC_RPC to http://127.0.0.1:8545 — that is the cloudflared origin only.
+ExecStart=/usr/bin/python3 -u /opt/btq/btq-node/l1_mainnet.py
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

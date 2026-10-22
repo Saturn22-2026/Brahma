@@ -87,6 +87,18 @@ cd wallet-android
 .\gradlew :app:assembleDebug
 ```
 
+## Docs
+
+- [Technical white paper (draft)](docs/WHITEPAPER.md) — also `/static/whitepaper.html` on the node  
+- [Privacy policy (draft)](docs/PRIVACY_POLICY.md) — also `/static/privacy.html`  
+- [Audit readiness / eight-gap close-out](docs/AUDIT_READINESS.md)  
+- [Compliance gap pack (EU / US / SA / PRC)](docs/COMPLIANCE_GAP_PACK.md)  
+- [BTQ→BRM rename inventory](docs/BRM_RENAME.md)  
+
+- [Internal security war-game](docs/INTERNAL_REVIEW.md) (not a named-firm audit)
+
+**Launch truth:** marketing default is private testnet. Live `brah_getStats.public_launch` on the public origin must match public copy. See `docs/AUDIT_READINESS.md` §C.
+
 ## What this repo does not claim
 
 - No Rust L1 in production.
@@ -94,6 +106,7 @@ cd wallet-android
 - No branded third-party audit. See [docs/INTERNAL_REVIEW.md](docs/INTERNAL_REVIEW.md).
 - No public Ethereum mainnet deploy as Brah L1.
 - Hybrid Ed25519+ML-DSA is not what the running node verifies. The node verifies Dilithium3.
+- Draft white paper / privacy pages are **not** MiCA notification, KYC, or a licence.
 
 ## License
 

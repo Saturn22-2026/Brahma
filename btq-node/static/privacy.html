@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — BRAHMNETWORK</title>
+<meta name="description" content="Privacy policy for Brahma Coin / BRAHMNETWORK public site and node operators.">
+<style>
+  :root { --bg:#0c0b09; --fg:#e8e0d4; --mut:#8a8070; --line:#2a261e; --gold:#E4AC3F; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:400 16px/1.6 Georgia, "Times New Roman", serif; background:var(--bg); color:var(--fg); }
+  main { max-width:42rem; margin:0 auto; padding:48px 20px 80px; }
+  h1 { font:500 2rem/1.2 Georgia, serif; margin:0 0 8px; }
+  h2 { font:500 1.15rem/1.3 Georgia, serif; margin:2rem 0 0.6rem; color:var(--gold); }
+  p, li { color:var(--fg); }
+  .mut { color:var(--mut); font:400 12px/1.5 ui-monospace, monospace; letter-spacing:.04em; }
+  a { color:var(--gold); }
+  hr { border:0; border-top:1px solid var(--line); margin:2rem 0; }
+  ul { padding-left:1.2rem; }
+</style>
+</head>
+<body>
+<main>
+  <p class="mut">EFFECTIVE 2026-10-22 · DRAFT FOR OPERATORS</p>
+  <h1>Privacy Policy</h1>
+  <p class="mut">Brahma Coin · BRAHMNETWORK · private testnet</p>
+  <p>This page summarizes how a BRAHMNETWORK <strong>node operator</strong> and the public host may process limited technical data. Full text: project file <code>docs/PRIVACY_POLICY.md</code>. Replace the contact below before regulated use.</p>
+  <hr>
+  <h2>What we may process</h2>
+  <ul>
+    <li>IP address, User-Agent, and TLS metadata — security and rate limits</li>
+    <li>RPC requests you send — to execute ledger methods</li>
+    <li>Join memo <code>dev:&lt;phoneId&gt;[:referrer]</code> — one claim per phone (anti-farm)</li>
+    <li>Public addresses and on-chain amounts — ledger data is public by design</li>
+    <li>APK download logs — when the operator serves <code>/wallet.apk</code></li>
+  </ul>
+  <h2>What we do not do here</h2>
+  <ul>
+    <li>No KYC identity collection in the open-source wallet</li>
+    <li>No intended sale of personal data for advertising in the default config</li>
+    <li>Do not put names or secrets in transaction memos</li>
+  </ul>
+  <h2>Blockchain notice</h2>
+  <p>Sealed transactions are public and hard to erase. Assume permanence.</p>
+  <h2>Contact</h2>
+  <p class="mut">privacy@[operator-domain] — set by the operator of this origin</p>
+  <hr>
+  <p><a href="/">← BRAHMNETWORK home</a> · <a href="/static/whitepaper.html">White paper</a></p>
+</main>
+</body>
+</html>

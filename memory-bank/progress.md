@@ -46,7 +46,9 @@
 - `test_launch_gates.py`: hardening + replica catch-up + mine-schedule + L2 + CORS/explorer + public site copy + dual HRP
 - `test_miner_stress.py`: isolated temp `BRAH_DATA_DIR` miner load — 24 sequential mines (first-bonus once), stale/invalid `pow_nonce` rejected, 6 miners under lock to height 18, 12-bit search heat plus one 20-bit header. Never the live `:8545` ledger. Run: `python test_miner_stress.py` from `btq-node/`
 - Bugbot review on `fix/gradle-sdk-issues`: composeApp `build.gradle.kts` parses; `gradle.properties` no longer pins a machine JDK; `generate_genesis_keys.py` imports `Path`/`json`/`secrets`/`Dilithium3`/`address_from_pubkey`; genesis `engine.js` persists seed and restores keys from the displayed phrase; `mineBrahma()` refuses a second mine while busy instead of unlocking after 90s
-- `canonical_rpc_method` maps `brah_*` → `brah_*` and does not double-prefix `brah_*` (wallet mine was failing with Method not found)
+- `canonical_rpc_method` maps `brm_*` / `btq_*` → `brah_*` and does not double-prefix `brah_*` (wallet mine was failing with Method not found)
+- BTQ→BRM non-breaking aliases (2026-10-22): env `BRM_*`, mesh `BRMHELLO`/`BRMINVITE`/`BRMF`/`BRM1|`, systemd `brm-l1.service`, inventory `docs/BRM_RENAME.md`. Disk paths `btq-node`/`btq-data` unchanged.
+- Compliance gap pack (2026-10-22): EU/US/SA refreshed; **China (PRC)** added as prohibition / out-of-market (`COMPLIANCE_GAP_PACK.md`, `AUDIT_READINESS` #9 + §H, canvas). Geo/ToS blocks not shipped.
 
 - Phone mine PoW uses leading SHA-256 bits (not BigInteger per hash) and a canonical BRM1G header so 20-bit work can finish and match `brah_submitTx`
 
