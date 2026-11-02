@@ -159,6 +159,19 @@ class CryptoManager {
         fun inviteCanonical(ref: String, claim: String, apk: String, ts: Long): ByteArray =
             "BRAHINVITE|$ref|$claim|$apk|$ts".toByteArray(Charsets.UTF_8)
 
+        fun isPublicBrahmHost(host: String?): Boolean {
+            val h = host?.lowercase()?.trim().orEmpty()
+            return h == "www.brahmnetwork.com" || h == "brahmnetwork.com"
+        }
+
+        fun isPrivateLanHost(host: String?): Boolean {
+            val h = host?.lowercase()?.trim().orEmpty()
+            if (h == "localhost" || h == "127.0.0.1") return true
+            if (h.startsWith("192.168.") || h.startsWith("10.")) return true
+            if (h.matches(Regex("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*"))) return true
+            return false
+        }
+
         fun isSafeHttpUrl(url: String, allowedPath: String, allowEmpty: Boolean = false): Boolean {
             if (url.isEmpty()) return allowEmpty
             if (url.length > 256) return false
@@ -166,12 +179,14 @@ class CryptoManager {
                 val parsed = java.net.URI(url)
                 val scheme = parsed.scheme?.lowercase()
                 val path = (parsed.path ?: "/").trimEnd('/').ifEmpty { "/" }
+                val host = parsed.host
                 scheme in setOf("http", "https")
                     && parsed.userInfo.isNullOrEmpty()
                     && parsed.fragment.isNullOrEmpty()
                     && path == allowedPath
-                    && !parsed.host.isNullOrBlank()
-                    && ".." !in (parsed.host ?: "")
+                    && !host.isNullOrBlank()
+                    && ".." !in host
+                    && (isPublicBrahmHost(host) || (scheme == "http" && isPrivateLanHost(host)))
             } catch (_: Exception) {
                 false
             }
@@ -223,8 +238,8 @@ class CryptoManager {
                 val parsed = java.net.URI(if (raw.endsWith("/")) raw else "$raw/")
                 val host = parsed.host ?: return false
                 when (parsed.scheme?.lowercase()) {
-                    "https" -> true
-                    "http" -> debug && host.isNotBlank() && host != "0.0.0.0"
+                    "https" -> isPublicBrahmHost(host)
+                    "http" -> debug && host.isNotBlank() && host != "0.0.0.0" && isPrivateLanHost(host)
                     else -> false
                 }
             } catch (_: Exception) {

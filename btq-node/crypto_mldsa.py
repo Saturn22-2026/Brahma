@@ -194,9 +194,13 @@ def matching_canonical_message(
         )
         for prefix in MSG_PREFIXES
     ]
-    if public_key_hex and signature_hex:
-        pk = _parse_hex(public_key_hex)
-        sig = _parse_hex(signature_hex)
+    pk_hex = (public_key_hex or "").strip()
+    sig_hex = (signature_hex or "").strip()
+    if require_sig and (not pk_hex or not sig_hex):
+        raise ValueError("signature required")
+    if pk_hex and sig_hex:
+        pk = _parse_hex(pk_hex)
+        sig = _parse_hex(sig_hex)
         for msg in candidates:
             if verify_dilithium3(pk, msg, sig):
                 return msg

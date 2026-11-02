@@ -844,11 +844,12 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
     fun applyClaimLink(url: String) {
         val ref = CryptoManager.referrerFromClaimUrl(url) ?: return
         setReferrer(ref)
-        if (_address.value.isBlank()) {
-            _status.value = "Referrer saved. Create a wallet to claim."
-            return
+        // Save referrer only — do not auto-submit join from a deep link.
+        _status.value = if (_address.value.isBlank()) {
+            "Referrer saved. Create a wallet, then tap Join to claim."
+        } else {
+            "Referrer saved. Tap Join to claim with this invite."
         }
-        claimJoin(_address.value, null, "Referrer saved")
     }
 
     fun burnBrahma(amount: Double) {

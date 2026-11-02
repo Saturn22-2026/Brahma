@@ -263,7 +263,7 @@ class LaunchGates(unittest.TestCase):
         state = _fresh_state()
         pool = account(state, "POOL_MINING")
         self.assertIsInstance(pool["0"], int)
-        self.assertEqual(pool["0"], to_units(45_000_000))
+        self.assertEqual(pool["0"], to_units(50_000_000))
 
     def test_signed_pow_send_moves_units(self):
         state = _fresh_state()
@@ -1207,16 +1207,23 @@ class LaunchGates(unittest.TestCase):
         self.assertFalse(report["mainnet_ready"])
         self.assertTrue(report["protocol_locked"])
         self.assertEqual(report.get("peers"), 0)
+        self.assertEqual(report.get("independent_peers"), 0)
         self.assertEqual(report.get("seed_peers"), 0)
 
     def test_configured_seed_is_not_a_live_peer(self):
         net = PeerNet(18545, ["197.101.163.240:18545"], "brah-test", lambda _p: None)
         self.assertEqual(net.seed_count(), 1)
         self.assertEqual(net.peer_count(), 0)
+        self.assertEqual(net.independent_peer_count(), 0)
         net.live[("197.101.163.240", 18545)] = time.time()
         self.assertEqual(net.peer_count(), 1)
+        self.assertEqual(net.independent_peer_count(), 1)
+        net.live[("127.0.0.1", 18546)] = time.time()
+        self.assertEqual(net.peer_count(), 2)
+        self.assertEqual(net.independent_peer_count(), 1)
         net.live[("197.101.163.240", 18545)] = time.time() - 91
-        self.assertEqual(net.peer_count(), 0)
+        self.assertEqual(net.peer_count(), 1)
+        self.assertEqual(net.independent_peer_count(), 0)
 
     def test_tls_watch_days_left_threshold(self):
         from datetime import datetime, timezone

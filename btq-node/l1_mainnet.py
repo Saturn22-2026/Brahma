@@ -1315,13 +1315,15 @@ def named_public_rpc() -> str:
 
 def mainnet_ready_report() -> dict:
     live = _peer_net.peer_count() if _peer_net is not None else 0
+    independent = _peer_net.independent_peer_count() if _peer_net is not None else 0
     seeds = _peer_net.seed_count() if _peer_net is not None else 0
     named = named_public_rpc()
-    # A BRAH_PEERS seed is not a live operator. Ready needs a signed HELLO.
-    ready = live >= 1 and bool(named)
+    # Seeds and same-host / loopback HELLO peers do not count as a second operator.
+    ready = independent >= 1 and bool(named)
     launched = env("PUBLIC_LAUNCH") == "1" and ready
     return {
         "peers": live,
+        "independent_peers": independent,
         "seed_peers": seeds,
         "named_public_rpc": bool(named),
         "protocol_locked": True,
@@ -2363,7 +2365,8 @@ class L1Handler(BaseHTTPRequestHandler):
                     )
                 with _lock:
                     state = load_or_init()
-                    result = self._dispatch(state, method, params, verify=False)
+                    # Preview already required a valid Dilithium3 signature; seal with verify on.
+                    result = self._dispatch(state, method, params, verify=True)
             else:
                 with _lock:
                     state = load_or_init()

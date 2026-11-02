@@ -421,11 +421,6 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   const chk=sha256Hex('BRM1G'+body).slice(0,4);
   return 'BRM1G'+body+chk;
  }
- function claimOrigin(){
-  const host=(location.hostname||'').toLowerCase();
-  if(host==='www.brahmnetwork.com'||host==='brahmnetwork.com') return location.origin;
-  return 'https://www.brahmnetwork.com';
- }
  btn.addEventListener('click',()=>{
   const addr=parseAddr(inp.value);
   if(!addr){
@@ -500,6 +495,23 @@ document.querySelectorAll('.rv').forEach(el=>io.observe(el));
   });
   const chip=document.getElementById('gateChip');
   if(chip)chip.textContent=pl?'PUBLIC LAUNCH — TRUE':'PRIVATE TESTNET — PUBLIC LAUNCH: FALSE';
+  const joinLede=document.getElementById('joinLede');
+  if(joinLede){
+   joinLede.textContent=pl
+    ? 'Public launch is TRUE on this origin. Get the Android wallet, create your Dilithium identity, claim your join reward, and hold a first-hand address.'
+    : 'There is no countdown, because public launch is FALSE on this origin — and this site follows live stats. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.';
+  }
+  const joinLaunchSt=document.getElementById('joinLaunchSt');
+  if(joinLaunchSt){
+   joinLaunchSt.textContent=pl?'TRUE':'FALSE';
+   joinLaunchSt.classList.toggle('ok',pl);joinLaunchSt.classList.toggle('bad',!pl);
+  }
+  const netLede=document.getElementById('netLede');
+  if(netLede){
+   netLede.textContent=pl
+    ? 'BRAHMNETWORK reports public_launch TRUE on this origin. Confirm independent operators and live gates before treating it as a public mainnet.'
+    : 'BRAHMNETWORK is a private testnet until live public_launch is TRUE. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that\'s the point.';
+  }
  }).catch(()=>{});
 })();
 route();

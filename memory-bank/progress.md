@@ -49,6 +49,7 @@
 - `canonical_rpc_method` maps `brm_*` / `btq_*` → `brah_*` and does not double-prefix `brah_*` (wallet mine was failing with Method not found)
 - BTQ→BRM non-breaking aliases (2026-10-22): env `BRM_*`, mesh `BRMHELLO`/`BRMINVITE`/`BRMF`/`BRM1|`, systemd `brm-l1.service`, inventory `docs/BRM_RENAME.md`. Disk paths `btq-node`/`btq-data` unchanged.
 - Compliance gap pack (2026-10-22): EU/US/SA refreshed; **China (PRC)** added as prohibition / out-of-market (`COMPLIANCE_GAP_PACK.md`, `AUDIT_READINESS` #9 + §H, canvas). Geo/ToS blocks not shipped.
+- Mainnet-readiness hardening (2026-10-22): empty-sig spend closed; genesis v2; independent peer for `mainnet_ready`; wallet 1.0.54 / BC 1.72 / RPC host pin / no auto-claim-join. Live VPS sync + second operator + origin uptime still required before any mainnet claim.
 
 - Phone mine PoW uses leading SHA-256 bits (not BigInteger per hash) and a canonical BRM1G header so 20-bit work can finish and match `brah_submitTx`
 

@@ -39,7 +39,7 @@ object SentinelRuntime {
         if (host.isBlank() || rpcPort !in 1..65535) return
         if (host == "127.0.0.1" || host == "localhost") return
         val url = "http://$host:$rpcPort/"
-        if (CryptoManager.isAllowedRpcUrl(url, true)) {
+        if (CryptoManager.isAllowedRpcUrl(url, com.brahmnetwork.wallet.BuildConfig.DEBUG)) {
             discoveredRpc.add(url)
         }
     }

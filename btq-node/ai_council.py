@@ -12,11 +12,11 @@ TIER1_REF = 50.0
 TIER2_JOIN = 50.0
 TIER2_REF = 25.0
 POST_JOIN = 25.0
-REWARDS_POOL = 25_000_000.0
-WHALE_TAX_BPS = 2500
-# Dump tax starts when one send is more than 10% of circulating Brahma.
+REWARDS_POOL = 30_000_000.0
+WHALE_TAX_BPS = 1000
+# Dump tax starts when one send is more than 10% of circulating Brahma; tax is 10%.
 WHALE_THRESHOLD_BPS = 1000
-DONATION_UNLOCK_DAYS = 730
+DONATION_UNLOCK_DAYS = 0
 FIRST_MINE_BONUS = 1.0
 FIRST_MINE_BONUS_Brah = FIRST_MINE_BONUS
 MINE_FULL_JOINS = 10_000

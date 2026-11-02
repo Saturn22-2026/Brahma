@@ -788,7 +788,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>05</i>STATUS — STATED HONESTLY</p>
       <h1 class="rv" style="transition-delay:.08s">The gates,<br>as they <em>are.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">BRAHMNETWORK is a private testnet. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that's the point.</p>
+      <p class="lede rv" id="netLede" style="transition-delay:.16s">BRAHMNETWORK follows live <code>public_launch</code> on this origin. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that's the point.</p>
       <div class="gates rv" style="transition-delay:.24s">
         <div class="grow"><div class="gk">PROTOCOL LOCKED</div><div class="gv ok">YES — SUPPLY, MINE SCHEDULE, REWARDS, TAX AND BURNS ARE FIXED IN PROTOCOL CODE</div></div>
         <div class="grow"><div class="gk">PUBLIC LAUNCH</div><div class="gv bad" id="gateLaunch">FALSE</div></div>
@@ -854,7 +854,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 <section class="view" id="view-wallet">
   <div class="wrap">
     <div class="page-head compact">
-      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.53</p>
+      <p class="overline rv"><i>06</i>ANDROID WALLET — BUILD 1.0.54</p>
       <h1 class="rv" style="transition-delay:.08s">The chain,<br>in a <em>pocket.</em></h1>
       <p class="lede rv" style="transition-delay:.16s">The app is called Brahma Coin. It signs with Dilithium3, searches real proof of work on the phone, seals over RPC or mesh, and never shows a price — because there isn't one. The phone below is a bit-search demo: real SHA-256 in this tab, not the node's block header.</p>
       <p class="rv" style="margin-top:28px"><span class="chip">BIT-SEARCH DEMO — REAL SHA-256 IN THIS TAB · NOT THE NODE HEADER</span></p>
@@ -864,7 +864,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="rv">
         <div class="phone">
           <div class="scr" id="scr">
-            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.53</span></div>
+            <div class="sbar"><span id="phClock">00:00</span><span>BRAHMA COIN · 1.0.54</span></div>
             <div class="ptabs">
               <button class="ptab on" data-pt="home">HOME</button>
               <button class="ptab" data-pt="mine">MINE</button>
@@ -952,7 +952,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>07</i>GENESIS ACCESS</p>
       <h1 class="rv" style="transition-delay:.08s">Ready before<br>the <em>flip.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">There is no countdown, because public launch is FALSE — and this site doesn't lie. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.</p>
+      <p class="lede rv" id="joinLede" style="transition-delay:.16s">There is no countdown until live public_launch flips. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.</p>
       <div id="claimInvite" class="rv" style="display:none;margin-top:28px">
         <p class="chip" id="claimInviteChip">INVITE LINK</p>
         <p id="claimInviteText" style="margin-top:12px"></p>
@@ -961,7 +961,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="checklist rv" style="transition-delay:.24s">
         <div><span class="cbox"></span><span><b>Two independent operators</b><p>Separate humans, separate machines — two processes on one PC are not two operators.</p></span><span class="st">PENDING</span></div>
         <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com forwarding to the node origin at http://127.0.0.1:8545.</p></span><span class="st">PENDING</span></div>
-        <div><span class="cbox"></span><span><b>Launch explicitly flipped on</b><p>Declared, never defaulted. Until then the honest label stays: private testnet.</p></span><span class="st">FALSE</span></div>
+        <div><span class="cbox"></span><span><b>Launch explicitly flipped on</b><p>Declared, never defaulted. Live truth is <code>brah_getStats.public_launch</code> on this origin.</p></span><span class="st bad" id="joinLaunchSt">FALSE</span></div>
       </div>
     </div>
 
@@ -970,7 +970,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.6v16.8c0 .5.5.8.9.5l10-8.2c.3-.3.3-.8 0-1.1l-10-8.4c-.4-.3-.9 0-.9.4z"/></svg>
         <span><small>DIRECT DOWNLOAD</small><b>Android APK</b></span>
       </a>
-      <span class="dl-note">ANDROID — BUILD 1.0.53 · SIGNS THE 3,293-BYTE DILITHIUM3 THE CHAIN ACCEPTS · IF 1.0.36 IS INSTALLED, UNINSTALL IT, THEN INSTALL THIS AND RECOVER THE PHRASE · JOIN PAYS 100, REFERRER 50</span>
+      <span class="dl-note">ANDROID — BUILD 1.0.54 · BC 1.72 · SIGNS THE 3,293-BYTE DILITHIUM3 THE CHAIN ACCEPTS · IF AN OLDER BUILD IS INSTALLED, UNINSTALL IT, THEN INSTALL THIS AND RECOVER THE PHRASE · JOIN PAYS 100, REFERRER 50 · VERIFY THE APK SHA-256 THE OPERATOR PUBLISHES</span>
     </div>
 
     <div class="faq">

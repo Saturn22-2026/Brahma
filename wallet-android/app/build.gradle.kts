@@ -52,8 +52,8 @@ android {
         applicationId = "com.brahmnetwork.wallet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 41
-        versionName = "1.0.35"
+        versionCode = 60
+        versionName = "1.0.54"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -111,7 +111,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
     
     // Network
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.72")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.zxing:core:3.5.3")
