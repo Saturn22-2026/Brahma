@@ -14,7 +14,7 @@
 <style>
 :root{
   --bg:#0D0B08; --bg-2:#14100A; --panel:#161209;
-  --ink:#F0E8D8; --ink-dim:#BFB39D; --mut:#8E8371;
+  --ink:#F0E8D8; --ink-dim:#C9BEA8; --mut:#A09480;
   --gold:#E4AC3F; --gold-deep:#8A651E;
   --ok:#9DB56B; --bad:#C4573B;
   --line:rgba(228,204,160,.13); --line-strong:rgba(228,204,160,.32);
@@ -43,11 +43,11 @@ h2.sec{font:450 clamp(34px,4.6vw,60px)/1.06 var(--serif);letter-spacing:-.015em;
 .brand .mark{display:grid;place-items:center;width:34px;height:34px;flex:none}
 .brand .mark img,.f-brand .mark img{width:100%;height:100%;display:block;border-radius:50%;object-fit:cover}
 .brand .bt b{display:block;font:600 17px/1 var(--serif);letter-spacing:.03em}
-.brand .bt small{display:block;font:500 8px var(--mono);letter-spacing:.42em;color:var(--mut);margin-top:3px}
+.brand .bt small{display:block;font:500 10px var(--mono);letter-spacing:.42em;color:var(--mut);margin-top:3px}
 .f-brand .mark{display:block;width:32px;height:32px;flex:none}
-.hero-brand{position:relative;width:100%;border:1px solid var(--line-strong);overflow:hidden;background:#050A18}
-.hero-brand img{display:block;width:100%;height:auto;min-height:clamp(280px,42vh,520px);object-fit:cover;object-position:center}
-.hero-brand-cap{margin-top:14px;font:400 9px var(--mono);letter-spacing:.24em;color:var(--mut);text-align:center}
+.hero-brand{position:relative;width:100%;border:1px solid var(--line-strong);overflow:hidden;background:#050A18;box-shadow:0 30px 80px -40px rgba(228,172,63,.35)}
+.hero-brand img{display:block;width:100%;height:auto;aspect-ratio:1024/765}
+.hero-brand-cap{margin-top:14px;font:400 10px var(--mono);letter-spacing:.24em;color:var(--mut);text-align:center}
 .tk img.tk-mark{width:17px;height:17px;border-radius:50%;object-fit:cover;flex:none}
 .nav{display:flex;gap:22px;align-items:center}
 .nav a{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);text-decoration:none;position:relative;padding:6px 0;transition:color .2s}
@@ -71,35 +71,37 @@ h2.sec{font:450 clamp(34px,4.6vw,60px)/1.06 var(--serif);letter-spacing:-.015em;
 .m-link{display:flex;align-items:baseline;gap:18px;font:450 38px var(--serif);color:var(--ink);text-decoration:none;padding:11px 0;border-bottom:1px solid var(--line)}
 .m-link i{font:400 11px var(--mono);color:var(--gold);font-style:normal;letter-spacing:.2em}
 .m-link:hover{color:var(--gold)}
-.m-foot{margin:32px 0 40px;font:400 9px var(--mono);letter-spacing:.3em;color:var(--mut)}
+.m-foot{margin:32px 0 40px;font:400 10.5px var(--mono);letter-spacing:.3em;color:var(--mut)}
 main{padding-top:var(--nav)}
 .view{display:none}
 .view.on{display:block;animation:vin .55s cubic-bezier(.22,.7,.3,1) both}
 @keyframes vin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.hero{max-width:1240px;margin:0 auto;padding:52px 40px 30px;display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;min-height:calc(100vh - var(--nav))}
-.gatechip{display:inline-flex;align-items:center;gap:9px;font:500 9.5px var(--mono);letter-spacing:.22em;color:var(--ink-dim);border:1px solid var(--line-strong);padding:7px 12px}
+.hero{max-width:1240px;margin:0 auto;padding:72px 40px 64px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center}
+.hero>*{min-width:0}
+.hero .lede{margin-bottom:34px}
+.gatechip{display:inline-flex;align-items:center;gap:9px;font:500 10.5px var(--mono);letter-spacing:.22em;color:var(--ink-dim);border:1px solid var(--line-strong);padding:7px 12px}
 .gatechip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none}
 .hero h1{font:500 clamp(54px,8vw,112px)/0.96 var(--serif);letter-spacing:-.02em;margin:26px 0 26px}
 .hero h1 em{font-style:italic;color:var(--gold);font-weight:450}
 .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px}
-.stat-strip{display:flex;flex-wrap:wrap}
-.stat-strip>div{padding:2px 24px;border-left:1px solid var(--line)}
+.stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);padding-top:22px}
+.stat-strip>div{padding:0 18px;border-left:1px solid var(--line)}
 .stat-strip>div:first-child{padding-left:0;border-left:none}
-.stat-strip b{display:block;font:500 19px var(--mono);letter-spacing:-.01em}
-.stat-strip span{display:block;font:400 8.5px var(--mono);letter-spacing:.18em;color:var(--mut);margin-top:7px}
+.stat-strip b{display:block;font:500 17px var(--mono);letter-spacing:-.01em;white-space:nowrap}
+.stat-strip span{display:block;font:400 10px/1.5 var(--mono);letter-spacing:.14em;color:var(--mut);margin-top:8px}
 .orb-wrap{position:relative;height:clamp(380px,56vh,600px);cursor:grab;touch-action:none}
 .orb-wrap.pt{cursor:pointer}
 .orb-wrap canvas{display:block;width:100%;height:100%}
 .orb-tip{position:absolute;transform:translate(-50%,-100%);background:#191309;border:1px solid var(--line-strong);padding:9px 13px;pointer-events:none;opacity:0;transition:opacity .18s;white-space:nowrap;z-index:3}
 .orb-tip b{display:block;font:italic 500 15px var(--serif);color:var(--ink)}
-.orb-tip span{font:400 8.5px var(--mono);letter-spacing:.14em;color:var(--mut)}
-.orb-cap{margin-top:14px;font:400 9px var(--mono);letter-spacing:.24em;color:var(--mut);text-align:center}
+.orb-tip span{font:400 10px var(--mono);letter-spacing:.14em;color:var(--mut)}
+.orb-cap{margin-top:14px;font:400 10.5px var(--mono);letter-spacing:.24em;color:var(--mut);text-align:center}
 .honesty{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.honesty .wrap{display:flex;flex-wrap:wrap}
-.hc{flex:1;min-width:200px;padding:18px 26px;border-left:1px solid var(--line)}
+.honesty .wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.hc{padding:20px 20px;border-left:1px solid var(--line)}
 .hc:first-child{border-left:none;padding-left:0}
-.hc span{display:block;font:400 8.5px var(--mono);letter-spacing:.22em;color:var(--mut)}
-.hc b{display:block;font:500 13px var(--mono);margin-top:6px;letter-spacing:.06em}
+.hc span{display:block;font:400 10px var(--mono);letter-spacing:.18em;color:var(--mut)}
+.hc b{display:block;font:500 12.5px/1.5 var(--mono);margin-top:8px;letter-spacing:.04em}
 .hc b.ok{color:var(--ok)}.hc b.bad{color:var(--bad)}
 .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;padding:15px 0}
 .tk-track{display:flex;width:max-content;animation:mq 38s linear infinite}
@@ -139,7 +141,7 @@ main{padding-top:var(--nav)}
 .supply-big{margin:64px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:38px 0}
 .supply-big b{font:500 clamp(40px,7.4vw,104px)/1 var(--mono);letter-spacing:-.045em}
 .supply-big i{font-style:normal;color:var(--gold)}
-.supply-big span{display:block;margin-top:14px;font:400 9px var(--mono);letter-spacing:.26em;color:var(--mut);line-height:2}
+.supply-big span{display:block;margin-top:14px;font:400 10.5px var(--mono);letter-spacing:.26em;color:var(--mut);line-height:2}
 .facts{margin-top:80px;display:grid;grid-template-columns:1fr 1fr;column-gap:70px}
 .fact{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line);align-items:baseline}
 .fact dt{font:500 10px var(--mono);letter-spacing:.22em;color:var(--mut)}
@@ -171,7 +173,7 @@ main{padding-top:var(--nav)}
 .idlist{margin-top:22px}
 .idlist li{list-style:none;display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink-dim)}
 .idlist li i{font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.16em;padding-top:3px}
-.chip{display:inline-block;font:500 9px var(--mono);letter-spacing:.22em;color:var(--gold);border:1px solid var(--gold-deep);padding:5px 10px;margin-bottom:6px}
+.chip{display:inline-block;font:500 10.5px var(--mono);letter-spacing:.22em;color:var(--gold);border:1px solid var(--gold-deep);padding:5px 10px;margin-bottom:6px}
 .gates{margin-top:56px;border:1px solid var(--line-strong)}
 .grow{display:grid;grid-template-columns:240px 1fr;border-top:1px solid var(--line)}
 .grow:first-child{border-top:none}
@@ -199,14 +201,14 @@ main{padding-top:var(--nav)}
 .nine-strip>div{flex:1;padding:20px 26px;border-right:1px solid var(--line)}
 .nine-strip>div:last-child{border-right:none}
 .nine-strip b{display:block;font:500 19px var(--mono)}
-.nine-strip span{display:block;font:400 8.5px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
+.nine-strip span{display:block;font:400 10px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
 .nine-grid{display:grid;grid-template-columns:320px 1px 1fr;padding:8px 0 0;border-top:1px solid var(--line);margin-top:70px}
 .rail{display:flex;flex-direction:column}
 .rail-item{display:flex;align-items:center;gap:14px;padding:15px 18px;background:none;border:none;border-left:2px solid transparent;cursor:pointer;text-align:left;transition:.2s;color:var(--ink-dim)}
 .rail-item i{font:400 10px var(--mono);font-style:normal;color:var(--mut);width:20px;flex:none}
 .rail-item svg{flex:none}
 .rail-item b{font:500 17px var(--serif);color:var(--ink);font-weight:500}
-.rail-item span{margin-left:auto;font:400 9.5px var(--mono);letter-spacing:.14em;color:var(--mut)}
+.rail-item span{margin-left:auto;font:400 10.5px var(--mono);letter-spacing:.14em;color:var(--mut)}
 .rail-item:hover{background:#14100A}
 .rail-item.on{border-left-color:var(--gold);background:#16120B}
 .e-div{background:var(--line)}
@@ -225,28 +227,28 @@ main{padding-top:var(--nav)}
 .d-specs{margin-top:36px;display:flex;border-top:1px solid var(--line);flex-wrap:wrap}
 .d-specs>div{padding:16px 34px 4px 0;margin-right:34px;border-right:1px solid var(--line)}
 .d-specs>div:last-child{border-right:none}
-.d-specs i{display:block;font:400 8.5px var(--mono);font-style:normal;letter-spacing:.22em;color:var(--mut)}
+.d-specs i{display:block;font:400 10px var(--mono);font-style:normal;letter-spacing:.22em;color:var(--mut)}
 .d-specs b{display:block;font:500 13px var(--mono);margin-top:8px}
-.d-note{margin-top:30px;font:400 9px var(--mono);letter-spacing:.2em;color:var(--mut);line-height:2}
+.d-note{margin-top:30px;font:400 10.5px var(--mono);letter-spacing:.2em;color:var(--mut);line-height:2}
 .d-swap{animation:dswap .5s cubic-bezier(.22,.7,.3,1) both}
 @keyframes dswap{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .launchl2{border:1px solid var(--line);padding:44px;margin:90px 0 110px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
 .launchl2 h3{font:500 28px var(--serif)}
 .launchl2 p{color:var(--mut);font-size:14.5px;margin-top:12px;max-width:52ch}
 .launchl2 .burnb{font:500 40px var(--mono);color:var(--gold);white-space:nowrap}
-.launchl2 .burnb span{display:block;font:400 8.5px var(--mono);letter-spacing:.22em;color:var(--mut);margin-top:8px}
-.ladder{position:relative;height:410px;display:flex;gap:12px;margin-top:90px}
+.launchl2 .burnb span{display:block;font:400 10px var(--mono);letter-spacing:.22em;color:var(--mut);margin-top:8px}
+.ladder{position:relative;height:470px;display:flex;gap:12px;margin-top:90px}
 .step{flex:1;position:relative}
 .s-fill{position:absolute;left:0;right:0;bottom:78px;height:var(--h);background:#16110A;border:1px solid var(--line-strong);border-top:2px solid var(--gold);padding:16px 16px 0;transition:background .25s}
 .step:hover .s-fill{background:#1D160C}
 .s-reward{font:500 40px/1 var(--serif)}
-.s-unit{display:block;font:400 8.5px var(--mono);letter-spacing:.18em;color:var(--mut);margin-top:8px}
+.s-unit{display:block;font:400 10px var(--mono);letter-spacing:.18em;color:var(--mut);margin-top:8px}
 .s-ref{display:block;margin-top:12px;font:500 10px var(--mono);color:var(--gold);letter-spacing:.1em}
 .s-meta{position:absolute;left:0;right:0;bottom:0}
 .s-era{font:500 10px var(--mono);letter-spacing:.16em;color:var(--ink-dim);display:block}
 .s-range{font:400 10px var(--mono);color:var(--mut);display:block;margin-top:6px}
 .you{position:absolute;top:-44px;bottom:78px;width:1px;background:var(--gold);transition:left .45s cubic-bezier(.22,.7,.3,1);z-index:2}
-.you::after{content:"YOU";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font:500 9px var(--mono);letter-spacing:.22em;color:var(--gold);background:var(--bg);padding:2px 7px;border:1px solid var(--gold)}
+.you::after{content:"YOU";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font:500 10.5px var(--mono);letter-spacing:.22em;color:var(--gold);background:var(--bg);padding:2px 7px;border:1px solid var(--gold)}
 .ladder-note{margin-top:22px;font:400 10px/2 var(--mono);color:var(--mut);letter-spacing:.1em}
 .calc{border:1px solid var(--line-strong);padding:48px;margin-top:100px;display:grid;grid-template-columns:1.2fr .8fr;gap:60px}
 .calc label.t{display:block;font:500 10px var(--mono);letter-spacing:.24em;color:var(--mut);margin-bottom:26px}
@@ -260,14 +262,14 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .c-res{border-left:1px solid var(--line);padding-left:56px}
 .c-era{font:italic 500 28px var(--serif);color:var(--gold)}
 .c-row{margin-top:28px}
-.c-row i{display:block;font:400 8.5px var(--mono);font-style:normal;letter-spacing:.22em;color:var(--mut)}
+.c-row i{display:block;font:400 10px var(--mono);font-style:normal;letter-spacing:.22em;color:var(--mut)}
 .c-row b{display:block;font:500 40px var(--mono);letter-spacing:-.02em;margin-top:6px}
 .c-row.small b{font-size:19px}
 .c-row.small{margin-top:20px}
 .c-meta{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);font:400 10px var(--mono);color:var(--mut);letter-spacing:.12em;line-height:2.1}
-.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:100px 0 0}
+.rules{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:100px 0 0}
 .rule{border:1px solid var(--line);padding:24px}
-.rule i{display:block;font:500 9.5px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.2em}
+.rule i{display:block;font:500 10.5px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.2em}
 .rule b{display:block;font:600 14.5px var(--sans);margin:10px 0 6px}
 .rule p{font-size:13px;color:var(--mut);line-height:1.6}
 .forge{border:1px solid var(--line);padding:52px;display:grid;grid-template-columns:1fr 1fr;gap:56px}
@@ -279,11 +281,12 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .f-out{border:1px dashed var(--line-strong);padding:30px;display:none}
 .f-out.show{display:block;animation:dswap .4s ease both}
 .inv-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
-.inv-row i{font:400 8.5px var(--mono);font-style:normal;letter-spacing:.2em;color:var(--mut);width:44px;flex:none}
+.inv-row i{font:400 10px var(--mono);font-style:normal;letter-spacing:.2em;color:var(--mut);width:44px;flex:none}
 .inv-row code{font:500 12px var(--mono);color:var(--gold);word-break:break-all;flex:1}
 .inv-row button{flex:none}
 .f-btns{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
-.mine{display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:center;padding:100px 0;border-top:1px solid var(--line);margin-top:90px}
+.mine{display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:start;padding:100px 0;border-top:1px solid var(--line);margin-top:90px}
+.mine>.rv:first-child{position:sticky;top:calc(var(--nav) + 32px)}
 .phone{width:min(340px,100%);margin:0 auto;background:#0F0C07;border:1px solid var(--line-strong);border-radius:44px;padding:12px;box-shadow:0 24px 60px -30px rgba(0,0,0,.8)}
 .scr{background:#120E09;border:1px solid var(--line);border-radius:34px;padding:20px 20px 16px;position:relative;overflow:hidden}
 @keyframes foundf{0%{border-color:var(--gold)}100%{border-color:var(--line)}}
@@ -298,9 +301,9 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .eye-pair{display:flex;gap:6px;align-items:center}.eye-pair .eye{min-width:28px;font-size:10px;font-weight:700;letter-spacing:.04em}.eye{background:none;border:none;color:var(--mut);cursor:pointer;padding:3px;display:grid;place-items:center}
 .eye.on{color:var(--gold)}
 .bal{font:500 38px/1.1 var(--mono);letter-spacing:-.02em;margin-top:8px}
-.bal-l{font:400 9px var(--mono);color:var(--mut);letter-spacing:.24em;margin:4px 0 10px}
+.bal-l{font:400 10.5px var(--mono);color:var(--mut);letter-spacing:.24em;margin:4px 0 10px}
 .homerow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
-.homerow span{font:400 8.5px var(--mono);letter-spacing:.18em;color:var(--mut)}
+.homerow span{font:400 10px var(--mono);letter-spacing:.18em;color:var(--mut)}
 .homerow b{font:500 12.5px var(--mono)}
 .homerow b.gold{color:var(--gold)}
 .l2note{margin-top:12px;font:400 8.5px/1.9 var(--mono);color:var(--mut);letter-spacing:.14em;border-top:1px solid var(--line);padding-top:12px}
@@ -309,14 +312,14 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 #ringP{transition:stroke-dashoffset .25s linear}
 .lz{position:relative;z-index:2;text-align:center}
 .lz b{font:500 46px/1 var(--mono);letter-spacing:-.02em}
-.lz span{display:block;font:400 8.5px var(--mono);letter-spacing:.24em;color:var(--mut);margin-top:8px}
+.lz span{display:block;font:400 10px var(--mono);letter-spacing:.24em;color:var(--mut);margin-top:8px}
 .rip{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border:1px solid var(--gold);border-radius:50%;animation:rip .7s ease-out forwards;pointer-events:none}
 @keyframes rip{from{opacity:.7;transform:scale(.6)}to{opacity:0;transform:scale(1.55)}}
-.prog-t{font:400 9px var(--mono);color:var(--mut);letter-spacing:.16em;text-align:center;margin-top:6px}
+.prog-t{font:400 10.5px var(--mono);color:var(--mut);letter-spacing:.16em;text-align:center;margin-top:6px}
 .lblrow{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
-.lblrow span{font:400 8.5px var(--mono);letter-spacing:.2em;color:var(--mut)}
+.lblrow span{font:400 10px var(--mono);letter-spacing:.2em;color:var(--mut)}
 .bits,.joins{display:flex;gap:6px;margin-top:6px}
-.bitb,.jb{flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink-dim);font:500 9.5px var(--mono);letter-spacing:.1em;padding:8px 2px;cursor:pointer;transition:.2s}
+.bitb,.jb{flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink-dim);font:500 10.5px var(--mono);letter-spacing:.1em;padding:8px 2px;cursor:pointer;transition:.2s}
 .bitb:hover,.jb:hover{border-color:var(--gold);color:var(--gold)}
 .bitb.on,.jb.on{background:var(--gold);border-color:var(--gold);color:#161006}
 .ctl{width:100%;background:none;border:1px solid var(--gold);color:var(--gold);font:500 10px var(--mono);letter-spacing:.2em;padding:12px;cursor:pointer;transition:.2s;margin-top:14px}
@@ -324,10 +327,10 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .mstats{display:flex;border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
 .mstats>div{flex:1;text-align:center}
 .mstats b{display:block;font:500 13px var(--mono)}
-.mstats span{display:block;font:400 8px var(--mono);color:var(--mut);letter-spacing:.16em;margin-top:4px}
+.mstats span{display:block;font:400 10px var(--mono);color:var(--mut);letter-spacing:.16em;margin-top:4px}
 .slog{margin-top:12px;font:400 9.5px/1.9 var(--mono);color:var(--mut);letter-spacing:.05em;min-height:56px}
 .slog .new{color:var(--gold)}
-.selftest{margin-top:10px;font:400 8.5px var(--mono);letter-spacing:.16em;color:var(--mut);text-align:center}
+.selftest{margin-top:10px;font:400 10px var(--mono);letter-spacing:.16em;color:var(--mut);text-align:center}
 .selftest.pass{color:var(--ok)}
 .sim-side p{color:var(--mut);max-width:52ch;margin-top:22px}
 .sim-side ul{list-style:none;margin-top:30px}
@@ -335,7 +338,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .sim-side li i{font:500 10px var(--mono);font-style:normal;color:var(--gold);letter-spacing:.14em;padding-top:4px}
 .net-row{display:flex;gap:28px 44px;flex-wrap:wrap;margin-top:36px}
 .net-row b{display:block;font:500 22px var(--mono);color:var(--gold)}
-.net-row span{display:block;font:400 8.5px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
+.net-row span{display:block;font:400 10px var(--mono);color:var(--mut);letter-spacing:.2em;margin-top:6px}
 .scrtable{margin-top:34px}
 .scrtable>div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:15px 0;border-top:1px solid var(--line);align-items:baseline}
 .scrtable>div:last-child{border-bottom:1px solid var(--line)}
@@ -352,7 +355,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .dl{display:flex;align-items:center;gap:16px;border:1px solid var(--line-strong);padding:16px 28px;text-decoration:none;transition:.25s;min-width:225px}
 .dl:hover{border-color:var(--gold);transform:translateY(-2px)}
 .dl svg{width:24px;flex:none;color:var(--ink)}
-.dl small{display:block;font:400 8.5px var(--mono);letter-spacing:.22em;color:var(--mut)}
+.dl small{display:block;font:400 10px var(--mono);letter-spacing:.22em;color:var(--mut)}
 .dl b{font:500 15px var(--sans)}
 .dl-note{font:400 10px var(--mono);color:var(--mut);letter-spacing:.14em;align-self:center}
 .faq{margin-top:110px;border-top:1px solid var(--line)}
@@ -370,25 +373,29 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
 .f-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:44px}
 .f-brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .f-brand b{font:600 18px var(--serif)}
-.f-brand small{display:block;font:500 8px var(--mono);letter-spacing:.4em;color:var(--mut)}
+.f-brand small{display:block;font:500 10px var(--mono);letter-spacing:.4em;color:var(--mut)}
 .f-disc{font-size:12.5px;color:var(--mut);max-width:48ch;line-height:1.7}
 .f-links{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .f-links a{font:500 11px var(--mono);letter-spacing:.18em;color:var(--ink-dim);text-decoration:none;text-transform:uppercase}
 .f-links a:hover{color:var(--gold)}
-.f-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:48px;padding-top:22px;font:400 9.5px var(--mono);letter-spacing:.18em;color:var(--mut)}
+.f-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:48px;padding-top:22px;font:400 10.5px var(--mono);letter-spacing:.18em;color:var(--mut)}
 #toasts{position:fixed;right:22px;bottom:22px;z-index:300;display:flex;flex-direction:column;gap:10px}
 .toast{background:#191309;border:1px solid var(--line-strong);border-left:2px solid var(--gold);padding:14px 18px;font:400 13.5px var(--sans);color:var(--ink);max-width:330px;animation:tin .35s ease both}
 @keyframes tin{from{opacity:0;transform:translateY(10px)}}
 .toast.out{animation:tout .3s ease both}
 @keyframes tout{to{opacity:0;transform:translateY(8px)}}
 @media(max-width:1020px){
-  .hero{grid-template-columns:1fr;min-height:0;padding-top:40px}
+  .hero{grid-template-columns:minmax(0,1fr);padding-top:48px;gap:44px}
+  .honesty .wrap{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .hc:nth-child(3n+1){border-left:none;padding-left:0}
+  .hc:nth-child(n+4){border-top:1px solid var(--line)}
   .nine-grid{display:block}
   .rail{flex-direction:row;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:36px}
   .rail-item{border-left:none;border-bottom:2px solid transparent;flex:none}
   .rail-item.on{border-bottom-color:var(--gold)}
   .detail{padding-left:0;min-height:0}
   .mine{grid-template-columns:1fr;gap:60px}
+  .mine>.rv:first-child{position:static}
   .calc{grid-template-columns:1fr;gap:44px;padding:36px}
   .c-res{border-left:none;padding-left:0;border-top:1px solid var(--line);padding-top:36px}
   .quad{grid-template-columns:1fr 1fr}
@@ -422,7 +429,21 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   .grow{grid-template-columns:1fr}
   .gk{padding-bottom:0}
   .scrtable>div,.idlist li{grid-template-columns:1fr;gap:6px}
-  .hc{min-width:140px;padding:14px 18px}
+  .hero{padding-top:36px;padding-bottom:44px}
+  .stat-strip{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}
+  .stat-strip>div:nth-child(odd){border-left:none;padding-left:0}
+  .honesty .wrap{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hc{padding:16px 16px}
+  .hc:nth-child(3n+1){border-left:1px solid var(--line);padding-left:16px}
+  .hc:nth-child(odd){border-left:none;padding-left:0}
+  .hc:nth-child(n+3){border-top:1px solid var(--line)}
+  .cta-row .btn{flex:1 1 auto;justify-content:center}
+  .top{padding:0 18px}
+  .brand .bt b,.top .btn{white-space:nowrap}
+}
+@media(max-width:480px){
+  .top .btn{display:none}
+  .gatechip{letter-spacing:.14em}
 }
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -516,7 +537,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="mrow rv"><span class="mnum">01 /</span><h3>Post-quantum identity</h3><p>The ledger is a Python node. Wallets sign with Dilithium3 (ML-DSA-65). Addresses are checksummed BRM1G. One Brahma Coin is 100,000,000 base units.</p></div>
       <div class="mrow rv"><span class="mnum">02 /</span><h3>Honest by design</h3><p>This is a private testnet, and the site says so. Before any mainnet claim: two independent operators, a named public host live, and launch explicitly flipped on. Two processes on one PC are not two operators.</p></div>
       <div class="mrow rv"><span class="mnum">03 /</span><h3>Pools are organs</h3><p>Mining, adoption, founder, empowerment, and the strategic burn are protocol organs. They cannot send as a user. There is no donation pool.</p></div>
-      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 10% of circulating supply burns 25% of itself. The wallet has an active burn button. The nine L2 memecoins stay on the same blocks.</p></div>
+      <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 10% of circulating supply burns 10% of itself. The wallet has an active burn button. The nine L2 memecoins stay on the same blocks.</p></div>
     </div>
   </section>
 
@@ -526,7 +547,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <h2 class="sec rv">From pocket<br>to protocol.</h2>
       <div class="flow">
         <div class="fs rv"><div class="ftx"><i>01</i><b>Download</b><p>Create or recover a Dilithium identity. An app recovery phrase — not BIP-39.</p></div></div>
-        <div class="fs rv" style="transition-delay:.1s"><div class="ftx"><i>02</i><b>Claim</b><p>One join claim per address, paid from the 30,000,000 adoption pool. Referrers get half.</p></div></div>
+        <div class="fs rv" style="transition-delay:.1s"><div class="ftx"><i>02</i><b>Claim</b><p>One join claim per address, paid from the 30,000,000 adoption pool, plus 1,000 of each genesis L2. Referrers get half the Brahma.</p></div></div>
         <div class="fs rv" style="transition-delay:.2s"><div class="ftx"><i>03</i><b>Mine</b><p>The phone searches ~20 bits of proof of work. The node seals; the reward pays.</p></div></div>
         <div class="fs rv" style="transition-delay:.3s"><div class="ftx"><i>04</i><b>Halve</b><p>Block reward halves as joined users grow — 0.00014, then 0.00007, then 0.000035, on toward zero.</p></div></div>
       </div>
@@ -576,7 +597,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="fact"><dt>BASE UNIT</dt><dd>1E8 PER COIN</dd></div>
       <div class="fact"><dt>YEARLY MINE CAP</dt><dd>5,000,000</dd></div>
       <div class="fact"><dt>GENESIS WALLETS</dt><dd>50 × 200,000</dd></div>
-      <div class="fact"><dt>WHALE TAX</dt><dd>25% BURN OVER 10% CIRC.</dd></div>
+      <div class="fact"><dt>WHALE TAX</dt><dd>10% BURN OVER 10% CIRC.</dd></div>
       <div class="fact"><dt>ADDRESSES</dt><dd>BRM1G CHECKSUMMED</dd></div>
     </dl>
 
@@ -628,7 +649,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
           <h3>Whale tax</h3>
           <p class="pl">Brahma Coin only. L2 transfers are not taxed this way. Positive amounts only — protocol pools cannot be the sender or the destination.</p>
           <div class="sched">
-            <div><span>SEND &gt; 10% OF CIRCULATING SUPPLY</span><b class="gold">25% OF THE SEND IS BURNED</b></div>
+            <div><span>SEND &gt; 10% OF CIRCULATING SUPPLY</span><b class="gold">10% OF THE SEND IS BURNED</b></div>
             <div><span>L2 MEMECOIN TRANSFERS</span><b>EXEMPT</b></div>
             <div><span>ZERO OR NEGATIVE AMOUNTS</span><b>REJECTED</b></div>
           </div>
@@ -672,7 +693,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="launchl2 rv">
       <div>
         <h3>The nine stay.</h3>
-        <p>New L2 launches are closed — there is no burn-to-launch. Active burn in the wallet still removes Brahma Coin from circulation. A send over 10% of circulating supply burns 25% of itself.</p>
+        <p>New L2 launches are closed — there is no burn-to-launch. Active burn in the wallet still removes Brahma Coin from circulation. A send over 10% of circulating supply burns 10% of itself.</p>
       </div>
       <div class="burnb">NINE STAY<span>NO LAUNCH · NO BURN-TO-LAUNCH</span></div>
     </div>
@@ -684,25 +705,25 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>04</i>ADOPTION POOL — 30,000,000 BRAHMA COIN</p>
       <h1 class="rv" style="transition-delay:.08s">Early hands<br>eat <em>first.</em></h1>
-      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 30,000,000 adoption pool. One claim per address and one per phone. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the join amount.</p>
+      <p class="lede rv" style="transition-delay:.16s">The first claim (join) pays from the 30,000,000 adoption pool. One claim per address and one per phone. A first join also credits 1,000 of each of the nine genesis L2 tokens. When the pool is empty, joins stop paying — and the node limits joins to 20 per hour. Referrers always receive half the Brahma join amount.</p>
     </div>
 
     <div class="ladder rv" id="ladder">
       <div class="you" id="youMark" style="left:12%"></div>
       <div class="step">
-        <div class="s-fill" style="--h:88%"><span class="s-reward">100</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 50</span></div>
+        <div class="s-fill" style="--h:92%"><span class="s-reward">100</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 50</span></div>
         <div class="s-meta"><span class="s-era">TIER I — FIRST HANDS</span><span class="s-range">JOINS 1 – 10,000</span></div>
       </div>
       <div class="step">
-        <div class="s-fill" style="--h:60%"><span class="s-reward">50</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 25</span></div>
+        <div class="s-fill" style="--h:70%"><span class="s-reward">50</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 25</span></div>
         <div class="s-meta"><span class="s-era">TIER II — SECOND WAVE</span><span class="s-range">JOINS 10,001 – 35,000</span></div>
       </div>
       <div class="step">
-        <div class="s-fill" style="--h:37%"><span class="s-reward">25</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 12.5</span></div>
+        <div class="s-fill" style="--h:50%"><span class="s-reward">25</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 12.5</span></div>
         <div class="s-meta"><span class="s-era">TIER III — THIRD WATCH</span><span class="s-range">JOINS 35,001 – 60,000</span></div>
       </div>
       <div class="step">
-        <div class="s-fill" style="--h:20%"><span class="s-reward">12.5</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 6.25</span></div>
+        <div class="s-fill" style="--h:34%"><span class="s-reward">12.5</span><span class="s-unit">BRAHMA COIN / JOIN</span><span class="s-ref">REFERRER · 6.25</span></div>
         <div class="s-meta"><span class="s-era">TIER IV — LAST QUARTER</span><span class="s-range">JOINS 60,001 – 85,000</span></div>
       </div>
     </div>
@@ -728,24 +749,36 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="rules">
       <div class="rule rv"><i>ONE PER ADDRESS</i><b>One claim, ever</b><p>The join claim is paid once per address, from the adoption pool. No farming, no resets.</p></div>
       <div class="rule rv" style="transition-delay:.08s"><i>POOL EMPTY → STOP</i><b>Joins stop paying</b><p>When the 30,000,000 adoption pool runs dry, new joins simply stop paying. The chain doesn't borrow to reward.</p></div>
+      <div class="rule rv" style="transition-delay:.12s"><i>NO FARMING HUBS</i><b>Six senders burns the hub</b><p>An address that receives from six different senders has all its Brahma and L2 burned, and anything sent to it afterwards burns too. Farms that funnel many phones into one wallet lose everything.</p></div>
       <div class="rule rv" style="transition-delay:.16s"><i>L2</i><b>NINE STAY · 750M SHARED</b><p>The nine genesis L2 tokens remain. At every mine-schedule halving, a shared 750,000,000 pool of each is split across joined/mined wallets. When mining L1 is gone, the remaining operator-grant L2 releases the same way. New L2 launches are closed.</p></div>
+    </div>
+
+    <section class="alloc-sec rv" style="margin-top:100px">
+      <p class="overline"><i>—</i>REFERRALS — HOW THE BONUS WORKS</p>
+      <h2 class="sec">Bring a hand,<br>keep <em style="color:var(--gold)">half.</em></h2>
+    </section>
+    <div class="rules" style="margin-top:40px">
+      <div class="rule rv"><i>HALF THE JOIN</i><b>Paid the moment they join</b><p>When someone joins with your invite, you receive half their Brahma join reward: 50 while joins are under 10,000, then 25, then halving with the ladder above.</p></div>
+      <div class="rule rv" style="transition-delay:.06s"><i>BRAHMA ONLY</i><b>No L2 for the referrer</b><p>The new wallet gets 1,000 of each genesis L2. The referrer's bonus is Brahma Coin only.</p></div>
+      <div class="rule rv" style="transition-delay:.12s"><i>NO SELF-REFERRAL</i><b>Your own address pays nothing</b><p>Inviting yourself earns no bonus. One join per address and one per phone still applies.</p></div>
+      <div class="rule rv" style="transition-delay:.18s"><i>SAME POOL</i><b>Ends when the pool ends</b><p>Referral bonuses come from the same 30,000,000 adoption pool. When it is empty, joins and referrals both stop paying. Joined without an invite? You can still add a referrer once, later.</p></div>
     </div>
 
     <div class="forge rv" style="margin-top:100px;margin-bottom:110px">
       <div>
         <h3>Build your invite.</h3>
-        <p class="fl">Paste your BRM1G address and the site assembles your claim links. Whoever joins through them mines for themselves; you receive half their join amount.</p>
+        <p class="fl">Paste your BRM1G address and the site assembles your claim links. Whoever joins through them mines for themselves; you receive half their Brahma join amount.</p>
         <div class="f-field">
           <input class="f-in" id="invAddr" placeholder="BRM1G… your address" autocomplete="off" spellcheck="false">
         </div>
         <div class="f-btns"><button class="btn solid" id="invGen">Build links</button></div>
       </div>
       <div class="f-out" id="invOut">
-        <p style="font:400 9px var(--mono);letter-spacing:.24em;color:var(--mut);margin-bottom:6px">YOUR CLAIM LINKS</p>
+        <p style="font:400 10.5px var(--mono);letter-spacing:.24em;color:var(--mut);margin-bottom:6px">YOUR CLAIM LINKS</p>
         <div class="inv-row"><i>APP</i><code id="invApk"></code><button class="btn sm" data-inv="apk">Copy</button></div>
         <div class="inv-row"><i>WEB</i><code id="invWeb"></code><button class="btn sm" data-inv="web">Copy</button></div>
         <div class="inv-row"><i>DEEP</i><code id="invBrahm"></code><button class="btn sm" data-inv="brahm">Copy</button></div>
-        <p style="margin-top:18px;font:400 9px var(--mono);letter-spacing:.2em;color:var(--mut)">DEEP LINK: BRAHM://CLAIM</p>
+        <p style="margin-top:18px;font:400 10.5px var(--mono);letter-spacing:.2em;color:var(--mut)">DEEP LINK: BRAHM://CLAIM</p>
       </div>
     </div>
   </div>
@@ -953,7 +986,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="fq rv"><button class="fq-q">What happens at a halving?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         <div class="fq-a"><div><p>The mine schedule halves per the join ladder — 0.00014 becomes 0.00007, then 0.000035, on toward zero. And a shared 750,000,000 pool of each of the nine genesis L2 tokens is split across wallets that joined or mined — not 750M each.</p></div></div></div>
       <div class="fq rv"><button class="fq-q">Can I launch my own L2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <div class="fq-a"><div><p>No. New L2 launches are closed — there is no burn-to-launch. The nine genesis tokens stay. Use the Burn button only to permanently remove Brahma Coin. A send over 10% of circulating supply also burns 25% of that send.</p></div></div></div>
+        <div class="fq-a"><div><p>No. New L2 launches are closed — there is no burn-to-launch. The nine genesis tokens stay. Use the Burn button only to permanently remove Brahma Coin. A send over 10% of circulating supply also burns 10% of that send.</p></div></div></div>
     </div>
 
     <p class="fine rv">BRAHMNETWORK IS A PRIVATE TESTNET. NO EXCHANGE, NO USD, NO MARKET PRICE — UNITS ONLY. NO PAUSE OR MINT BY AN OWNER. NOT DECENTRALIZED UNTIL TWO INDEPENDENT OPERATORS, A LIVE NAMED HOST, AND AN EXPLICIT LAUNCH FLIP EXIST. NOTHING HERE IS INVESTMENT ADVICE. CREATE RESPONSIBLY.</p>
