@@ -59,12 +59,14 @@ from crypto_mldsa import (
     addresses_equal,
     canonical_message,
     checksum_address,
+    device_message,
     is_brah_address,
     load_or_create_identity,
     assert_key_owns_address,
     matching_canonical_message,
     normalize_address,
     sibling_address,
+    verify_device_key,
     verify_invite,
     verify_spend,
 )
@@ -688,12 +690,12 @@ def claim_html(ref_raw: str = "") -> str:
         ".muted{color:#9a9a9a}nav a{margin-right:1rem}</style>"
         "</head><body>"
         "<h1>BRAHMNETWORK</h1>"
-        "<p>Private post-quantum testnet. Canonical ledger is this Python node. "
-        "Not Bitcoin, not Ethereum, not a public mainnet. Coin: Brahma Coin.</p>"
+        "<p>Public BRAHMNETWORK. Canonical ledger is this Python node. "
+        "Not Bitcoin, not Ethereum. Coin: Brahma Coin.</p>"
         f"<p>Height <code>{html.escape(height)}</code> · joined <code>{html.escape(joined)}</code> · "
         f"mined <code>{html.escape(mined)}</code> Brahma Coin</p>"
         "<p class=\"muted\">Balances are Brahma Coin units (1 Brahma Coin = 100,000,000). "
-        "Dilithium3 spends. <code>public_launch</code> is false.</p>"
+        "Dilithium3 spends. <code>public_launch</code> follows the live gate.</p>"
         "<nav><a href=\"/\">Home</a><a href=\"/claim\">Claim</a>"
         "<a href=\"/explorer\">Explorer</a><a href=\"/rpc\">RPC</a></nav>"
         "<h2>JSON-RPC</h2>"
@@ -1114,9 +1116,17 @@ def maybe_l2_halving_airdrop(state: dict) -> bool:
 
 
 def parse_join_memo(memo: str) -> tuple[str, str]:
-    """Parse join memo `dev:<deviceId>` or `dev:<deviceId>:<referrer>`. Returns (device_id, referrer)."""
+    """Parse `dev:<id>[:referrer]` or `dk:<pub>:<sig>[:referrer]`. Returns (device, referrer)."""
     raw = (memo or "").strip()
-    if not raw.lower().startswith("dev:"):
+    low = raw.lower()
+    if low.startswith("dk:"):
+        parts = raw[3:].split(":")
+        if len(parts) < 2:
+            return "", ""
+        device = f"dk:{parts[0]}:{parts[1]}"
+        referrer = parts[2].strip() if len(parts) > 2 else ""
+        return device, referrer
+    if not low.startswith("dev:"):
         return "", raw
     body = raw[4:].strip()
     if not body:
@@ -1125,6 +1135,36 @@ def parse_join_memo(memo: str) -> tuple[str, str]:
     device_id = parts[0].strip()[:128]
     rest = parts[1].strip() if len(parts) > 1 else ""
     return device_id, rest
+
+
+def bind_join_device(state: dict, addr: str, device: str) -> str:
+    """Return the stored device id. A dk: proof must verify. A dev: id still joins."""
+    devices = state.setdefault("join_devices", {})
+    if not isinstance(devices, dict):
+        devices = {}
+        state["join_devices"] = devices
+    if device.lower().startswith("dk:"):
+        parts = device[3:].split(":")
+        if len(parts) != 2:
+            raise ValueError("Device key required")
+        pub, sig = parts
+        shown = addr
+        try:
+            shown = checksum_address(addr) if is_brah_address(addr) else addr
+        except Exception:
+            shown = addr
+        if not verify_device_key(pub, device_message(shown, pub), sig):
+            raise ValueError("Device key signature invalid")
+        device_id = hashlib.sha256(bytes.fromhex(pub)).hexdigest()
+    else:
+        device_id = device.strip()[:128]
+        if not device_id:
+            raise ValueError("Device id required (memo dev:<phoneId>)")
+    bound = str(devices.get(device_id) or "")
+    if bound and not addresses_equal(bound, addr):
+        raise ValueError("This phone already claimed join rewards")
+    devices[device_id] = normalize_address(addr)
+    return device_id
 
 
 def burn_account_all(state: dict, addr: str) -> dict:
@@ -1150,9 +1190,9 @@ def burn_account_all(state: dict, addr: str) -> dict:
 
 def note_consolidation_send(state: dict, to_addr: str, from_addr: str) -> dict | None:
     """
-    Track distinct inbound senders per destination. On the 6th distinct sender,
-    burn all coins on the destination (anti scrap-phone consolidation farms).
-    Once burned, any further inbound is burned again.
+    Burn a hub only when six fresh join wallets empty their Brahma into it
+    within an hour. Ordinary receives from friends are left intact.
+    Once that farm pattern has burned the hub, later inbound is burned again.
     """
     if not to_addr or not from_addr or to_addr == from_addr:
         return None
@@ -1164,21 +1204,28 @@ def note_consolidation_send(state: dict, to_addr: str, from_addr: str) -> dict |
     if to_key == from_key:
         return None
     a = account(state, to_key)
-    hubs = state.setdefault("inbound_senders", {})
+    if a.get("consolidation_burned"):
+        summary = burn_account_all(state, to_key)
+        return {"burned": True, "distinct_senders": 0, **summary}
+    sender = account(state, from_key)
+    joined = int(sender.get("join_time") or 0)
+    emptied = int(sender.get("0") or 0) == 0
+    fresh = joined > 0 and int(time.time()) - joined <= 3600 and emptied
+    if not fresh:
+        return {"burned": False, "distinct_senders": 0}
+    hubs = state.setdefault("farm_dump_senders", {})
     if not isinstance(hubs, dict):
         hubs = {}
-        state["inbound_senders"] = hubs
+        state["farm_dump_senders"] = hubs
     senders = hubs.get(to_key)
     if not isinstance(senders, list):
         senders = []
     if from_key not in senders:
         senders.append(from_key)
-    if len(senders) > 64:
-        senders = senders[-64:]
-    hubs[to_key] = senders
-    distinct = len(set(senders))
+    hubs[to_key] = senders[-64:]
+    distinct = len(set(hubs[to_key]))
     a["inbound_sender_count"] = distinct
-    if a.get("consolidation_burned") or distinct >= CONSOLIDATION_BURN_SENDERS:
+    if distinct >= CONSOLIDATION_BURN_SENDERS:
         summary = burn_account_all(state, to_key)
         return {"burned": True, "distinct_senders": distinct, **summary}
     return {"burned": False, "distinct_senders": distinct}
@@ -1228,17 +1275,31 @@ def block_header(state: dict, miner: str, txs: list, reward: int) -> tuple[str, 
     return header, root
 
 
-def maybe_retarget(state: dict) -> None:
-    """Adjust bits toward ~8s blocks. Floor 18, ceiling 24. BRAHMNETWORK curve, not Bitcoin's."""
+def accept_block_time(state: dict, claimed: int) -> int | None:
+    """Ignore a stamp earlier than the previous block or more than two hours ahead of it."""
+    if claimed <= 0:
+        return None
+    prev = int(state.get("last_block_time") or 0)
+    if prev and (claimed < prev or claimed > prev + 7200):
+        return None
+    return claimed
+
+
+def maybe_retarget(state: dict, now: int | None = None) -> None:
+    """Adjust bits toward ~8s blocks. Floor 18, ceiling 24. Uses block time, not a free clock."""
     height = int(state["chain_height"])
     window = 64
     if height == 0 or height % window != 0:
         return
-    last_t = int(state.get("retarget_time", 0))
-    now = int(time.time())
+    last_t = int(state.get("retarget_time") or 0)
+    if now is None or now <= 0:
+        now = int(time.time())
     if last_t <= 0:
         state["retarget_height"] = height
         state["retarget_time"] = now
+        return
+    if now < last_t or now > last_t + 7200:
+        state["retarget_height"] = height
         return
     elapsed = max(1, now - last_t)
     target = window * 8
@@ -1301,8 +1362,21 @@ def load_all_blocks() -> list:
 
 
 def block_work(block: dict) -> int:
-    bits = int(block.get("pow_bits") or 20)
-    bits = max(1, min(bits, 62))
+    """Work counts only when the hash meets the bits the block declares, inside 18–24."""
+    try:
+        bits = int(block.get("pow_bits"))
+        nonce = int(block.get("nonce"))
+        index = int(block.get("index"))
+        reward = int(block.get("reward") or 0)
+    except (TypeError, ValueError):
+        return 0
+    if bits < 18 or bits > 24:
+        return 0
+    header = f"{index - 1}|{block.get('previous_hash')}|{block.get('miner')}|{reward}|{block.get('tx_root')}"
+    if not meets_pow(header, nonce, bits):
+        return 0
+    if str(block.get("hash") or "") != sha256_hex(f"{header}:{nonce}"):
+        return 0
     return 1 << bits
 
 
@@ -1319,8 +1393,9 @@ def mainnet_ready_report() -> dict:
     seeds = _peer_net.seed_count() if _peer_net is not None else 0
     named = named_public_rpc()
     # Seeds and same-host / loopback HELLO peers do not count as a second operator.
-    ready = independent >= 1 and bool(named)
-    launched = env("PUBLIC_LAUNCH") == "1" and ready
+    # Public launch means an independent node is reachable. No named host.
+    ready = independent >= 1
+    launched = ready
     return {
         "peers": live,
         "independent_peers": independent,
@@ -1410,12 +1485,7 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
         state["join_devices"] = devices
 
     def _bind_device() -> None:
-        if not device_id:
-            raise ValueError("Device id required (memo dev:<phoneId>)")
-        bound = str(devices.get(device_id) or "")
-        if bound and not addresses_equal(bound, addr):
-            raise ValueError("This phone already claimed join rewards")
-        devices[device_id] = normalize_address(addr)
+        bind_join_device(state, addr, device_id)
 
     if entry is not None:
         if recorded_ref:
@@ -1452,6 +1522,7 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
     pool["0"] = int(pool["0"]) - total
     acct = account(state, addr)
     acct["0"] = int(acct["0"]) + join_amt
+    acct["join_time"] = now
     if pay_ref > 0:
         bonus = account(state, ref)
         bonus["0"] = int(bonus["0"]) + pay_ref
@@ -1666,12 +1737,15 @@ def seal_block(state: dict, miner: str, txs: list, reward: int, pow_nonce: int, 
         bits = 0
         nonce = 0
     block_hash = sha256_hex(f"{header}:{nonce}")
+    stamped = accept_block_time(state, int(time.time()))
     state["chain_height"] = int(state["chain_height"]) + 1
-    if require_pow:
-        maybe_retarget(state)
+    if stamped:
+        state["last_block_time"] = stamped
+    if require_pow and stamped:
+        maybe_retarget(state, stamped)
     block = {
         "index": state["chain_height"],
-        "timestamp": int(time.time()),
+        "timestamp": int(state.get("last_block_time") or time.time()),
         "previous_hash": state["tip_hash"],
         "miner": miner,
         "nonce": nonce,
@@ -1754,11 +1828,17 @@ def _apply_extension(state: dict, block: dict) -> bool:
         nonce = int(block["nonce"])
     except (KeyError, TypeError, ValueError):
         return False
-    bits = int(block.get("pow_bits") or state["pow_bits"])
+    bits = int(state["pow_bits"])
     if tx["kind"] == "mine":
-        if not meets_pow(header, nonce, bits):
+        try:
+            claimed = int(block.get("pow_bits"))
+        except (TypeError, ValueError):
+            return False
+        if claimed != bits or not meets_pow(header, nonce, bits):
             return False
     elif reward != 0:
+        return False
+    elif int(block.get("pow_bits") or 0) != 0 or nonce != 0:
         return False
     if block.get("hash") != sha256_hex(f"{header}:{nonce}"):
         return False
@@ -1790,32 +1870,62 @@ def _apply_extension(state: dict, block: dict) -> bool:
     stored["tx_root"] = root
     stored["reward"] = reward
     stored["miner"] = miner
-    stored["pow_bits"] = int(block.get("pow_bits") or state["pow_bits"])
+    stored["pow_bits"] = bits if tx["kind"] == "mine" else 0
     settle_protocol(state)
     append_block(stored)
     save_state(state)
+    if tx["kind"] == "mine":
+        claimed_time = int(block.get("timestamp") or 0)
+        accepted = accept_block_time(state, claimed_time)
+        if accepted:
+            state["last_block_time"] = accepted
+            state["chain_height"] = int(block["index"])
+            maybe_retarget(state, accepted)
+            save_state(state)
     return True
 
 
 def _replay_prefix(prefix: list) -> dict:
-    if STATE_PATH.exists():
-        STATE_PATH.unlink()
-    if CHAIN_PATH.exists():
-        CHAIN_PATH.unlink()
-    state = load_or_init()
-    applied = [b for b in prefix if int(b.get("index") or 0) > 0]
-    if applied:
-        state["pow_bits"] = int(applied[-1].get("pow_bits") or state["pow_bits"])
-        save_state(state)
-    for block in applied:
-        if not _apply_extension(state, block):
-            raise RuntimeError("replay failed")
+    """Replay onto scratch files. The live chain is replaced only after every block checks."""
+    global STATE_PATH, CHAIN_PATH
+    live_state, live_chain = STATE_PATH, CHAIN_PATH
+    bak_state = live_state.with_suffix(".json.bak")
+    bak_chain = live_chain.with_suffix(".jsonl.bak")
+    scratch_state = live_state.with_suffix(".replay.json")
+    scratch_chain = live_chain.with_suffix(".replay.jsonl")
+    if live_state.exists():
+        bak_state.write_bytes(live_state.read_bytes())
+    if live_chain.exists():
+        bak_chain.write_bytes(live_chain.read_bytes())
+    try:
+        for path in (scratch_state, scratch_chain):
+            if path.exists():
+                path.unlink()
+        STATE_PATH, CHAIN_PATH = scratch_state, scratch_chain
         state = load_or_init()
-    return state
+        applied = [b for b in prefix if int(b.get("index") or 0) > 0]
+        for block in applied:
+            if not _apply_extension(state, block):
+                raise RuntimeError("replay failed")
+            state = load_or_init()
+        os.replace(scratch_state, live_state)
+        if scratch_chain.exists():
+            os.replace(scratch_chain, live_chain)
+        return state
+    except Exception:
+        if bak_state.exists():
+            os.replace(bak_state, live_state)
+        if bak_chain.exists():
+            os.replace(bak_chain, live_chain)
+        raise
+    finally:
+        STATE_PATH, CHAIN_PATH = live_state, live_chain
 
 
 def _prefer_block(challenger: dict, incumbent: dict) -> bool:
     cw, iw = block_work(challenger), block_work(incumbent)
+    if cw == 0:
+        return False
     if cw != iw:
         return cw > iw
     return str(challenger.get("hash") or "") < str(incumbent.get("hash") or "")
@@ -2568,7 +2678,7 @@ td,th{{padding:6px 10px;text-align:left}} a{{color:#00FF88}}</style></head>
 <p>Canonical python-l1 · Dilithium3 spends · integer units · height {state['chain_height']} ·
 mined {from_units(int(state['total_mined']))} Brahma Coin ·
 joined {state.get('joined_count', 0)} · next join {join_amt} / referrer {ref_amt} ·
-rewards left {from_units(int(account(state, 'POOL_AIRDROP').get('0', 0)))} · protocol locked · private testnet</p>
+rewards left {from_units(int(account(state, 'POOL_AIRDROP').get('0', 0)))} · protocol locked · public launch {str(mainnet_ready_report().get('public_launch')).lower()}</p>
 <p><a href="/">Home</a> · <a href="/rpc">JSON-RPC POST /</a></p>
 <table><tr><th>Height</th><th>Miner</th><th>Txs</th><th>Hash</th><th>Reward</th></tr>{table}</table>
 </body></html>
@@ -2635,6 +2745,7 @@ def run(port: int | None = None) -> None:
         listen_host=bind,
         rpc_port=port,
         udp_port=udp_port,
+        store_path=str(DATA / "learned_peers.txt"),
     )
     _peer_net.start()
     # Let seed HELLO land so BLOCK replies have a peer to send to.

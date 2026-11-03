@@ -277,7 +277,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             val raw = url.trim()
             if (raw.isBlank()) return
             val normalized = if (raw.endsWith("/")) raw else "$raw/"
-            if (CryptoManager.isAllowedRpcUrl(normalized, debug)) extras.add(normalized)
+            if (CryptoManager.isAllowedRpcUrl(normalized, debug, learnedHosts())) extras.add(normalized)
         }
         add(Constants.publicHttps())
         val last = prefs.getString("last_good_rpc", "").orEmpty()
@@ -331,14 +331,52 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    private val chainChecked = mutableSetOf<String>()
+
+    private fun learnedHosts(): Set<String> {
+        return prefs.getStringSet("learned_rpc_hosts", emptySet()).orEmpty()
+    }
+
+    private fun rememberHost(url: String) {
+        val host = CryptoManager.rpcHost(url)?.lowercase() ?: return
+        val next = learnedHosts().toMutableSet()
+        next.add(host)
+        prefs.edit().putStringSet("learned_rpc_hosts", next).apply()
+    }
+
+    private fun acceptChain(url: String, work: Long): Boolean {
+        if (work <= 0L) return false
+        val best = prefs.getLong("best_chain_work", 0L)
+        if (work < best) return false
+        if (work > best) prefs.edit().putLong("best_chain_work", work).apply()
+        rememberHost(url)
+        chainChecked.add(url)
+        if (!Constants.isPrivateLanRpc(url)) {
+            prefs.edit().putString("last_good_rpc", url).apply()
+        }
+        return true
+    }
+
     private fun wireRpc(client: BrahRpc) {
         client.onSuccess = { url ->
-            if (!Constants.isPrivateLanRpc(url)) {
-                prefs.edit().putString("last_good_rpc", url).apply()
+            if (url in chainChecked || Constants.isPrivateLanRpc(url)) {
+                if (!Constants.isPrivateLanRpc(url)) {
+                    prefs.edit().putString("last_good_rpc", url).apply()
+                }
+                CryptoManager.rpcHost(url)?.let {
+                    com.brahmnetwork.wallet.sentinel.SentinelRuntime.rememberRpcHost(it)
+                }
+                return@onSuccess
             }
-            val host = CryptoManager.rpcHost(url)
-            if (!host.isNullOrBlank()) {
-                com.brahmnetwork.wallet.sentinel.SentinelRuntime.rememberRpcHost(host)
+            viewModelScope.launch {
+                val work = ChainCheck.score(BrahRpc(listOf(url)))
+                if (work == null || !acceptChain(url, work)) {
+                    _status.value = "Node chain does not match this coin"
+                    return@launch
+                }
+                CryptoManager.rpcHost(url)?.let {
+                    com.brahmnetwork.wallet.sentinel.SentinelRuntime.rememberRpcHost(it)
+                }
             }
         }
     }
@@ -350,15 +388,31 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setRpcUrl(url: String) {
         val cleaned = url.trim()
-        if (!CryptoManager.isAllowedRpcUrl(cleaned, com.brahmnetwork.wallet.BuildConfig.DEBUG)) {
-            _status.value = "RPC URL refused (HTTPS, or debug LAN/localhost only)"
+        val debug = com.brahmnetwork.wallet.BuildConfig.DEBUG
+        if (CryptoManager.isAllowedRpcUrl(cleaned, debug, learnedHosts())) {
+            prefs.edit().putString("rpc_url", cleaned).apply()
+            _rpcUrl.value = cleaned
+            rpc = BrahRpc { rpcUrlList() }.also { wireRpc(it) }
+            com.brahmnetwork.wallet.sentinel.SentinelRuntime.addRpcSeed(cleaned)
+            refreshBalances()
             return
         }
-        prefs.edit().putString("rpc_url", cleaned).apply()
-        _rpcUrl.value = cleaned
-        rpc = BrahRpc { rpcUrlList() }.also { wireRpc(it) }
-        com.brahmnetwork.wallet.sentinel.SentinelRuntime.addRpcSeed(cleaned)
-        refreshBalances()
+        val host = CryptoManager.rpcHost(cleaned)
+        if (debug || host == null || !CryptoManager.isPublicNodeHost(host)) {
+            _status.value = "RPC URL refused"
+            return
+        }
+        viewModelScope.launch {
+            val work = ChainCheck.score(BrahRpc(listOf(if (cleaned.endsWith("/")) cleaned else "$cleaned/")))
+            if (work == null || !acceptChain(cleaned, work)) {
+                _status.value = "RPC URL refused. Chain is lighter than the one already kept."
+                return@launch
+            }
+            prefs.edit().putString("rpc_url", cleaned).apply()
+            _rpcUrl.value = cleaned
+            rpc = BrahRpc { rpcUrlList() }.also { wireRpc(it) }
+            refreshBalances()
+        }
     }
 
     fun shareInvite(context: android.content.Context) {
@@ -526,6 +580,13 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         return try {
             val result = client.call("brah_submitTx", listOf(tx)).obj()
             if (kind == "mine") {
+                if (!CryptoManager.meetsPow(header, powNonce, bits)) {
+                    throw IllegalStateException("PoW check failed")
+                }
+                val returned = result.get("hash")?.asString
+                if (!returned.isNullOrBlank() && !returned.equals(blockHash, ignoreCase = true)) {
+                    throw IllegalStateException("Node hash does not match this block")
+                }
                 try {
                     SentinelRuntime.gossipBlock(
                         mapOf(
@@ -831,6 +892,13 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
 
     fun joinMemo(referrer: String = _referrerAddress.value): String {
         val ref = CryptoManager.toBrahAddress(referrer.trim())
+        val addr = CryptoManager.toBrahAddress(_address.value.trim())
+        val proof = if (addr.isNotEmpty()) DeviceJoinKey.proof(addr) else null
+        if (proof != null) {
+            val body = "dk:${proof.compressedPub}:${proof.signatureHex}"
+            val memo = if (ref.isNotEmpty()) "$body:$ref" else body
+            if (memo.length <= 256) return memo
+        }
         val dev = deviceJoinId()
         return if (ref.isNotEmpty()) "dev:$dev:$ref" else "dev:$dev"
     }

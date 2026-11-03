@@ -159,9 +159,12 @@ class CryptoManager {
         fun inviteCanonical(ref: String, claim: String, apk: String, ts: Long): ByteArray =
             "BRAHINVITE|$ref|$claim|$apk|$ts".toByteArray(Charsets.UTF_8)
 
-        fun isPublicBrahmHost(host: String?): Boolean {
+        fun isPublicNodeHost(host: String?): Boolean {
             val h = host?.lowercase()?.trim().orEmpty()
-            return h == "www.brahmnetwork.com" || h == "brahmnetwork.com"
+            if (h.isBlank() || h == "0.0.0.0" || ".." in h) return false
+            if (h.endsWith(".trycloudflare.com")) return false
+            if (isPrivateLanHost(h)) return false
+            return true
         }
 
         fun isPrivateLanHost(host: String?): Boolean {
@@ -186,7 +189,7 @@ class CryptoManager {
                     && path == allowedPath
                     && !host.isNullOrBlank()
                     && ".." !in host
-                    && (isPublicBrahmHost(host) || (scheme == "http" && isPrivateLanHost(host)))
+                    && (isPublicNodeHost(host) || (scheme == "http" && isPrivateLanHost(host)))
             } catch (_: Exception) {
                 false
             }
@@ -231,14 +234,20 @@ class CryptoManager {
             return claimHost.equals(nodeHost, ignoreCase = true)
         }
 
-        fun isAllowedRpcUrl(url: String, debug: Boolean): Boolean {
+        fun isSeedHost(host: String?): Boolean {
+            val h = host?.lowercase()?.trim().orEmpty()
+            if (h == "www.brahmnetwork.com" || h == "brahmnetwork.com") return true
+            return Constants.SEED_RPC_URLS.any { rpcHost(it)?.equals(h, ignoreCase = true) == true }
+        }
+
+        fun isAllowedRpcUrl(url: String, debug: Boolean, learned: Set<String> = emptySet()): Boolean {
             val raw = url.trim()
             if (raw.isEmpty()) return true
             return try {
                 val parsed = java.net.URI(if (raw.endsWith("/")) raw else "$raw/")
                 val host = parsed.host ?: return false
                 when (parsed.scheme?.lowercase()) {
-                    "https" -> isPublicBrahmHost(host)
+                    "https" -> isSeedHost(host) || host.lowercase() in learned.map { it.lowercase() }
                     "http" -> debug && host.isNotBlank() && host != "0.0.0.0" && isPrivateLanHost(host)
                     else -> false
                 }

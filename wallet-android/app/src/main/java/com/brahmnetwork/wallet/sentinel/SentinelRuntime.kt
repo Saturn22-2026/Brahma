@@ -145,6 +145,7 @@ object SentinelRuntime {
                 }
             }
             packet.type.equals("TRANSACTION", ignoreCase = true) -> {
+                if (!com.brahmnetwork.wallet.ChainCheck.meshPayloadOk(packet.payload)) return
                 queue?.enqueue(packet.payload)
                 _queued.value = queue?.size() ?: 0
                 onTransaction?.invoke(packet.payload)

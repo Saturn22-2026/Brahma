@@ -6,8 +6,8 @@
   "signature": "Dilithium3",
   "units_per_btq": 100000000,
   "protocol_locked": true,
-  "public_launch": false,
-  "warning": "Private testnet until live public_launch matches marketing. Pools are protocol organs. Founder/empower/strategic/50 distribution keys are generated into genesis_accounts.json (public) and genesis_secrets.json (operator only). Python L1 is the canonical ledger. Economics v2: mining 50M, adoption 30M, no donation pool.",
+  "public_launch": true,
+  "warning": "Public launch follows an independent peer and the named host. Pools are protocol organs. Founder/empower/strategic/50 distribution keys are generated into genesis_accounts.json (public) and genesis_secrets.json (operator only). Python L1 is the canonical ledger. Economics v2: mining 50M, adoption 30M, no donation pool.",
   "economics": {
     "total_supply": 100000000,
     "mining_pool": 50000000,

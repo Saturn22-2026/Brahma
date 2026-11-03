@@ -3,13 +3,15 @@ package com.brahmnetwork.wallet
 import android.os.Build
 
 /**
- * Wallet parameters for BRAHMNETWORK (Brahma Coin). Private testnet.
- * Debug builds may use LAN HTTP. Release builds require TLS.
+ * Wallet parameters for BRAHMNETWORK (Brahma Coin).
+ * Release builds try the shipped public nodes over TLS, in order.
  */
 object Constants {
     private const val USB_RPC_URL = "http://127.0.0.1:8545/"
     const val LAN_RPC_URL = "http://192.168.168.16:8545/"
     const val PUBLIC_HTTPS_URL = "https://www.brahmnetwork.com/"
+    /** Shipped public nodes. The phone tries these in order, then any HTTPS node it has learned. */
+    val SEED_RPC_URLS = listOf(PUBLIC_HTTPS_URL)
     /** Live operator grant (103 Brahma). Opening this identity makes it first. */
     const val OPERATOR_GRANT_ADDR = "BRM1Ge19737c9aa6f097f76cb609a84a6"
     const val OPERATOR_GRANT_ADDRESS = "BRM1Ge19737c9aa6f097f76cb609a84a6"
@@ -45,15 +47,15 @@ object Constants {
         get() = rpcUrlCandidates(preferLan = false)
 
     fun rpcUrlCandidates(preferLan: Boolean): List<String> {
-        val https = publicHttps()
+        val https = (listOf(publicHttps()) + SEED_RPC_URLS).distinct()
         val raw = if (!BuildConfig.DEBUG) {
-            listOf(https)
+            https
         } else if (isEmulator) {
-            listOf(https, EMULATOR_RPC_URL, USB_RPC_URL)
+            https + listOf(EMULATOR_RPC_URL, USB_RPC_URL)
         } else if (preferLan) {
-            listOf(https, LAN_RPC_URL, USB_RPC_URL)
+            https + listOf(LAN_RPC_URL, USB_RPC_URL)
         } else {
-            listOf(https)
+            https
         }
         return raw.filter { it.isNotBlank() }
     }

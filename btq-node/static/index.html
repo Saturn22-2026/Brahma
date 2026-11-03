@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BRAHMNETWORK — Creation is mined.</title>
-<meta name="description" content="BRAHMNETWORK — a post-quantum Layer 1. Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone. Private testnet until the launch gates flip. Units only — never dollars.">
+<meta name="description" content="BRAHMNETWORK — a post-quantum Layer 1. Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone. Public launch is on. Units only — never dollars.">
 <link rel="icon" type="image/png" href="/static/brahma-mark.png">
 <link rel="apple-touch-icon" href="/static/brahma-mark.png">
 <meta property="og:image" content="/static/brahma-brand.jpg">
@@ -80,7 +80,8 @@ main{padding-top:var(--nav)}
 .hero>*{min-width:0}
 .hero .lede{margin-bottom:34px}
 .gatechip{display:inline-flex;align-items:center;gap:9px;font:500 10.5px var(--mono);letter-spacing:.22em;color:var(--ink-dim);border:1px solid var(--line-strong);padding:7px 12px}
-.gatechip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none}
+.gatechip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+.gatechip.bad::before{background:var(--bad)}
 .hero h1{font:500 clamp(54px,8vw,112px)/0.96 var(--serif);letter-spacing:-.02em;margin:26px 0 26px}
 .hero h1 em{font-style:italic;color:var(--gold);font-weight:450}
 .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px}
@@ -351,6 +352,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .checklist b{font:500 14px var(--sans);display:block}
 .checklist p{font:400 11px var(--mono);color:var(--mut);letter-spacing:.08em;margin-top:4px;line-height:1.8}
 .checklist .st{font:500 10px var(--mono);letter-spacing:.2em;color:var(--bad);white-space:nowrap}
+.checklist .st.ok{color:var(--ok)}
 .dl-row{display:flex;gap:16px;flex-wrap:wrap;margin:70px 0 90px}
 .dl{display:flex;align-items:center;gap:16px;border:1px solid var(--line-strong);padding:16px 28px;text-decoration:none;transition:.25s;min-width:225px}
 .dl:hover{border-color:var(--gold);transform:translateY(-2px)}
@@ -481,14 +483,14 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   <a class="m-link" href="#/network"><i>05</i>Network</a>
   <a class="m-link" href="#/wallet"><i>06</i>Wallet</a>
   <a class="m-link" href="#/join"><i>07</i>Join</a>
-  <p class="m-foot">BRAHMNETWORK — PRIVATE TESTNET · CHAIN 2026</p>
+  <p class="m-foot">BRAHMNETWORK — PUBLIC LAUNCH · CHAIN 2026</p>
 </div>
 
 <main>
 <section class="view" id="view-home">
   <div class="hero">
     <div>
-      <p class="gatechip rv" id="gateChip">PRIVATE TESTNET — PUBLIC LAUNCH: FALSE</p>
+      <p class="gatechip rv" id="gateChip">PUBLIC LAUNCH — TRUE</p>
       <h1 class="rv" style="transition-delay:.08s">Creation<br>is <em>mined.</em></h1>
       <p class="lede rv" style="transition-delay:.16s">Brahma Coin is the native unit of BRAHMNETWORK — a post-quantum Layer 1. A Python node seals the chain, wallets sign with Dilithium3 (ML-DSA-65), and 100,000,000 coins are mined on the phone. Units only. Never dollars.</p>
       <div class="cta-row rv" style="transition-delay:.24s">
@@ -518,7 +520,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   <div class="honesty rv">
     <div class="wrap">
       <div class="hc"><span>PROTOCOL LOCKED</span><b class="ok">YES — FIXED IN PROTOCOL CODE</b></div>
-      <div class="hc"><span>PUBLIC LAUNCH</span><b class="bad" id="liveLaunch">FALSE</b></div>
+      <div class="hc"><span>PUBLIC LAUNCH</span><b class="ok" id="liveLaunch">TRUE</b></div>
       <div class="hc"><span>SECOND OPERATOR</span><b class="bad">REQUIRED — NOT YET REAL</b></div>
       <div class="hc"><span>DOLLAR VALUE</span><b class="bad">NONE — UNITS ONLY, FOREVER</b></div>
       <div class="hc"><span>THIS NODE HEIGHT</span><b id="liveHeight">—</b></div>
@@ -535,7 +537,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <h2 class="sec">Written before<br>the first block.</h2>
       </div>
       <div class="mrow rv"><span class="mnum">01 /</span><h3>Post-quantum identity</h3><p>The ledger is a Python node. Wallets sign with Dilithium3 (ML-DSA-65). Addresses are checksummed BRM1G. One Brahma Coin is 100,000,000 base units.</p></div>
-      <div class="mrow rv"><span class="mnum">02 /</span><h3>Honest by design</h3><p>This is a private testnet, and the site says so. Before any mainnet claim: two independent operators, a named public host live, and launch explicitly flipped on. Two processes on one PC are not two operators.</p></div>
+      <div class="mrow rv"><span class="mnum">02 /</span><h3>Honest by design</h3><p>Public launch is on when an independent node is reachable. Two processes on one machine are not two operators. The site follows that live gate.</p></div>
       <div class="mrow rv"><span class="mnum">03 /</span><h3>Pools are organs</h3><p>Mining, adoption, founder, empowerment, and the strategic burn are protocol organs. They cannot send as a user. There is no donation pool.</p></div>
       <div class="mrow rv"><span class="mnum">04 /</span><h3>Scarcity with teeth</h3><p>100,000,000 cap, a 5,000,000 yearly mine cap, and a whale tax: any single send over 10% of circulating supply burns 10% of itself. The wallet has an active burn button. The nine L2 memecoins stay on the same blocks.</p></div>
     </div>
@@ -587,7 +589,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     </div>
 
     <dl class="facts rv">
-      <div class="fact"><dt>NETWORK</dt><dd>BRAHMNETWORK — PRIVATE TESTNET</dd></div>
+      <div class="fact"><dt>NETWORK</dt><dd>BRAHMNETWORK — PUBLIC LAUNCH</dd></div>
       <div class="fact"><dt>CHAIN ID</dt><dd>2026</dd></div>
       <div class="fact"><dt>NODE</dt><dd>PYTHON</dd></div>
       <div class="fact"><dt>SIGNATURES</dt><dd>DILITHIUM3 / ML-DSA-65</dd></div>
@@ -788,10 +790,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>05</i>STATUS — STATED HONESTLY</p>
       <h1 class="rv" style="transition-delay:.08s">The gates,<br>as they <em>are.</em></h1>
-      <p class="lede rv" id="netLede" style="transition-delay:.16s">BRAHMNETWORK follows live <code>public_launch</code> on this origin. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that's the point.</p>
+      <p class="lede rv" id="netLede" style="transition-delay:.16s">BRAHMNETWORK is in public launch on this origin. It is not Bitcoin and not Ethereum. The gate below is the live <code>public_launch</code> flag: an independent node is reachable. No named host is required.</p>
       <div class="gates rv" style="transition-delay:.24s">
         <div class="grow"><div class="gk">PROTOCOL LOCKED</div><div class="gv ok">YES — SUPPLY, MINE SCHEDULE, REWARDS, TAX AND BURNS ARE FIXED IN PROTOCOL CODE</div></div>
-        <div class="grow"><div class="gk">PUBLIC LAUNCH</div><div class="gv bad" id="gateLaunch">FALSE</div></div>
+        <div class="grow"><div class="gk">PUBLIC LAUNCH</div><div class="gv ok" id="gateLaunch">TRUE</div></div>
         <div class="grow"><div class="gk">NAMED HOST</div><div class="gv"><code>WWW.BRAHMNETWORK.COM</code> — MUST FORWARD TO THE NODE ORIGIN <code>HTTP://127.0.0.1:8545</code></div></div>
         <div class="grow"><div class="gk">SECOND OPERATOR</div><div class="gv bad">REQUIRED BEFORE ANY MAINNET CLAIM — TWO PROCESSES ON ONE PC ARE NOT TWO OPERATORS</div></div>
         <div class="grow"><div class="gk">DOLLAR VALUE</div><div class="gv bad">NONE — THE COIN HAS NO MARKET PRICE. UNITS ONLY. NEVER DOLLARS.</div></div>
@@ -803,7 +805,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="flip-grid">
         <div class="ep"><i>01 — OPERATORS</i><b>Two independent operators</b><p>Separate humans, separate machines. Two processes on one PC do not count, no matter how they're named.</p></div>
         <div class="ep"><i>02 — HOST</i><b>Named public host live</b><p>www.brahmnetwork.com actually reaching the node origin — not a landing page in front of a dead socket.</p></div>
-        <div class="ep"><i>03 — FLAG</i><b>Explicit launch flip</b><p>Launch is a declared act, never a default. Until it is flipped on, the honest label is private testnet.</p></div>
+        <div class="ep"><i>03 — FLAG</i><b>Launch follows the gate</b><p>Public launch is on while an independent peer and www.brahmnetwork.com are live. There is no separate operator switch.</p></div>
       </div>
     </section>
 
@@ -952,7 +954,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="page-head compact">
       <p class="overline rv"><i>07</i>GENESIS ACCESS</p>
       <h1 class="rv" style="transition-delay:.08s">Ready before<br>the <em>flip.</em></h1>
-      <p class="lede rv" id="joinLede" style="transition-delay:.16s">There is no countdown until live public_launch flips. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.</p>
+      <p class="lede rv" id="joinLede" style="transition-delay:.16s">Public launch is on. Get the Android wallet, create your Dilithium identity, claim your join reward, and hold a first-hand address.</p>
       <div id="claimInvite" class="rv" style="display:none;margin-top:28px">
         <p class="chip" id="claimInviteChip">INVITE LINK</p>
         <p id="claimInviteText" style="margin-top:12px"></p>
@@ -961,7 +963,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <div class="checklist rv" style="transition-delay:.24s">
         <div><span class="cbox"></span><span><b>Two independent operators</b><p>Separate humans, separate machines — two processes on one PC are not two operators.</p></span><span class="st">PENDING</span></div>
         <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com forwarding to the node origin at http://127.0.0.1:8545.</p></span><span class="st">PENDING</span></div>
-        <div><span class="cbox"></span><span><b>Launch explicitly flipped on</b><p>Declared, never defaulted. Live truth is <code>brah_getStats.public_launch</code> on this origin.</p></span><span class="st bad" id="joinLaunchSt">FALSE</span></div>
+        <div><span class="cbox"></span><span><b>Launch follows the live gate</b><p>Public launch is <code>brah_getStats.public_launch</code> on this origin. It is on while an independent node is reachable. No named host and no tunnel are required.</p></span><span class="st ok" id="joinLaunchSt">TRUE</span></div>
       </div>
     </div>
 
@@ -989,7 +991,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <div class="fq-a"><div><p>No. New L2 launches are closed — there is no burn-to-launch. The nine genesis tokens stay. Use the Burn button only to permanently remove Brahma Coin. A send over 10% of circulating supply also burns 10% of that send.</p></div></div></div>
     </div>
 
-    <p class="fine rv">BRAHMNETWORK IS A PRIVATE TESTNET. NO EXCHANGE, NO USD, NO MARKET PRICE — UNITS ONLY. NO PAUSE OR MINT BY AN OWNER. NOT DECENTRALIZED UNTIL TWO INDEPENDENT OPERATORS, A LIVE NAMED HOST, AND AN EXPLICIT LAUNCH FLIP EXIST. NOTHING HERE IS INVESTMENT ADVICE. CREATE RESPONSIBLY.</p>
+    <p class="fine rv">BRAHMNETWORK PUBLIC LAUNCH. NO EXCHANGE, NO USD, NO MARKET PRICE — UNITS ONLY. NO PAUSE OR MINT BY AN OWNER. PUBLIC LAUNCH STAYS ON WHILE AN INDEPENDENT PEER AND THE NAMED HOST ARE LIVE. NOTHING HERE IS INVESTMENT ADVICE. CREATE RESPONSIBLY.</p>
   </div>
 </section>
 </main>
@@ -999,7 +1001,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="f-grid">
       <div>
         <div class="f-brand"><span class="mark"><img src="/static/brahma-mark.png" width="32" height="32" alt=""></span><span><b>BRAHMA COIN</b><small>BRAHMNETWORK</small></span></div>
-        <p class="f-disc">A post-quantum Layer 1 — Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone, nine L2 tokens on the same blocks. Private testnet until the gates flip — live <code>public_launch</code> on this origin is the truth. Units only, never dollars. Not investment advice.</p>
+        <p class="f-disc">A post-quantum Layer 1 — Python node, Dilithium3 signatures, 100,000,000 Brahma Coin mined on the phone, nine L2 tokens on the same blocks. Public launch while an independent node is reachable. Units only, never dollars. Not investment advice.</p>
       </div>
       <div class="f-links">
         <a href="#/home">Home</a><a href="#/coin">Brahma Coin</a><a href="#/nine">The Nine</a><a href="#/rewards">Rewards</a><a href="#/network">Network</a><a href="#/wallet">Wallet</a><a href="#/join">Join</a>

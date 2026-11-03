@@ -1,4 +1,4 @@
-"""Launch-gate war games. Not a third-party audit. Public launch remains false."""
+"""Launch-gate war games. Not a third-party audit. Public launch follows an independent peer."""
 from __future__ import annotations
 
 import json
@@ -210,7 +210,7 @@ class LaunchGates(unittest.TestCase):
         # Second credit path is a no-op when balances already exist.
         self.assertFalse(credit_join_l2(state, joiner))
 
-    def test_consolidation_burn_on_sixth_sender(self):
+    def test_ordinary_receives_are_not_burned(self):
         state = _fresh_state()
         _pk, _sk, hub = _key()
         account(state, hub)["0"] = to_units(1)
@@ -218,6 +218,18 @@ class LaunchGates(unittest.TestCase):
             _pk, _sk, sender = _key()
             account(state, sender)["0"] = to_units(1)
             raw = _signed(state, _pk, _sk, sender, "send", to=hub, amount=to_units(1))
+            commit_signed(state, raw)
+        self.assertGreater(int(account(state, hub)["0"]), 0)
+        self.assertFalse(account(state, hub).get("consolidation_burned"))
+
+    def test_fresh_join_dump_burns_the_hub(self):
+        state = _fresh_state()
+        _pk, _sk, hub = _key()
+        for i in range(6):
+            _pk, _sk, sender = _key()
+            apply_rewards(state, sender, f"dev:farm-phone-{i}")
+            amount = int(account(state, sender)["0"])
+            raw = _signed(state, _pk, _sk, sender, "send", to=hub, amount=amount)
             commit_signed(state, raw)
         self.assertEqual(int(account(state, hub)["0"]), 0)
         self.assertTrue(account(state, hub).get("consolidation_burned"))
@@ -1201,7 +1213,7 @@ class LaunchGates(unittest.TestCase):
         self.assertEqual(int(account(disk, a2)["0"]), reward2)
         self.assertEqual(int(account(disk, a1)["0"]), 0)
 
-    def test_mainnet_ready_needs_peer_and_named_host(self):
+    def test_mainnet_ready_needs_independent_peer(self):
         report = mainnet_ready_report()
         self.assertFalse(report["public_launch"])
         self.assertFalse(report["mainnet_ready"])
@@ -1212,7 +1224,7 @@ class LaunchGates(unittest.TestCase):
 
     def test_configured_seed_is_not_a_live_peer(self):
         net = PeerNet(18545, ["197.101.163.240:18545"], "brah-test", lambda _p: None)
-        self.assertEqual(net.seed_count(), 1)
+        self.assertEqual(net.seed_count(), 2)
         self.assertEqual(net.peer_count(), 0)
         self.assertEqual(net.independent_peer_count(), 0)
         net.live[("197.101.163.240", 18545)] = time.time()
@@ -1224,6 +1236,21 @@ class LaunchGates(unittest.TestCase):
         net.live[("197.101.163.240", 18545)] = time.time() - 91
         self.assertEqual(net.peer_count(), 1)
         self.assertEqual(net.independent_peer_count(), 0)
+
+    def test_claimed_one_bit_is_not_work(self):
+        from l1_mainnet import block_work
+
+        easy = {
+            "index": 2,
+            "previous_hash": "aa",
+            "miner": "BRM1G",
+            "reward": 1,
+            "tx_root": "bb",
+            "nonce": 0,
+            "pow_bits": 1,
+            "hash": "00",
+        }
+        self.assertEqual(block_work(easy), 0)
 
     def test_tls_watch_days_left_threshold(self):
         from datetime import datetime, timezone

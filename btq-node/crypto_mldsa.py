@@ -428,6 +428,44 @@ def verify_hello(payload: dict, now: int | None = None) -> bool:
     return False
 
 
+def device_message(address: str, pub_hex: str) -> bytes:
+    return f"BRAHDEV|{address}|{pub_hex}".encode("utf-8")
+
+
+def verify_device_key(pub_hex: str, message: bytes, sig_hex: str) -> bool:
+    """Verify a non-exportable phone P-256 key. pub_hex is the compressed point."""
+    try:
+        raw = bytes.fromhex(pub_hex.strip())
+        sig = bytes.fromhex(sig_hex.strip())
+    except ValueError:
+        return False
+    if len(raw) != 33 or raw[0] not in (2, 3) or not sig:
+        return False
+    spki = bytes.fromhex("3039301306072a8648ce3d020106082a8648ce3d030107032200") + raw
+    try:
+        with tempfile.TemporaryDirectory() as folder:
+            der = Path(folder) / "pub.der"
+            pem = Path(folder) / "pub.pem"
+            msg = Path(folder) / "msg.bin"
+            signature = Path(folder) / "sig.bin"
+            der.write_bytes(spki)
+            msg.write_bytes(message)
+            signature.write_bytes(sig)
+            made = subprocess.run(
+                ["openssl", "pkey", "-pubin", "-inform", "DER", "-in", str(der), "-out", str(pem)],
+                capture_output=True,
+            )
+            if made.returncode != 0:
+                return False
+            checked = subprocess.run(
+                ["openssl", "dgst", "-sha256", "-verify", str(pem), "-signature", str(signature), str(msg)],
+                capture_output=True,
+            )
+            return checked.returncode == 0
+    except OSError:
+        return False
+
+
 def load_or_create_identity(path: Path) -> tuple[bytes, bytes]:
     if Dilithium3 is None:
         raise ValueError("Dilithium3 not installed (pip install dilithium-py)")

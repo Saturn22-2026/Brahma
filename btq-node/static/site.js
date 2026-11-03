@@ -494,7 +494,7 @@ document.querySelectorAll('.rv').forEach(el=>io.observe(el));
    el.classList.toggle('ok',pl);el.classList.toggle('bad',!pl);
   });
   const chip=document.getElementById('gateChip');
-  if(chip)chip.textContent=pl?'PUBLIC LAUNCH — TRUE':'PRIVATE TESTNET — PUBLIC LAUNCH: FALSE';
+  if(chip){chip.textContent=pl?'PUBLIC LAUNCH — TRUE':'PUBLIC LAUNCH — FALSE';chip.classList.toggle('bad',!pl);}
   const joinLede=document.getElementById('joinLede');
   if(joinLede){
    joinLede.textContent=pl
@@ -509,7 +509,7 @@ document.querySelectorAll('.rv').forEach(el=>io.observe(el));
   const netLede=document.getElementById('netLede');
   if(netLede){
    netLede.textContent=pl
-    ? 'BRAHMNETWORK reports public_launch TRUE on this origin. Confirm independent operators and live gates before treating it as a public mainnet.'
+    ? 'BRAHMNETWORK is in public launch while an independent node is reachable. It is not Bitcoin and not Ethereum.'
     : 'BRAHMNETWORK is a private testnet until live public_launch is TRUE. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that\'s the point.';
   }
  }).catch(()=>{});
