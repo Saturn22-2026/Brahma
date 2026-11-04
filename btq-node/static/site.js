@@ -475,9 +475,11 @@ document.getElementById('fYear').textContent=new Date().getFullYear();
 setInterval(()=>{document.getElementById('utcClock').textContent=new Date().toUTCString().slice(17,25)+' UTC';},1000);
 setInterval(()=>{const el=document.getElementById('phClock');
  if(el)el.textContent=new Date().toTimeString().slice(0,5);},15000);
-const io=new IntersectionObserver(es=>es.forEach(x=>{
- if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}}),{threshold:.12});
-document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+ const io=new IntersectionObserver(es=>es.forEach(x=>{
+  if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}}),{threshold:.12});
+ document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+}
 
 (function(){
  fetch('/',{method:'POST',headers:{'Content-Type':'application/json'},

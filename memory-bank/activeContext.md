@@ -1,6 +1,6 @@
 # Active context
 
-**Current focus** (one short paragraph): Wallet **1.0.55** (`versionCode` 61) is the public download at `https://www.brahmnetwork.com/wallet.apk?v=61` (15,846,317 bytes, SHA-256 `DA4295A3F9C4C8F5EC32239215A0F69BB66336F682A97677940F33274F8CC552`). Signed with this PC’s Android debug key. BouncyCastle in the APK is **1.78.1**. `BRAH_SERVE_APK=1` stayed on; the node was not restarted. Laptop `cloudflared` stays off. Join pays **100 Brahma** + **1,000 each L2**. **Folder rename pending:** close Cursor, run `C:\GitHub\rename-Bitcoin-Quantum-to-Brahma.ps1`, reopen `C:\GitHub\Brahma`.
+**Current focus** (one short paragraph): Wallet **1.0.55** (`versionCode` 61) is the public download at `https://www.brahmnetwork.com/wallet.apk?v=61`. The header **Get the app** button and the phone menu go there. Homepage sections are visible without scroll; motion is only for visitors who allow it. Public cards lead with `https://www.brahmnetwork.com`. The LAN address is labeled operator Wi-Fi only. Laptop `cloudflared` stays off. Join pays **100 Brahma** + **1,000 each L2**.
 
 Coin is **Brahma Coin**, L1 is **BRAHMNETWORK**. Parallel, isolated work: `polymarket-hft/` localhost paper scalper for Polymarket (port 8787). GitHub listing/docs use Brahma Coin (not Brahma). Repo URL is still `Saturn22-2026/Brahma` until renamed on GitHub. Operator node `0.0.0.0:8545`. Phone LAN `192.168.168.65` → `192.168.168.16:8545`.
 

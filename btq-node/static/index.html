@@ -34,8 +34,11 @@ a{color:inherit}button{font-family:inherit}
 .overline i{font-style:normal;color:var(--mut);margin-right:12px}
 h2.sec{font:450 clamp(34px,4.6vw,60px)/1.06 var(--serif);letter-spacing:-.015em;margin-top:22px}
 .lede{color:var(--mut);font-size:17px;max-width:52ch}
-.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
-.rv.in{opacity:1;transform:none}
+.rv{opacity:1;transform:none}
+@media (prefers-reduced-motion:no-preference){
+  .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .rv.in{opacity:1;transform:none}
+}
 .top{position:fixed;inset:0 0 auto;z-index:50;display:flex;align-items:center;justify-content:space-between;
   height:var(--nav);padding:0 28px;border-bottom:1px solid var(--line);
   background:rgba(13,11,8,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
@@ -471,7 +474,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <a href="#/wallet">Wallet</a>
     <a href="#/join">Join</a>
   </nav>
-  <a class="btn solid sm" href="#/join">Get the app</a>
+  <a class="btn solid sm" href="https://www.brahmnetwork.com/wallet.apk?v=61">Get the app</a>
   <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
 </header>
 
@@ -483,6 +486,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
   <a class="m-link" href="#/network"><i>05</i>Network</a>
   <a class="m-link" href="#/wallet"><i>06</i>Wallet</a>
   <a class="m-link" href="#/join"><i>07</i>Join</a>
+  <a class="m-link" href="https://www.brahmnetwork.com/wallet.apk?v=61"><i>APK</i>Get the wallet</a>
   <p class="m-foot">BRAHMNETWORK — PUBLIC LAUNCH · CHAIN 2026</p>
 </div>
 
@@ -521,7 +525,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <div class="wrap">
       <div class="hc"><span>PROTOCOL LOCKED</span><b class="ok">YES — FIXED IN PROTOCOL CODE</b></div>
       <div class="hc"><span>PUBLIC LAUNCH</span><b class="ok" id="liveLaunch">TRUE</b></div>
-      <div class="hc"><span>SECOND OPERATOR</span><b class="bad">REQUIRED — NOT YET REAL</b></div>
+      <div class="hc"><span>SECOND OPERATOR</span><b class="ok">THIROSHA — PEERED</b></div>
       <div class="hc"><span>DOLLAR VALUE</span><b class="bad">NONE — UNITS ONLY, FOREVER</b></div>
       <div class="hc"><span>THIS NODE HEIGHT</span><b id="liveHeight">—</b></div>
       <div class="hc"><span>THIS NODE JOINED</span><b id="liveJoined">—</b></div>
@@ -561,8 +565,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <p class="overline rv"><i>03</i>REACH THE NODE</p>
       <h2 class="sec rv">Where it works.</h2>
       <div class="endpoints">
-        <div class="ep rv"><i>OPERATOR WI-FI</i><b>http://192.168.168.16:8545</b><p>On the operator LAN (192.168.168.*) the wallet prefers the local node directly.</p></div>
-        <div class="ep rv" style="transition-delay:.1s"><i>GSM / INTERNET</i><b>https://www.brahmnetwork.com</b><p>Works only if the host actually reaches the node origin. The named host must forward to the node.</p></div>
+        <div class="ep rv"><i>PUBLIC HOST</i><b>https://www.brahmnetwork.com</b><p>The wallet and this site use this host. It works when the named host reaches the node origin.</p></div>
+        <div class="ep rv" style="transition-delay:.1s"><i>OPERATOR WI-FI ONLY</i><b>http://192.168.168.16:8545</b><p>Only on the operator LAN (192.168.168.*). Phones off that Wi-Fi cannot use this address.</p></div>
         <div class="ep rv" style="transition-delay:.2s"><i>NO INTERNET — MESH</i><b>Sentinel · TCP 18545 · BT · Wi-Fi Aware</b><p>Sign and hash on the phone, gossip the packet. Any node that hears it seals it.</p></div>
       </div>
     </div>
@@ -795,7 +799,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <div class="grow"><div class="gk">PROTOCOL LOCKED</div><div class="gv ok">YES — SUPPLY, MINE SCHEDULE, REWARDS, TAX AND BURNS ARE FIXED IN PROTOCOL CODE</div></div>
         <div class="grow"><div class="gk">PUBLIC LAUNCH</div><div class="gv ok" id="gateLaunch">TRUE</div></div>
         <div class="grow"><div class="gk">NAMED HOST</div><div class="gv"><code>WWW.BRAHMNETWORK.COM</code> — MUST FORWARD TO THE NODE ORIGIN <code>HTTP://127.0.0.1:8545</code></div></div>
-        <div class="grow"><div class="gk">SECOND OPERATOR</div><div class="gv bad">REQUIRED BEFORE ANY MAINNET CLAIM — TWO PROCESSES ON ONE PC ARE NOT TWO OPERATORS</div></div>
+        <div class="grow"><div class="gk">SECOND OPERATOR</div><div class="gv ok">THIROSHA — PEERED AT 100.102.152.54:18545</div></div>
         <div class="grow"><div class="gk">DOLLAR VALUE</div><div class="gv bad">NONE — THE COIN HAS NO MARKET PRICE. UNITS ONLY. NEVER DOLLARS.</div></div>
       </div>
     </div>
@@ -803,7 +807,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
     <section class="flip rv">
       <p class="overline"><i>—</i>WHAT FLIPS LAUNCH TO TRUE</p>
       <div class="flip-grid">
-        <div class="ep"><i>01 — OPERATORS</i><b>Two independent operators</b><p>Separate humans, separate machines. Two processes on one PC do not count, no matter how they're named.</p></div>
+        <div class="ep"><i>01 — OPERATORS</i><b>Thirosha is the second operator</b><p>Thirosha is peered at 100.102.152.54:18545. Public launch counts that machine.</p></div>
         <div class="ep"><i>02 — HOST</i><b>Named public host live</b><p>www.brahmnetwork.com actually reaching the node origin — not a landing page in front of a dead socket.</p></div>
         <div class="ep"><i>03 — FLAG</i><b>Launch follows the gate</b><p>Public launch is on while an independent peer and www.brahmnetwork.com are live. There is no separate operator switch.</p></div>
       </div>
@@ -813,8 +817,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
       <p class="overline"><i>—</i>HOW THE PHONE REACHES A NODE</p>
       <h2 class="sec">Three roads.<br>One chain.</h2>
       <div class="endpoints">
-        <div class="ep"><i>LAN — OPERATOR PC</i><b>http://192.168.168.16:8545</b><p>On the operator Wi-Fi (192.168.168.*) the wallet prefers the local node. Lowest latency, no middleman.</p></div>
-        <div class="ep"><i>GSM — INTERNET</i><b>https://www.brahmnetwork.com</b><p>Only if Cloudflare actually reaches the node. If the origin is down, the road is down — and the site won't pretend otherwise.</p></div>
+        <div class="ep"><i>PUBLIC HOST</i><b>https://www.brahmnetwork.com</b><p>The road for phones off the operator Wi-Fi. If the origin is down, this road is down.</p></div>
+        <div class="ep"><i>OPERATOR WI-FI ONLY</i><b>http://192.168.168.16:8545</b><p>Only on the operator LAN (192.168.168.*). It is not a public address.</p></div>
         <div class="ep"><i>MESH — NO INTERNET</i><b>Sentinel · TCP 18545 · Bluetooth · Wi-Fi Aware</b><p>Sign and search PoW on the phone, gossip the signed packet. A node that hears the packet seals it.</p></div>
       </div>
       <div class="rpc">
@@ -961,7 +965,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 26px}
         <p style="margin-top:16px"><a class="dl" id="claimOpenApp" href="#"><span><small>OPEN APP</small><b>Claim in Brahma Coin wallet</b></span></a></p>
       </div>
       <div class="checklist rv" style="transition-delay:.24s">
-        <div><span class="cbox"></span><span><b>Two independent operators</b><p>Separate humans, separate machines — two processes on one PC are not two operators.</p></span><span class="st">PENDING</span></div>
+        <div><span class="cbox"></span><span><b>Thirosha is the second operator</b><p>Peered at 100.102.152.54:18545. Public launch counts that machine.</p></span><span class="st ok">LIVE</span></div>
         <div><span class="cbox"></span><span><b>Named public host live</b><p>www.brahmnetwork.com forwarding to the node origin at http://127.0.0.1:8545.</p></span><span class="st">PENDING</span></div>
         <div><span class="cbox"></span><span><b>Launch follows the live gate</b><p>Public launch is <code>brah_getStats.public_launch</code> on this origin. It is on while an independent node is reachable. No named host and no tunnel are required.</p></span><span class="st ok" id="joinLaunchSt">TRUE</span></div>
       </div>
