@@ -17,7 +17,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Bitcoin-Quantum-Sovereign"
+rootProject.name = "Brahma"
 
 include(":app")
 include(":shared")

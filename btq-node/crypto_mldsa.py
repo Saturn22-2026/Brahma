@@ -220,13 +220,14 @@ _BC_ROOT = Path(__file__).resolve().parent
 _BC_JAVA_FALLBACK = r"C:\Users\Navesh\.jdks\jbr-17.0.14\bin\java.exe"
 _BC_JAR_FALLBACKS = (
     str(_BC_ROOT / "bcprov-jdk18on-1.72.jar"),
+    str(_BC_ROOT / "bcprov-jdk18on-1.85.jar"),
     r"C:\Users\Navesh\.gradle\caches\modules-2\files-2.1\org.bouncycastle\bcprov-jdk18on\1.72\d8dc62c28a3497d29c93fee3e71c00b27dff41b4\bcprov-jdk18on-1.72.jar",
     r"C:\Users\Navesh\.gradle\caches\modules-2\files-2.1\org.bouncycastle\bcprov-jdk18on\1.78.1\39e9e45359e20998eb79c1828751f94a818d25f8\bcprov-jdk18on-1.78.1.jar",
 )
 
 
 def bouncycastle_classpath(root, jar: str) -> str:
-    """Classpath for bc_verify: node dir + jar, joined with the OS separator."""
+    """Classpath for the verifier class: node dir + jar, joined with the OS separator."""
     return os.pathsep.join([str(root), str(jar)])
 
 
@@ -240,23 +241,32 @@ def bouncycastle_java() -> str:
     return "java"
 
 
-def bouncycastle_jar() -> str | None:
-    """Prefer BRAH_BCPROV_JAR when present; else 1.72 beside the node, then known cache paths."""
+def _first_jar(names: tuple[str, ...]) -> str | None:
     preferred = env("BCPROV_JAR")
-    if preferred and Path(preferred).exists():
+    if preferred and Path(preferred).exists() and any(name in Path(preferred).name for name in names):
         return preferred
     for path in _BC_JAR_FALLBACKS:
-        if Path(path).exists():
-            return path
-    return preferred
+        jar = Path(path)
+        if jar.is_file() and any(name in jar.name for name in names):
+            return str(jar)
+    return None
 
 
-def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
-    """Wallet signs with BC Dilithium3. dilithium-py cannot check those."""
-    cls = _BC_ROOT / "bc_verify.class"
+def bouncycastle_jar() -> str | None:
+    """Historical Dilithium3 checker. Phones already in use sign with 1.72 / 1.78.1."""
+    return _first_jar(("1.72", "1.78.1"))
+
+
+def bouncycastle_mldsa_jar() -> str | None:
+    """FIPS 204 checker. BouncyCastle 1.85 verifies pure ML-DSA-87."""
+    return _first_jar(("1.85",))
+
+
+def _run_bc_verify(class_name: str, jar: str, pk: bytes, message: bytes, signature: bytes) -> bool:
     java = bouncycastle_java()
-    jar = bouncycastle_jar()
-    if not cls.exists() or not jar or not Path(java).exists() or not Path(jar).exists():
+    if not jar or not Path(jar).is_file() or not Path(java).exists():
+        return False
+    if not (_BC_ROOT / f"{class_name}.class").is_file():
         return False
     try:
         with tempfile.TemporaryDirectory(prefix="brah-bc-") as tmp:
@@ -264,13 +274,12 @@ def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
             (t / "pk.hex").write_text(pk.hex(), encoding="ascii")
             (t / "sig.hex").write_text(signature.hex(), encoding="ascii")
             (t / "msg.hex").write_text(message.hex(), encoding="ascii")
-            cp = bouncycastle_classpath(_BC_ROOT, jar)
             proc = subprocess.run(
                 [
                     java,
                     "-cp",
-                    cp,
-                    "bc_verify",
+                    bouncycastle_classpath(_BC_ROOT, jar),
+                    class_name,
                     str(t / "pk.hex"),
                     str(t / "sig.hex"),
                     str(t / "msg.hex"),
@@ -284,13 +293,26 @@ def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
         return False
 
 
+def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
+    """Dilithium3 uses the phone jar. A 2592-byte key is FIPS 204 ML-DSA-87 and uses 1.85."""
+    if len(pk) == 2592:
+        jar = bouncycastle_mldsa_jar()
+        return bool(jar) and _run_bc_verify("bc_mldsa", jar, pk, message, signature)
+    legacy = bouncycastle_jar()
+    if legacy and _run_bc_verify("bc_verify", legacy, pk, message, signature):
+        return True
+    modern = bouncycastle_mldsa_jar()
+    return bool(modern) and _run_bc_verify("bc_mldsa", modern, pk, message, signature)
+
+
 def verify_dilithium3(public_key: bytes, message: bytes, signature: bytes) -> bool:
+    """Accept existing Dilithium3 keys and FIPS 204 ML-DSA-87 keys. A 2592-byte key is ML-DSA-87 and is not sliced."""
     if not public_key or not signature:
         return False
     candidates = [public_key]
-    if len(public_key) > 1952:
+    if len(public_key) > 1952 and len(public_key) != 2592:
         candidates.append(public_key[-1952:])
-    if Dilithium3 is not None and len(signature) != 3309:
+    if len(public_key) != 2592 and Dilithium3 is not None and len(signature) != 3309:
         with _MLDSA_LOCK:
             for pk in candidates:
                 try:

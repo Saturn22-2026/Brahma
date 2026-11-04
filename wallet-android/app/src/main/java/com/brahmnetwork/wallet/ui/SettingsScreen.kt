@@ -278,7 +278,7 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     Text("Crypto Governance", style = MaterialTheme.typography.titleMedium, color = Color.White)
     Spacer(Modifier.height(16.dp))
     OutlinedTextField(
-        value = "ML-DSA (NIST-65) + SPHINCS+",
+        value = "Dilithium3 phrases. FIPS 204 ML-DSA-87 accepted",
         onValueChange = {},
         readOnly = true,
         label = { Text("Active Cryptographic Primitive") },

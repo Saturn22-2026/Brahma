@@ -426,7 +426,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   if(!addr){
    toast('That does not look like a BRAHMNETWORK address — BRM1G plus 24 or 28 hex digits, lowercase body.');inp.focus();return;}
   const origin=claimOrigin();
-  const apk=origin+'/wallet.apk';
+  const apk=origin+'/wallet.apk?v=61';
   const claim=origin+'/claim?ref='+addr;
   links={web:'Download the Brahma Coin wallet:\n'+apk+'\n\nInvite:\n'+claim,
    apk:apk,

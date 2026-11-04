@@ -56,10 +56,18 @@ class CryptoManager {
             to: String,
             asset: String,
             amountUnits: Long,
-            memo: String
+            memo: String,
+            prefix: String = "BRAH1|"
         ): ByteArray {
-            return "BRAH1|$chainId|$nonce|$kind|$from|$to|$asset|$amountUnits|$memo"
+            return "$prefix$chainId|$nonce|$kind|$from|$to|$asset|$amountUnits|$memo"
                 .toByteArray(Charsets.UTF_8)
+        }
+
+        const val LEGACY_MSG_PREFIX = "BTQ1|"
+
+        fun nodeCouldNotCheckSignature(message: String?): Boolean {
+            val text = message?.lowercase().orEmpty()
+            return text.contains("signature") && (text.contains("invalid") || text.contains("could not"))
         }
 
         fun sha256Hex(text: String): String {
@@ -275,6 +283,13 @@ class CryptoManager {
             pool.removeAt(rng.nextInt(pool.size))
         }
         return (words + checksumWord(words)).joinToString(" ")
+    }
+
+    fun keyPairFromEncoded(publicEncoded: String, secretEncoded: String): KeyPair {
+        return KeyPair(
+            publicKey = CryptoManager.fromHex(publicEncoded),
+            secretKey = CryptoManager.fromHex(secretEncoded)
+        )
     }
 
     fun deriveKeyPairFromMnemonic(mnemonic: String): KeyPair {

@@ -25,7 +25,7 @@ class WalletEngine(private val scope: CoroutineScope) {
             val hash = MessageDigest.getInstance("SHA-256")
                 .digest(dummyPubKey.toByteArray())
                 .joinToString("") { "%02x".format(it) }
-            val address = "BTQ1G" + hash.take(24).uppercase()
+            val address = "BRM1G" + hash.take(24).uppercase()
 
             _state.value = _state.value.copy(address = address)
             addLog("🔐 Sovereign Identity Generated: $address")

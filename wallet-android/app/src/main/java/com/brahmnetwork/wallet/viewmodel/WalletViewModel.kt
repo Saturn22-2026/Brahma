@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.brahmnetwork.wallet.ChainCheck
 import com.brahmnetwork.wallet.Constants
 import com.brahmnetwork.wallet.CryptoManager
+import com.brahmnetwork.wallet.DeviceJoinKey
 import com.brahmnetwork.wallet.DeviceWallets
 import com.brahmnetwork.wallet.KeyPair
 import com.brahmnetwork.wallet.VaultPassword
@@ -358,7 +360,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun wireRpc(client: BrahRpc) {
-        client.onSuccess = { url ->
+        client.onSuccess = onSuccess@{ url ->
             if (url in chainChecked || Constants.isPrivateLanRpc(url)) {
                 if (!Constants.isPrivateLanRpc(url)) {
                     prefs.edit().putString("last_good_rpc", url).apply()

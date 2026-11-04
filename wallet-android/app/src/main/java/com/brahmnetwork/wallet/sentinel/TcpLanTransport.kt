@@ -23,7 +23,7 @@ class TcpLanTransport(
     private val identity: MeshIdentity,
     private val udpPort: Int = 18547,
     private val gson: Gson = Gson(),
-    var onRpcDiscovered: ((host: String, rpcPort: Int) -> Unit)? = null
+    var onRpcDiscovered: ((host: String, rpcPort: Int) -> Unit)? = null,
     var onPeer: ((host: String, port: Int) -> Unit)? = null
 ) : Transport {
     override val name: String = "TcpLan"
