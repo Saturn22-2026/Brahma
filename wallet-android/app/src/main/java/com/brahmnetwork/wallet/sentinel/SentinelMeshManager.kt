@@ -70,6 +70,14 @@ class SentinelMeshManager(
             if (packet.payload.toByteArray().size > 8192) return
             if (!InviteGuard.accept(packet.payload)) return
         }
+        if (packet.type.equals("BLOCK", ignoreCase = true)) {
+            val block = try {
+                com.google.gson.Gson().fromJson(packet.payload, com.google.gson.JsonObject::class.java)
+            } catch (_: Exception) {
+                null
+            }
+            if (block == null || !com.brahmnetwork.wallet.ChainCheck.headerOk(block)) return
+        }
         seenPackets[packet.id] = System.currentTimeMillis()
         packetBuffer[packet.id] = packet
         trim()

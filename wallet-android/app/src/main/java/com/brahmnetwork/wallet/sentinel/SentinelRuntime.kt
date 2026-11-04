@@ -61,12 +61,19 @@ object SentinelRuntime {
             } catch (_: Exception) {
                 null
             }
-        }.distinct()
+        }.toMutableList()
+        seeds.add(Constants.SEED_P2P_HOST to Constants.MESH_PORT)
+        savedPeers(context).forEach { seeds.add(it) }
+        val distinctSeeds = seeds.distinct()
         val identity = MeshIdentity.load(context.applicationContext)
         queue = MeshTxQueue.from(context.applicationContext)
         _queued.value = queue?.size() ?: 0
-        val tcp = TcpLanTransport(nodeId, Constants.MESH_PORT, seeds, identity)
+        val tcp = TcpLanTransport(nodeId, Constants.MESH_PORT, distinctSeeds, identity)
         tcp.onRpcDiscovered = { host, rpcPort -> rememberRpcHost(host, rpcPort) }
+        tcp.onPeer = { host, port ->
+            tcp.addPeer(host, port)
+            savePeer(context, host, port)
+        }
         try {
             val lanHost = URI(Constants.LAN_RPC_URL).host
             if (!lanHost.isNullOrBlank()) tcp.addPeer(lanHost, Constants.MESH_PORT)
@@ -81,6 +88,7 @@ object SentinelRuntime {
         if (managerRef.compareAndSet(null, mesh)) {
             tcpRef.set(tcp)
             mesh.start()
+            mesh.inject("SYNC", """{"want_from":1}""")
         }
     }
 
@@ -144,6 +152,14 @@ object SentinelRuntime {
                 } catch (_: Exception) {
                 }
             }
+            packet.type.equals("BLOCK", ignoreCase = true) -> {
+                val block = try {
+                    gson.fromJson(packet.payload, JsonObject::class.java)
+                } catch (_: Exception) {
+                    null
+                } ?: return
+                if (!com.brahmnetwork.wallet.ChainCheck.headerOk(block)) return
+            }
             packet.type.equals("TRANSACTION", ignoreCase = true) -> {
                 if (!com.brahmnetwork.wallet.ChainCheck.meshPayloadOk(packet.payload)) return
                 queue?.enqueue(packet.payload)
@@ -151,6 +167,24 @@ object SentinelRuntime {
                 onTransaction?.invoke(packet.payload)
             }
         }
+    }
+
+    private fun prefs(context: Context) =
+        context.getSharedPreferences("sentinel_peers", Context.MODE_PRIVATE)
+
+    private fun savedPeers(context: Context): List<Pair<String, Int>> {
+        return prefs(context).getStringSet("peers", emptySet()).orEmpty().mapNotNull { raw ->
+            val host = raw.substringBefore(":")
+            val port = raw.substringAfter(":", "").toIntOrNull() ?: return@mapNotNull null
+            if (host.isBlank()) null else host to port
+        }
+    }
+
+    private fun savePeer(context: Context, host: String, port: Int) {
+        if (host.isBlank() || host == "127.0.0.1" || host == "localhost") return
+        val next = prefs(context).getStringSet("peers", emptySet()).orEmpty().toMutableSet()
+        next.add("$host:$port")
+        prefs(context).edit().putStringSet("peers", next).apply()
     }
 
     private fun prefsRpc(context: Context): String {

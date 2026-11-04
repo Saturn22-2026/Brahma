@@ -24,6 +24,7 @@ class TcpLanTransport(
     private val udpPort: Int = 18547,
     private val gson: Gson = Gson(),
     var onRpcDiscovered: ((host: String, rpcPort: Int) -> Unit)? = null
+    var onPeer: ((host: String, port: Int) -> Unit)? = null
 ) : Transport {
     override val name: String = "TcpLan"
     override var onPacketReceived: ((MeshPacket) -> Unit)? = null
@@ -134,6 +135,7 @@ class TcpLanTransport(
             if (node == nodeId) return
             if (identity.verify(node, port, pk, sig, ts)) {
                 peers.add(host to port)
+                onPeer?.invoke(host, port)
                 val rpcPort = obj.get("rpcPort")?.asInt ?: 8545
                 if (rpcPort in 1..65535) {
                     onRpcDiscovered?.invoke(host, rpcPort)

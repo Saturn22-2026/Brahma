@@ -12,6 +12,8 @@ object Constants {
     const val PUBLIC_HTTPS_URL = "https://www.brahmnetwork.com/"
     /** Shipped public nodes. The phone tries these in order, then any HTTPS node it has learned. */
     val SEED_RPC_URLS = listOf(PUBLIC_HTTPS_URL)
+    /** P2P seed. Phones dial this on Sentinel even when the HTTPS name is down. */
+    const val SEED_P2P_HOST = "84.12.123.117"
     /** Live operator grant (103 Brahma). Opening this identity makes it first. */
     const val OPERATOR_GRANT_ADDR = "BRM1Ge19737c9aa6f097f76cb609a84a6"
     const val OPERATOR_GRANT_ADDRESS = "BRM1Ge19737c9aa6f097f76cb609a84a6"
