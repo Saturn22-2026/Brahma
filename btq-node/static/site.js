@@ -2,11 +2,11 @@
 const COINS=[
  {id:'amrith',name:'Amrith',ticker:'AMRITH',color:'#DE8A3C',tag:'Nectar of the ledger.',lore:'AMRITH is the first pour. Immortal units on mortal phones — held before holding was cool, never rugged, never left the corner.'},
  {id:'kiaan',name:'Kiaan',ticker:'KIAAN',color:'#B34A2E',tag:'The king\'s share.',lore:'Forged at the lowest block heights and proud of it. KIAAN is proof the trenches do not just test a token — they crown one.'},
- {id:'crazy',name:'Alesha',ticker:'ALESHA',color:'#C93C74',tag:'Named Alesha.',lore:'ALESHA does not follow the ledger. The ledger follows ALESHA. Five billion units, zero chill.'},
+ {id:'crazy',name:'Alesha',ticker:'ALESHA',color:'#C93C74',tag:'Named Alesha.',lore:'ALESHA does not follow the ledger. The ledger follows ALESHA. One hundred billion units, zero chill.'},
  {id:'boujie',name:'BoujieClique',ticker:'BOUJIE',color:'#95507A',tag:'Champagne mechanics.',lore:'Old-money manners on new-money rails. Every BOUJIE transfer arrives dressed for dinner — and never pays the whale tax.'},
  {id:'qmile',name:'QuarterMile',ticker:'QMILE',color:'#3F8F7B',tag:'Fastest on the block.',lore:'A quarter mile of pure gas on blocks that seal in about eight seconds. QMILE does not race — it leaves.'},
  {id:'sof',name:'Bonn',ticker:'BONN',color:'#7D9CC0',tag:'Named Bonn.',lore:'No stress. No whale tax. No hard feelings. BONN takes the easy road on the same blocks and still arrives first.'},
- {id:'5ave',name:'5thAvenue',ticker:'5AVE',color:'#9AA66B',tag:'Stack now, flex later.',lore:'The disciplined one of the family. 5AVE turns mined units into five billion reasons, one sealed block at a time.'},
+ {id:'5ave',name:'5thAvenue',ticker:'5AVE',color:'#9AA66B',tag:'Stack now, flex later.',lore:'The disciplined one of the family. 5AVE turns mined units into one hundred billion reasons, one sealed block at a time.'},
  {id:'thiro',name:'Thiro',ticker:'THIRO',color:'#E7A9A0',tag:'Third flame.',lore:'THIRO was not launched — it was adopted. Third of the renamed triad, still the main character of every group chat on the mesh.'},
  {id:'santi',name:'Santi',ticker:'SANTI',color:'#C4A35A',tag:'Peace on the tip.',lore:'SANTI seals last and rests first. Nine genesis L2s, one calm corner of the same blocks — peace that still stacks.'}
 ];
@@ -82,7 +82,7 @@ mmenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
 
 (function(){
  const items=[{name:'Brahma Coin',ticker:'NATIVE',supply:'100,000,000',color:'#E4AC3F',g:LOTUS(17)}]
-  .concat(COINS.map(c=>({name:c.name,ticker:c.ticker,supply:'5,000,000,000',color:c.color,g:glyph(c.id,c.color,17)})));
+  .concat(COINS.map(c=>({name:c.name,ticker:c.ticker,supply:'100,000,000,000',color:c.color,g:glyph(c.id,c.color,17)})));
  const html=items.map(o=>`<span class="tk">${o.g}<b>${o.name}</b><span>${o.ticker}</span><u>· ${o.supply} UNITS</u></span>`).join('');
  document.getElementById('tkTrack').innerHTML=html+html;
 })();
@@ -142,7 +142,7 @@ mmenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
   hov=hit?hit.n.id:null;
   wrap.classList.toggle('pt',!!hit);
   if(hit){tip.style.opacity=1;tip.style.left=hit.p.x+'px';tip.style.top=(hit.p.y-16)+'px';
-   tip.innerHTML=`<b>${hit.n.name}</b><span>5,000,000,000 UNITS · LAYER 2 ON THE SAME BLOCKS</span>`;}
+   tip.innerHTML=`<b>${hit.n.name}</b><span>100,000,000,000 UNITS · LAYER 2 ON THE SAME BLOCKS</span>`;}
   else tip.style.opacity=0;}
  requestAnimationFrame(frame);
  const setPt=e=>{const r=cv.getBoundingClientRect();pt.x=e.clientX-r.left;pt.y=e.clientY-r.top;};
@@ -426,7 +426,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   if(!addr){
    toast('That does not look like a BRAHMNETWORK address — BRM1G plus 24 or 28 hex digits, lowercase body.');inp.focus();return;}
   const origin=claimOrigin();
-  const apk=origin+'/wallet.apk?v=64';
+  const apk=origin+'/wallet.apk?v=65';
   const claim=origin+'/claim?ref='+addr;
   links={web:'Download the Brahma Coin wallet:\n'+apk+'\n\nInvite:\n'+claim,
    apk:apk,

@@ -687,16 +687,17 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         signingAddress: String = "",
         signingKeys: KeyPair? = null,
     ): String {
-        return try {
-            signSubmit(kind, to, asset, amountBrah, memo, client, signingAddress, signingKeys)
-        } catch (e: Exception) {
-            val msg = e.message.orEmpty()
-            if ("Bad nonce" in msg) {
-                signSubmit(kind, to, asset, amountBrah, memo, client, signingAddress, signingKeys)
-            } else {
-                throw e
+        var last: Exception? = null
+        repeat(4) {
+            try {
+                return signSubmit(kind, to, asset, amountBrah, memo, client, signingAddress, signingKeys)
+            } catch (e: Exception) {
+                last = e
+                val msg = e.message.orEmpty()
+                if ("Bad nonce" !in msg && "PoW invalid" !in msg) throw e
             }
         }
+        throw last ?: IllegalStateException("Mine failed")
     }
 
     /** Sign a join for [address] with its own key. The open wallet stays put. */
