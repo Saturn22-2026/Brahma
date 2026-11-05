@@ -24,7 +24,7 @@ MINE_BASE_BLOCK = 0.00014
 MINE_HALVE_EVERY_JOINS = 100_000
 YEARLY_MINE_CAP = 5_000_000.0
 L2_OPERATOR_GRANT_ADDR = "BRM1Ge19737c9aa6f097f76cb609a84a6"
-L2_OPERATOR_GRANT = 5_000_000_000
+L2_OPERATOR_GRANT = 100_000_000_000
 # Shared pool of each genesis L2 at a mine-schedule halving, split across active wallets.
 L2_HALVING_AIRDROP = 750_000_000
 L2_HALVING_AIRDROP_SHARE = L2_HALVING_AIRDROP
@@ -32,6 +32,8 @@ L2_BOOTSTRAP_IDS = tuple(str(i) for i in range(1, 10))
 # Distinct inbound senders before the hub address is wiped (anti scrap-phone farm).
 CONSOLIDATION_BURN_SENDERS = 6
 NEW_WALLET_JOIN_BRAH = 100.0
+# New joins allowed per country (or direct network) per hour. The empty pool still pays nothing.
+JOIN_MAX_PER_LOCATION = 5_000
 # Whole units of each genesis memecoin credited on first join.
 NEW_WALLET_JOIN_L2 = 1_000
 

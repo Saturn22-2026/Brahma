@@ -41,7 +41,7 @@ function copyText(txt,msg){
 
 const VIEWS=['home','coin','nine','rewards','network','wallet','join'];
 const TITLES={home:'BRAHMNETWORK — Creation is mined.',coin:'Brahma Coin — BRAHMNETWORK',nine:'The Genesis Nine — BRAHMNETWORK',
- rewards:'Adoption & Referrals — BRAHMNETWORK',network:'Network & Launch Gates — BRAHMNETWORK',wallet:'Brahma Coin Wallet — BRAHMNETWORK',join:'Join the Testnet — BRAHMNETWORK'};
+ rewards:'Adoption & Referrals — BRAHMNETWORK',network:'Network & Launch Gates — BRAHMNETWORK',wallet:'Brahma Coin Wallet — BRAHMNETWORK',join:'Join — BRAHMNETWORK'};
 let currentView='home';
 function pathIsClaim(){
  const p=(location.pathname||'/').replace(/\/+$/,'')||'/';
@@ -173,7 +173,7 @@ function renderDetail(){
     <div><h3 class="d-name">${c.name}</h3><div class="d-rule"></div><p class="d-tag">${c.tag}</p></div></div>
    <p class="d-lore">${c.lore}</p>
    <div class="d-specs">
-    <div><i>GENESIS GRANT</i><b>5,000,000,000</b></div>
+    <div><i>SUPPLY</i><b>100,000,000,000</b></div>
     <div><i>LAYER</i><b>2 ON L1</b></div>
     <div><i>HALVING AIRDROP</i><b>750,000,000 SHARED</b></div>
     <div><i>WHALE TAX</i><b>EXEMPT</b></div>
@@ -391,7 +391,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   eW.textContent=fmtAmt(t.j);
   eR.textContent=fmtAmt(r);
   const win=(v>85000)?`${fmt(t.lo)} – ${fmt(t.hi)} (TAIL CONTINUES)`:`${fmt(t.lo)} – ${fmt(Math.min(t.hi,85000))}`;
-  eM.innerHTML=`TIER WINDOW — JOINS ${win}<br>REFERRER RECEIVES HALF · NODE LIMITS JOINS TO 20 / HOUR · PAID FROM THE 30,000,000 POOL`;
+  eM.innerHTML=`TIER WINDOW — JOINS ${win}<br>REFERRER RECEIVES HALF · NO HOURLY CAP · PAID FROM THE 30,000,000 POOL`;
   if(v<=85000){
    const i=v<=10000?0:v<=35000?1:v<=60000?2:3;
    const frac=i*0.25+((v-T[i][0])/(T[i][1]-T[i][0]))*0.25;
@@ -426,7 +426,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.addEventListener('click',()=>{
   if(!addr){
    toast('That does not look like a BRAHMNETWORK address — BRM1G plus 24 or 28 hex digits, lowercase body.');inp.focus();return;}
   const origin=claimOrigin();
-  const apk=origin+'/wallet.apk?v=61';
+  const apk=origin+'/wallet.apk?v=63';
   const claim=origin+'/claim?ref='+addr;
   links={web:'Download the Brahma Coin wallet:\n'+apk+'\n\nInvite:\n'+claim,
    apk:apk,
@@ -496,12 +496,12 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
    el.classList.toggle('ok',pl);el.classList.toggle('bad',!pl);
   });
   const chip=document.getElementById('gateChip');
-  if(chip){chip.textContent=pl?'PUBLIC LAUNCH — TRUE':'PUBLIC LAUNCH — FALSE';chip.classList.toggle('bad',!pl);}
+  if(chip){chip.textContent='MAINNET · CHAIN 2026';chip.classList.remove('bad');}
   const joinLede=document.getElementById('joinLede');
   if(joinLede){
    joinLede.textContent=pl
     ? 'Public launch is TRUE on this origin. Get the Android wallet, create your Dilithium identity, claim your join reward, and hold a first-hand address.'
-    : 'There is no countdown, because public launch is FALSE on this origin — and this site follows live stats. What you can do today: get the Android wallet, create your Dilithium identity, claim your join reward on the testnet, and hold a first-hand address before the gates flip.';
+    : 'Public launch is off on this origin right now. The site follows that live state. You can still get the Android wallet and create an identity.';
   }
   const joinLaunchSt=document.getElementById('joinLaunchSt');
   if(joinLaunchSt){
@@ -512,7 +512,7 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   if(netLede){
    netLede.textContent=pl
     ? 'BRAHMNETWORK is in public launch while an independent node is reachable. It is not Bitcoin and not Ethereum.'
-    : 'BRAHMNETWORK is a private testnet until live public_launch is TRUE. It is not Bitcoin, not Ethereum, and not a public mainnet until the gates below are real. We publish our own red flags — that\'s the point.';
+    : 'Public launch is off on this origin until the live network gate is on. This is not Bitcoin and not Ethereum. The page states that plainly.';
   }
  }).catch(()=>{});
 })();

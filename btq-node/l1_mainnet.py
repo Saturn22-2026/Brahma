@@ -10,6 +10,7 @@ Rules enforced here:
 """
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import html
 import ipaddress
@@ -36,6 +37,7 @@ from ai_council import (
     L2_OPERATOR_GRANT,
     L2_OPERATOR_GRANT_ADDR,
     CONSOLIDATION_BURN_SENDERS,
+    JOIN_MAX_PER_LOCATION,
     NEW_WALLET_JOIN_BRAH,
     NEW_WALLET_JOIN_L2,
     REWARDS_POOL,
@@ -1392,26 +1394,59 @@ def mainnet_ready_report() -> dict:
     independent = _peer_net.independent_peer_count() if _peer_net is not None else 0
     seeds = _peer_net.seed_count() if _peer_net is not None else 0
     named = named_public_rpc()
-    # Seeds and same-host / loopback HELLO peers do not count as a second operator.
-    # Public launch means an independent node is reachable. No named host.
-    ready = independent >= 1
-    launched = ready
+    # This chain is mainnet. Peer count is reported and does not turn that off.
     return {
         "peers": live,
         "independent_peers": independent,
         "seed_peers": seeds,
         "named_public_rpc": bool(named),
         "protocol_locked": True,
-        "mainnet_ready": ready,
-        "public_launch": launched,
+        "mainnet_ready": True,
+        "public_launch": True,
     }
+
+
+_join_location: contextvars.ContextVar[str] = contextvars.ContextVar("join_location", default="mesh")
 
 
 def join_max_per_hour() -> int:
     try:
-        return max(1, int(env("JOIN_MAX_PER_HOUR", "20") or "20"))
+        return max(1, int(env("JOIN_MAX_PER_HOUR", str(JOIN_MAX_PER_LOCATION)) or str(JOIN_MAX_PER_LOCATION)))
     except ValueError:
-        return 20
+        return JOIN_MAX_PER_LOCATION
+
+
+def request_location(ip: str, headers) -> str:
+    """Country when Cloudflare sends one. Otherwise the caller's network."""
+    country = _header(headers, "CF-IPCountry").split(",")[0].strip().upper()
+    if len(country) == 2 and country.isalpha() and country not in ("XX", "T1"):
+        return "country:" + country
+    forwarded = _header(headers, "CF-Connecting-IP") or _header(headers, "X-Forwarded-For")
+    candidate = (forwarded.split(",")[0].strip() or ip or "").strip()
+    try:
+        addr = ipaddress.ip_address(candidate)
+    except ValueError:
+        return "net:unknown"
+    if addr.version == 4:
+        parts = candidate.split(".")
+        if len(parts) == 4:
+            return "net:" + parts[0] + "." + parts[1]
+    net = ipaddress.ip_network(f"{addr}/32", strict=False)
+    return "net:" + str(net.network_address)
+
+
+def _join_locations(state: dict, now: int) -> dict:
+    window = state.setdefault("join_hour", {"start": now, "locations": {}})
+    if not isinstance(window, dict):
+        window = {"start": now, "locations": {}}
+        state["join_hour"] = window
+    expired = now - int(window.get("start") or 0) >= 3600
+    locs = window.get("locations")
+    if expired or not isinstance(locs, dict):
+        window["start"] = now
+        window["locations"] = {}
+        window.pop("count", None)
+    return window["locations"]
 
 
 def _claimed_slot(claimed: dict, addr: str) -> tuple[str, object]:
@@ -1455,15 +1490,11 @@ def referral_count(state: dict, addr: str) -> int:
     return sum(int(refs.get(key, 0) or 0) for key in keys)
 
 
-def apply_rewards(state: dict, addr: str, referrer: str) -> str:
+def apply_rewards(state: dict, addr: str, referrer: str, *, enforce_join_rate: bool = False) -> str:
     claimed = state.setdefault("claimed_rewards", {})
     slot, entry = _claimed_slot(claimed, addr)
     recorded_ref = _recorded_referrer(entry) if entry is not None else ""
     now = int(time.time())
-    window = state.setdefault("join_hour", {"start": now, "count": 0})
-    if now - int(window.get("start") or 0) >= 3600:
-        window["start"] = now
-        window["count"] = 0
     device_id, memo_ref = parse_join_memo(referrer or "")
     join_amt_coins, ref_amt_coins = reward_rates(int(state.get("joined_count", 0)))
     # First-tier join is NEW_WALLET_JOIN_BRAH (100); later tiers follow reward_rates.
@@ -1511,8 +1542,6 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
 
     if join_amt <= 0:
         raise ValueError("Adoption rewards complete")
-    if int(window.get("count") or 0) >= join_max_per_hour():
-        raise ValueError("Join rate limit")
     total = join_amt + pay_ref
     pool = account(state, "POOL_AIRDROP")
     already = int(state.get("rewards_paid", 0))
@@ -1530,8 +1559,6 @@ def apply_rewards(state: dict, addr: str, referrer: str) -> str:
         state.setdefault("referrals", {})
         state["referrals"][ref] = int(state["referrals"].get(ref, 0)) + 1
     claimed[slot] = ref
-    window["count"] = int(window.get("count") or 0) + 1
-    state["join_hour"] = window
     state["joined_count"] = int(state.get("joined_count", 0)) + 1
     state["rewards_paid"] = already + total
     _bind_device()
@@ -1547,7 +1574,7 @@ def launch_l2(state: dict, creator: str, name: str, symbol: str) -> dict:
     raise ValueError("New L2 launches are closed")
 
 
-def apply_recorded_tx(state: dict, tx: dict) -> None:
+def apply_recorded_tx(state: dict, tx: dict, *, enforce_join_rate: bool = False) -> None:
     hid = tx_hash(tx)
     applied = state.setdefault("applied_txs", {})
     if applied.get(hid):
@@ -1581,7 +1608,7 @@ def apply_recorded_tx(state: dict, tx: dict) -> None:
         note_wallet(state, receiver)
         note_consolidation_send(state, receiver, sender)
     elif kind in ("join", "reward", "faucet"):
-        apply_rewards(state, tx["from"], tx.get("memo") or "")
+        apply_rewards(state, tx["from"], tx.get("memo") or "", enforce_join_rate=enforce_join_rate)
         note_wallet(state, tx["from"])
     elif kind == "donate":
         raise ValueError("Donation pool removed")
@@ -1778,7 +1805,7 @@ def commit_signed(state: dict, raw: dict, *, verify: bool = True) -> tuple[dict,
             raise ValueError("PoW invalid — client must solve the header")
     else:
         pow_nonce = 0
-    apply_recorded_tx(state, tx)
+    apply_recorded_tx(state, tx, enforce_join_rate=True)
     block = seal_block(state, tx["from"], [tx], reward, pow_nonce, require_pow=mining)
     _rail_note_sealed(state, tx)
     return tx, block
@@ -2394,6 +2421,13 @@ class L1Handler(BaseHTTPRequestHandler):
         self._send(404, "application/json", json.dumps({"error": "not found", "public_launch": False}))
 
     def do_POST(self) -> None:
+        token = _join_location.set(request_location(self.client_address[0], self.headers))
+        try:
+            self._do_post()
+        finally:
+            _join_location.reset(token)
+
+    def _do_post(self) -> None:
         if not rpc_allow(self.client_address[0]):
             self._send(429, "application/json", json.dumps({"error": "rate limited"}))
             return

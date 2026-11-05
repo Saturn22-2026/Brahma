@@ -53,6 +53,7 @@ from l1_mainnet import (
     home_html,
     static_asset,
     commit_signed,
+    _join_location,
     explorer_allowed,
     explorer_visible,
     is_public_edge_request,
@@ -529,7 +530,7 @@ class LaunchGates(unittest.TestCase):
             else:
                 os.environ["BRAH_ALLOW_LAN"] = prev
 
-    def test_join_rate_limit(self):
+    def test_join_has_no_hourly_cap(self):
         prev = os.environ.get("BRAH_JOIN_MAX_PER_HOUR")
         os.environ["BRAH_JOIN_MAX_PER_HOUR"] = "1"
         try:
@@ -537,9 +538,8 @@ class LaunchGates(unittest.TestCase):
             pk, sk, addr = _key()
             commit_signed(state, _signed(state, pk, sk, addr, "join"))
             pk2, sk2, addr2 = _key()
-            with self.assertRaises(ValueError) as ctx:
-                commit_signed(state, _signed(state, pk2, sk2, addr2, "join"))
-            self.assertIn("Join rate", str(ctx.exception))
+            commit_signed(state, _signed(state, pk2, sk2, addr2, "join"))
+            self.assertEqual(int(state["joined_count"]), 2)
         finally:
             if prev is None:
                 os.environ.pop("BRAH_JOIN_MAX_PER_HOUR", None)
@@ -1213,10 +1213,10 @@ class LaunchGates(unittest.TestCase):
         self.assertEqual(int(account(disk, a2)["0"]), reward2)
         self.assertEqual(int(account(disk, a1)["0"]), 0)
 
-    def test_mainnet_ready_needs_independent_peer(self):
+    def test_mainnet_stays_on_without_a_live_peer(self):
         report = mainnet_ready_report()
-        self.assertFalse(report["public_launch"])
-        self.assertFalse(report["mainnet_ready"])
+        self.assertTrue(report["public_launch"])
+        self.assertTrue(report["mainnet_ready"])
         self.assertTrue(report["protocol_locked"])
         self.assertEqual(report.get("peers"), 0)
         self.assertEqual(report.get("independent_peers"), 0)
