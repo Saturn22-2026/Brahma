@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -219,6 +220,7 @@ def _parse_hex(value: str) -> bytes:
 _BC_ROOT = Path(__file__).resolve().parent
 _BC_JAVA_FALLBACK = r"C:\Users\Navesh\.jdks\jbr-17.0.14\bin\java.exe"
 _BC_JAR_FALLBACKS = (
+    str(_BC_ROOT / "bcprov-jdk18on-1.78.1.jar"),
     str(_BC_ROOT / "bcprov-jdk18on-1.72.jar"),
     str(_BC_ROOT / "bcprov-jdk18on-1.85.jar"),
     r"C:\Users\Navesh\.gradle\caches\modules-2\files-2.1\org.bouncycastle\bcprov-jdk18on\1.72\d8dc62c28a3497d29c93fee3e71c00b27dff41b4\bcprov-jdk18on-1.72.jar",
@@ -238,7 +240,7 @@ def bouncycastle_java() -> str:
         return preferred
     if Path(_BC_JAVA_FALLBACK).exists():
         return _BC_JAVA_FALLBACK
-    return "java"
+    return shutil.which("java") or "java"
 
 
 def _first_jar(names: tuple[str, ...]) -> str | None:
@@ -253,8 +255,17 @@ def _first_jar(names: tuple[str, ...]) -> str | None:
 
 
 def bouncycastle_jar() -> str | None:
-    """Historical Dilithium3 checker. Phones already in use sign with 1.72 / 1.78.1."""
-    return _first_jar(("1.72", "1.78.1"))
+    """First Dilithium3 jar. 1.72 and 1.78.1 do not verify each other's signatures."""
+    return _first_jar(("1.78.1", "1.72"))
+
+
+def dilithium_jars() -> list[str]:
+    found: list[str] = []
+    for name in ("1.78.1", "1.72"):
+        jar = _first_jar((name,))
+        if jar and jar not in found:
+            found.append(jar)
+    return found
 
 
 def bouncycastle_mldsa_jar() -> str | None:
@@ -294,15 +305,14 @@ def _run_bc_verify(class_name: str, jar: str, pk: bytes, message: bytes, signatu
 
 
 def _verify_bouncycastle(pk: bytes, message: bytes, signature: bytes) -> bool:
-    """Dilithium3 uses the phone jar. A 2592-byte key is FIPS 204 ML-DSA-87 and uses 1.85."""
+    """Try 1.78.1 and 1.72. Each jar only accepts the signatures it signed. ML-DSA-87 uses 1.85."""
     if len(pk) == 2592:
         jar = bouncycastle_mldsa_jar()
         return bool(jar) and _run_bc_verify("bc_mldsa", jar, pk, message, signature)
-    legacy = bouncycastle_jar()
-    if legacy and _run_bc_verify("bc_verify", legacy, pk, message, signature):
-        return True
-    modern = bouncycastle_mldsa_jar()
-    return bool(modern) and _run_bc_verify("bc_mldsa", modern, pk, message, signature)
+    for jar in dilithium_jars():
+        if _run_bc_verify("bc_verify", jar, pk, message, signature):
+            return True
+    return False
 
 
 def verify_dilithium3(public_key: bytes, message: bytes, signature: bytes) -> bool:

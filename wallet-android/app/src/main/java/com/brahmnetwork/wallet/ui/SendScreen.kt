@@ -7,10 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.brahmnetwork.wallet.viewmodel.WalletViewModel
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun ColumnScope.SendScreen(viewModel: WalletViewModel) {
     val status by viewModel.status.collectAsState()
+    val balance by viewModel.balance.collectAsState()
     var recipient by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
 
@@ -42,6 +45,19 @@ fun ColumnScope.SendScreen(viewModel: WalletViewModel) {
             unfocusedBorderColor = Color.Gray
         )
     )
+    Spacer(Modifier.height(8.dp))
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(25 to "25%", 50 to "50%", 75 to "75%", 100 to "Max").forEach { (pct, label) ->
+            OutlinedButton(
+                onClick = { amount = shareOf(balance, pct) },
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 4.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF00FF88))
+            ) {
+                Text(label)
+            }
+        }
+    }
     
     Spacer(Modifier.height(24.dp))
     Button(
@@ -51,4 +67,14 @@ fun ColumnScope.SendScreen(viewModel: WalletViewModel) {
     ) {
         Text("Sign & Broadcast (Dilithium3)")
     }
+}
+
+private fun shareOf(balance: Double, percent: Int): String {
+    if (balance <= 0.0) return ""
+    return BigDecimal.valueOf(balance)
+        .multiply(BigDecimal(percent))
+        .divide(BigDecimal(100))
+        .setScale(8, RoundingMode.DOWN)
+        .stripTrailingZeros()
+        .toPlainString()
 }

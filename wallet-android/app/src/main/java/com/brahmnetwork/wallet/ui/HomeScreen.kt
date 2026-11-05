@@ -46,6 +46,8 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
     val referralTreeCount by viewModel.referralTreeCount.collectAsState()
     val queuedTx by SentinelRuntime.queuedTx.collectAsState()
     val hideL1Balances by viewModel.hideL1Balances.collectAsState()
+    val hideL2Balances by viewModel.hideL2Balances.collectAsState()
+    val tokens by viewModel.tokens.collectAsState()
 
     var showBurnDialog by remember { mutableStateOf(false) }
     var burnAmount by remember { mutableStateOf("") }
@@ -143,6 +145,47 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "L2 memecoins",
+                    color = Color.DarkGray,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { viewModel.setHideL2Balances(!hideL2Balances) }) {
+                    Icon(
+                        imageVector = if (hideL2Balances) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = if (hideL2Balances) "Show L2" else "Hide L2",
+                        tint = Color.DarkGray
+                    )
+                }
+            }
+            tokens.forEach { token ->
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(token.name, color = Color.Black, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        if (hideL2Balances) "••••" else String.format(Locale.US, "%,.0f", token.amount),
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+
+    Spacer(Modifier.height(16.dp))
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF111111)),
         border = BorderStroke(1.dp, sovereignGreen)
     ) {
@@ -178,7 +221,7 @@ fun ColumnScope.HomeScreen(viewModel: WalletViewModel) {
         Text("Burn Brahma Coin", fontWeight = FontWeight.Bold)
     }
     Text(
-        "Burns leave circulation permanently. A send larger than 10% of circulating supply also burns 25% of that send.",
+        "Burns leave circulation permanently. A send larger than 10% of circulating supply also burns 10% of that send.",
         style = MaterialTheme.typography.labelSmall,
         color = Color.Gray
     )

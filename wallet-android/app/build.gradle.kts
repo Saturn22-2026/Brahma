@@ -52,8 +52,8 @@ android {
         applicationId = "com.brahmnetwork.wallet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 61
-        versionName = "1.0.55"
+        versionCode = 64
+        versionName = "1.0.58"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

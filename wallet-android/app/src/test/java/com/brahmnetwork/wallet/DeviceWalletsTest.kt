@@ -24,8 +24,22 @@ class DeviceWalletsTest {
     }
 
     @Test
+    fun otherDevicesKeepOneWallet() {
+        val mine = listOf(VaultWallet(addr("ab".repeat(12)), "word 1"))
+        assertEquals(1, DeviceWallets.maxFor(mine.map { it.address }))
+        try {
+            DeviceWallets.add(mine, VaultWallet(addr("cd".repeat(12)), "word 2"))
+            throw AssertionError("expected limit")
+        } catch (e: IllegalStateException) {
+            assertEquals("1 wallet limit", e.message)
+        }
+        assertEquals(1, DeviceWallets.add(emptyList(), mine.first()).size)
+    }
+
+    @Test
     fun stopsAtSixtyAndKeepsDuplicatesOut() {
-        val slots = (1..60).map { VaultWallet(addr("%024x".format(it)), "word $it") }
+        val slots = listOf(VaultWallet(Constants.OPERATOR_GRANT_ADDR, "word 0")) +
+            (1..59).map { VaultWallet(addr("%024x".format(it)), "word $it") }
         assertEquals(60, slots.size)
         try {
             DeviceWallets.add(slots, VaultWallet(addr("%024x".format(61)), "word 61"))

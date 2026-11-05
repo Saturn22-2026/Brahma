@@ -2587,7 +2587,9 @@ class L1Handler(BaseHTTPRequestHandler):
                 raw["kind"] = "send"
             tx, block = commit_signed(state, raw, verify=verify)
             return {
-                "hash": tx["hash"],
+                "hash": block["hash"] if tx.get("kind") == "mine" else tx["hash"],
+                "tx_hash": tx["hash"],
+                "block_hash": block["hash"],
                 "height": block["index"],
                 "sealed": True,
                 "instant": bool(block.get("instant")),

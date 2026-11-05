@@ -304,6 +304,9 @@ class CryptoManager {
     }
 
     fun signMessage(secretKey: ByteArray, message: ByteArray, publicKey: ByteArray): ByteArray {
+        if (LegacyDilithium3.matches(secretKey, publicKey)) {
+            return LegacyDilithium3.sign(secretKey, message)
+        }
         val pub = DilithiumPublicKeyParameters(DilithiumParameters.dilithium3, publicKey)
         val priv = DilithiumPrivateKeyParameters(DilithiumParameters.dilithium3, secretKey, pub)
         val signer = DilithiumSigner()
@@ -312,6 +315,11 @@ class CryptoManager {
     }
 
     fun verify(publicKey: ByteArray, message: ByteArray, signature: ByteArray): Boolean {
+        if (signature.size == LegacyDilithium3.SIGNATURE_BYTES
+            && publicKey.size == LegacyDilithium3.PUBLIC_KEY_BYTES
+        ) {
+            return LegacyDilithium3.verify(publicKey, message, signature)
+        }
         return try {
             val signer = DilithiumSigner()
             signer.init(false, DilithiumPublicKeyParameters(DilithiumParameters.dilithium3, publicKey))

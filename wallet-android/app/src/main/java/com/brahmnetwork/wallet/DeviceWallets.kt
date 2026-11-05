@@ -1,13 +1,20 @@
 package com.brahmnetwork.wallet
 
 /**
- * The first wallet created on a device may keep up to [MAX] wallets.
- * A later wallet on that device cannot add to the set.
+ * Only the device holding [Constants.OPERATOR_GRANT_ADDR] may keep up to [MAX] wallets.
+ * Every other device keeps [SINGLE] wallet.
  */
 data class VaultWallet(val address: String, val mnemonic: String)
 
 object DeviceWallets {
     const val MAX = 60
+    const val SINGLE = 1
+
+    fun isMultiWalletDevice(vaultAddresses: List<String>): Boolean {
+        return vaultAddresses.any { CryptoManager.sameWalletAddress(it, Constants.OPERATOR_GRANT_ADDR) }
+    }
+
+    fun maxFor(vaultAddresses: List<String>): Int = if (isMultiWalletDevice(vaultAddresses)) MAX else SINGLE
     const val KEY_MARK = "key:"
 
     fun isStoredKey(stored: String): Boolean = stored.startsWith(KEY_MARK)
@@ -117,8 +124,9 @@ object DeviceWallets {
         if (existing.any { CryptoManager.sameWalletAddress(it.address, wallet.address) }) {
             return existing
         }
-        if (existing.size >= MAX) {
-            throw IllegalStateException("60 wallet limit")
+        val cap = maxFor(existing.map { it.address } + wallet.address)
+        if (existing.size >= cap) {
+            throw IllegalStateException("$cap wallet limit")
         }
         return existing + wallet
     }

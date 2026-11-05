@@ -12,47 +12,55 @@ object ChainCheck {
     const val GENESIS_HASH = "34ba978506a51f42077f23573801045b7ec9b82a43420ffe4b999deb5377eaf8"
 
     suspend fun score(client: BrahRpc): Long? {
+        val chosen = HashMap<Int, JsonObject>()
         var start = 0
-        var prev: String? = null
-        var sawGenesis = false
-        var work = 0L
-        var height = 0
+        var tip = 0
         while (start < 100_000) {
             val page = try {
-                client.call("brah_getBlocks", listOf(start, 64))?.asJsonObject
+                var loaded: com.google.gson.JsonObject? = null
+                var attempt = 0
+                while (loaded == null && attempt < 3) {
+                    loaded = try {
+                        client.call("brah_getBlocks", listOf(start, 64))?.asJsonObject
+                    } catch (_: Exception) {
+                        null
+                    }
+                    attempt++
+                }
+                loaded
             } catch (_: Exception) {
                 return null
             } ?: return null
             val blocks = page.getAsJsonArray("blocks") ?: return null
-            if (blocks.size() == 0) {
-                if (!sawGenesis || height > 0 && work == 0L) return null
-                return work
-            }
+            if (blocks.size() == 0) break
             for (el in blocks) {
                 val block = el.asJsonObject
                 val index = block.get("index")?.asInt ?: return null
                 val hash = block.get("hash")?.asString ?: return null
                 if (index == 0) {
                     if (!hash.equals(GENESIS_HASH, ignoreCase = true)) return null
-                    sawGenesis = true
-                } else {
-                    val previous = block.get("previous_hash")?.asString ?: return null
-                    if (prev != null && previous != prev) return null
-                    if (!headerOk(block)) return null
-                    work += provenWork(block)
+                    chosen[0] = block
+                    continue
                 }
-                prev = hash
-                height = index
+                if (!headerOk(block)) continue
+                val parent = chosen[index - 1]?.get("hash")?.asString ?: continue
+                val previous = block.get("previous_hash")?.asString ?: continue
+                if (previous == parent) chosen[index] = block
             }
-            val tip = page.get("tip")?.asInt ?: return if (sawGenesis && (height == 0 || work > 0L)) work else null
+            tip = page.get("tip")?.asInt ?: tip
             val last = blocks.last().asJsonObject.get("index")?.asInt ?: return null
-            if (last >= tip) {
-                if (!sawGenesis || height > 0 && work == 0L) return null
-                return work
-            }
+            if (last >= tip && tip > 0) break
+            if (last >= tip) break
             start = last + 1
         }
-        return null
+        if (chosen[0] == null) return null
+        var height = 0
+        while (chosen[height + 1] != null) height++
+        if (height == 0) return if (tip > 0) null else 0L
+        var work = 0L
+        for (index in 1..height) work += provenWork(chosen[index]!!)
+        if (work == 0L) return null
+        return work
     }
 
     fun provenWork(block: JsonObject): Long {

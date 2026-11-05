@@ -334,6 +334,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private val chainChecked = mutableSetOf<String>()
+    @Volatile private var chainCheckBusy = false
 
     private fun learnedHosts(): Set<String> {
         return prefs.getStringSet("learned_rpc_hosts", emptySet()).orEmpty()
@@ -361,7 +362,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun wireRpc(client: BrahRpc) {
         client.onSuccess = onSuccess@{ url ->
-            if (url in chainChecked || Constants.isPrivateLanRpc(url)) {
+            if (url in chainChecked || Constants.isPrivateLanRpc(url) || chainCheckBusy) {
                 if (!Constants.isPrivateLanRpc(url)) {
                     prefs.edit().putString("last_good_rpc", url).apply()
                 }
@@ -370,14 +371,22 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                 }
                 return@onSuccess
             }
+            chainCheckBusy = true
             viewModelScope.launch {
-                val work = ChainCheck.score(BrahRpc(listOf(url)))
-                if (work == null || !acceptChain(url, work)) {
-                    _status.value = "Node chain does not match this coin"
-                    return@launch
-                }
-                CryptoManager.rpcHost(url)?.let {
-                    com.brahmnetwork.wallet.sentinel.SentinelRuntime.rememberRpcHost(it)
+                try {
+                    val work = ChainCheck.score(BrahRpc(listOf(url)))
+                    if (work != null && acceptChain(url, work)) {
+                        if (_status.value.startsWith("Node chain")) _status.value = "Live"
+                        CryptoManager.rpcHost(url)?.let {
+                            com.brahmnetwork.wallet.sentinel.SentinelRuntime.rememberRpcHost(it)
+                        }
+                    } else if (work == null) {
+                        _status.value = "Could not read the chain. Tap Manual Re-sync."
+                    } else {
+                        _status.value = "Node chain does not match this coin"
+                    }
+                } finally {
+                    chainCheckBusy = false
                 }
             }
         }
@@ -1099,6 +1108,12 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                     _status.value = "Only the first wallet on this device can add wallets"
                     return
                 }
+                if (readVault().size >= DeviceWallets.maxFor(vaultAddrs + addr)
+                    && vaultAddrs.none { CryptoManager.sameWalletAddress(it, addr) }
+                ) {
+                    _status.value = limitReachedMessage()
+                    return
+                }
                 if (hasVaultPassword() && !CryptoManager.sameWalletAddress(addr, firstWalletAddress())) {
                     pendingRecoverMnemonic = normalized
                     _passwordPrompt.value = VaultPasswordPrompt.Enter(purpose = PasswordPurpose.Vault)
@@ -1142,16 +1157,16 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
     private fun finishRecoverAdd(addr: String, mnemonic: String, password: CharArray?) {
         val added = storeVaultWallet(addr, mnemonic, password)
         val shown = CryptoManager.toBrahAddress(addr)
-        if (!added && readVault().size >= DeviceWallets.MAX
+        if (!added && readVault().size >= vaultMax()
             && readVault().none { CryptoManager.sameWalletAddress(it.address, addr) }
         ) {
-            _status.value = "60 wallets already on this device"
+            _status.value = limitReachedMessage()
             return
         }
         promoteOperatorGrant()
         activatePlain(shown, mnemonic)
         val opened = if (added) {
-            "Opened $shown (${readVault().size} of ${DeviceWallets.MAX})"
+            "Opened $shown (${readVault().size} of ${vaultMax()})"
         } else {
             "Opened $shown"
         }
@@ -1451,8 +1466,8 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             _status.value = "This wallet has no phrase stored, so other wallets cannot be added"
             return
         }
-        if (slots.size >= DeviceWallets.MAX) {
-            _status.value = "60 wallets already on this device"
+        if (slots.size >= vaultMax()) {
+            _status.value = limitReachedMessage()
             return
         }
         if (hasVaultPassword()) {
@@ -1476,7 +1491,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             claimJoin(
                 shown,
                 keyPair,
-                "Added $shown (${readVault().size} of ${DeviceWallets.MAX}). Primary wallet stays active",
+                "Added $shown (${readVault().size} of ${vaultMax()}). Primary wallet stays active",
             )
         } catch (e: Exception) {
             _status.value = "Add wallet failed: ${e.message ?: "unknown error"}"
@@ -1496,7 +1511,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                     val parts = line.trim().split('\t')
                     if (parts.size != 3) return@forEach
                     val material = DeviceWallets.signingMaterial(parts[1], parts[2])
-                    val pair = cryptoManager.keyPairFromEncoded(parts[1], parts[2])
+                    val pair = cryptoManager.keyPairFromEncoded(parts[2], parts[1])
                     val derived = cryptoManager.deriveAddress(pair.publicKey)
                     if (!CryptoManager.sameWalletAddress(derived, parts[0])) return@forEach
                     if (storeVaultWallet(derived, material)) added += 1
@@ -1505,7 +1520,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
             if (added > 0) {
-                _status.value = "Loaded $added wallets. ${readVault().size} of ${DeviceWallets.MAX} on this device."
+                _status.value = "Loaded $added wallets. ${readVault().size} of ${vaultMax()} on this device."
             }
         } catch (_: Exception) {
             _status.value = "Wallet import failed"
@@ -1572,6 +1587,14 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         return DeviceWallets.canManage(_address.value, firstWalletAddress())
     }
 
+    private fun multiWalletDevice(): Boolean = DeviceWallets.isMultiWalletDevice(readVault().map { it.address })
+
+    private fun vaultMax(): Int = DeviceWallets.maxFor(readVault().map { it.address })
+
+    private fun limitReachedMessage(): String {
+        return if (multiWalletDevice()) "${DeviceWallets.MAX} wallets already on this device" else "One wallet per device"
+    }
+
     private fun readVault(): List<VaultWallet> {
         return try {
             DeviceWallets.decode(securePrefs.getString("wallet_vault", "") ?: "")
@@ -1586,7 +1609,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             publishDeviceWallets()
             return false
         }
-        if (slots.size >= DeviceWallets.MAX) {
+        if (slots.size >= DeviceWallets.maxFor(slots.map { it.address } + address)) {
             publishDeviceWallets()
             return false
         }
@@ -1704,7 +1727,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
     private fun keysForStored(stored: String): KeyPair {
         val parsed = DeviceWallets.parseStoredKey(stored)
         if (parsed != null) {
-            return cryptoManager.keyPairFromEncoded(parsed.first, parsed.second)
+            return cryptoManager.keyPairFromEncoded(parsed.second, parsed.first)
         }
         return cryptoManager.deriveKeyPairFromMnemonic(stored)
     }
@@ -1730,7 +1753,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         val slots = readVault()
         _walletSlots.value = slots.map { it.address }
         val manage = managesDeviceWallets()
-        _canManageVault.value = manage
+        _canManageVault.value = manage && DeviceWallets.isMultiWalletDevice(slots.map { it.address })
         _hostsManyWallets.value = slots.size > 1 || DeviceWallets.recoverShouldAdd(
             _address.value,
             firstWalletAddress(),
