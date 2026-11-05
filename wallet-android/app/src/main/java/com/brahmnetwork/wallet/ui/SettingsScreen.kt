@@ -374,12 +374,18 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
     Button(
         onClick = {
             if (recoveryPhrase.isEmpty()) return@Button
+            if (walletAddress.isNotBlank() && !canManageVault) return@Button
             if (walletAddress.isNotBlank()) viewModel.recoverWallet(recoveryPhrase, false) else showRecoverDialog = true
         },
         modifier = Modifier.fillMaxWidth(),
+        enabled = canManageVault || walletAddress.isBlank(),
         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
     ) {
-        Text(if (walletAddress.isNotBlank()) "Add this phrase to the 60" else "Recover Identity")
+        Text(when {
+            canManageVault -> "Add this phrase to the 60"
+            walletAddress.isBlank() -> "Recover Identity"
+            else -> "This phone keeps one wallet"
+        })
     }
 
     if (showRecoverDialog) {
@@ -418,7 +424,7 @@ fun ColumnScope.SettingsScreen(viewModel: WalletViewModel) {
             Text("Generate Brand New Identity", color = Color.Red)
         }
         else -> Text(
-            "Only the first wallet can add wallets. Return to the first wallet to add more.",
+            "This phone keeps one wallet.",
             color = Color.Gray,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 16.dp)

@@ -1104,6 +1104,10 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             val addr = cryptoManager.deriveAddress(keyPair.publicKey)
             val vaultAddrs = readVault().map { it.address }
             if (DeviceWallets.recoverShouldAdd(_address.value, firstWalletAddress(), vaultAddrs)) {
+                if (!DeviceWallets.isMultiWalletDevice(vaultAddrs)) {
+                    _status.value = "One wallet per device"
+                    return
+                }
                 reconcilePlaceholderIdentity()
                 if (!managesDeviceWallets()) {
                     _status.value = "Only the first wallet on this device can add wallets"
